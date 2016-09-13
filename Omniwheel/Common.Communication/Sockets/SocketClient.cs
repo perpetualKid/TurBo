@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Windows.Networking;
 using Windows.Networking.Sockets;
@@ -13,11 +15,13 @@ namespace Common.Communication.Channels
     {
         private HostName hostName;
         private StreamSocket streamSocket;
-        private DataWriter dataWriter;
-        private DataReader dataReader;
 
+        public SocketClient()
+        {
+            cancellationTokenSource = new CancellationTokenSource();
+        }
 
-        public async Task Connect(string remoteServer, string remotePort)
+        public async Task Connect(string remoteServer, string remotePort, DataFormat format)
         {
             try
             {
@@ -27,24 +31,26 @@ namespace Common.Communication.Channels
                 streamSocket.Control.NoDelay = true;
                 await streamSocket.ConnectAsync(hostName, remotePort);
                 ConnectionStatus = ConnectionStatus.Connected;
-                dataWriter = new DataWriter(streamSocket.OutputStream);
+                channel = ChannelFactory.CreateChannel(this, format);
+                channel.StreamSocket = streamSocket;
+                Task task = Task.Run(async () => await channel.Listening(streamSocket));
             }
-            catch (Exception e)
+            catch (Exception exception)
             {
                 ConnectionStatus = ConnectionStatus.Failed;
-                //todo:report errors via event to be consumed by UI thread
+                Debug.WriteLine(string.Format("Error receiving data: {0}", exception.Message));
             }
         }
 
         public async Task Disconnect()
         {
-            if (dataWriter != null)
-            {
-                await dataWriter.FlushAsync();
-                dataWriter.DetachStream();
-                dataWriter.Dispose();
-                dataWriter = null;
-            }
+            //if (dataWriter != null)
+            //{
+            //    await dataWriter.FlushAsync();
+            //    dataWriter.DetachStream();
+            //    dataWriter.Dispose();
+            //    dataWriter = null;
+            //}
             if (streamSocket != null)
             {
                 await streamSocket.CancelIOAsync();
@@ -54,12 +60,9 @@ namespace Common.Communication.Channels
             ConnectionStatus = ConnectionStatus.Disconnected;
         }
 
-        public async Task SendMessage(string message)
+        public override async Task Send(object data)
         {
-            //            _writer.WriteUInt32(_writer.MeasureString(message));
-            dataWriter.WriteString(message);
-            await dataWriter.StoreAsync();
-            await dataWriter.FlushAsync();
+            await channel.SendData(data);
         }
     }
 }

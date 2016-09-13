@@ -107,13 +107,13 @@
     <None Include="project.json" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ChannelParser\ChannelParserBase.cs" />
-    <Compile Include="ChannelParser\ChannelParserFactory.cs" />
-    <Compile Include="ChannelParser\StringParser.cs" />
-    <Compile Include="Channels\Events.cs" />
-    <Compile Include="Channels\SocketClient.cs" />
-    <Compile Include="Channels\SocketObject.cs" />
-    <Compile Include="Channels\SocketServer.cs" />
+    <Compile Include="Channels\ChannelBase.cs" />
+    <Compile Include="Channels\ChannelFactory.cs" />
+    <Compile Include="Channels\StringTextChannel.cs" />
+    <Compile Include="Events.cs" />
+    <Compile Include="Sockets\SocketClient.cs" />
+    <Compile Include="Sockets\SocketObject.cs" />
+    <Compile Include="Sockets\SocketServer.cs" />
     <Compile Include="Enums.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="Properties\Common.Communication.rd.xml" />

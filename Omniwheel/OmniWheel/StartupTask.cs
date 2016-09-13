@@ -18,6 +18,7 @@ using System.IO;
 using Windows.Storage.Streams;
 using System.Xml.Serialization;
 using Common.Communication.Channels;
+using Common.Communication;
 
 // The Background Application template is documented at http://go.microsoft.com/fwlink/?LinkID=533884&clcid=0x409
 
@@ -32,6 +33,8 @@ namespace OmniWheel
         string storageConnectionString = "DefaultEndpointsProtocol=https;AccountName=turtlebot;AccountKey=761qXiS3qdsDoA9X7j7yqPi/bAdALBEvuSirEjkeL4cZPTko0A7qmM2puwwYquyoxCw8HFP+htPHIkG06dwsHg==";
         CloudBlobContainer container;
         OneDriveConnector connector;
+        SocketServer server;
+        int counter;
 
         public async void Run(IBackgroundTaskInstance taskInstance)
         {
@@ -48,8 +51,9 @@ namespace OmniWheel
 
             //            await connector.Reauthorize(clientId, clientSecret, redirectUrl, refreshToken);
 
-            await SocketServer.Instance(8027).AddListener(Common.Communication.DataFormat.String);
-            SocketServer.Instance(8027).OnMessageReceived += StartupTask_OnMessageReceived;
+            server = await SocketServer.AddChannel(8027, DataFormat.StringText);
+            //await SocketServer.Instance(8027).AddChannel(DataFormat.String);
+            server.OnMessageReceived += StartupTask_OnStringMessageReceived;
             CloudStorageAccount storageAccount = CloudStorageAccount.Parse(storageConnectionString);
             CloudBlobClient blobClient = storageAccount.CreateCloudBlobClient();
             // Retrieve a reference to a container.
@@ -77,9 +81,10 @@ namespace OmniWheel
             }
         }
 
-        private void StartupTask_OnMessageReceived(object sender, MessageReceivedEventArgs e)
+        private async void StartupTask_OnStringMessageReceived(object sender, MessageReceivedEventArgs e)
         {
-            Debug.WriteLine(e.MessageAsString);
+            Debug.WriteLine((e as StringMessageReceivedEventArgs).Message);
+            await server.Send(counter++.ToString());
         }
 
         private async void Touch_OnPressed(object sender, BrickPi.Uwp.Base.SensorEventArgs e)

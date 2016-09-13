@@ -14,8 +14,11 @@ namespace Common.Communication.Channels
         protected ConnectionStatus connectionStatus;
         protected uint bytesRead;
         protected uint bytesWritten;
+        protected ChannelBase channel;
 
         public event EventHandler<ConnectionStatusChangedEventArgs> OnConnectionStatusChanged;
+
+        public event EventHandler<MessageReceivedEventArgs> OnMessageReceived;
 
         public void CancelSocketTask()
         {
@@ -42,20 +45,33 @@ namespace Common.Communication.Channels
             //cancellationTokenSource.Token.Register(() => NotifyCancelingTask()); 
         }
 
-        public CancellationTokenSource CancellationTokenSource { get { return this.cancellationTokenSource; } }
+        public CancellationTokenSource CancellationTokenSource { get { return cancellationTokenSource; } }
 
         public ConnectionStatus ConnectionStatus
         {
-            get { return this.connectionStatus; }
+            get { return connectionStatus; }
             internal set
             {
                 if (value != connectionStatus)
                 {
-                    this.connectionStatus = value;
+                    connectionStatus = value;
                     OnConnectionStatusChanged?.Invoke(this, new ConnectionStatusChangedEventArgs { Status = value });
                 }
             }
         }
+
+        public uint BytesWritten { get { return bytesWritten; } internal set { bytesWritten += value; } }
+
+        public uint BytesRead { get { return bytesRead; } internal set { bytesRead += value; } }
+
+        public ChannelBase Channel { get { return channel; } }
+
+        internal void PublishMessageReceived(MessageReceivedEventArgs eventArgs)
+        {
+            OnMessageReceived?.Invoke(this, eventArgs);
+        }
+
+        public abstract Task Send(object data);
 
     }
 }

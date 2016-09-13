@@ -214,15 +214,21 @@ namespace App1
                 if (socketClient == null)
                     socketClient = new SocketClient();
                 if (socketClient.ConnectionStatus!= ConnectionStatus.Connected)
-                    await socketClient.Connect("172.30.163.76", "8027");
+                    await socketClient.Connect("legolix", "8027", DataFormat.StringText);
+                socketClient.OnMessageReceived += SocketClient_OnMessageReceived;
                 using (var readStream = await file.OpenStreamForReadAsync())
                 {
                     using (var streamReader = new StreamReader(readStream))
-                        await socketClient.SendMessage(streamReader.ReadToEnd());
+                        await socketClient.Send(streamReader.ReadToEnd() + Environment.NewLine);
                     //await SocketClient.Disconnect();
                 }
                 //                await Task.Run(() => JsonStreamReader.ReadEndless(file.OpenStreamForReadAsync().Result));
             }
+        }
+
+        private void SocketClient_OnMessageReceived(object sender, MessageReceivedEventArgs e)
+        {
+            Debug.WriteLine((e as StringMessageReceivedEventArgs).Message);
         }
     }
 }

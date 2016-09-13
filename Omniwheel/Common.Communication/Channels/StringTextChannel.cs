@@ -10,31 +10,30 @@ using Nito.AsyncEx;
 using Windows.Networking.Sockets;
 using Windows.Storage.Streams;
 
-namespace Common.Communication.ChannelParser
+namespace Common.Communication.Channels
 {
-    public class StringParser : ChannelParserBase
+    public class StringTextChannel : ChannelBase
     {
-        private AsyncAutoResetEvent dataReadEvent;
         private Queue<string> queue;
         private const uint bufferSize = 512;
-        private static char[] lineBreak = { '\r', '\n', '\0' };
+        private readonly char[] lineBreak = { '\r', '\n', '\0' };
 
-        public StringParser(SocketObject socket) : base(socket)
+        public StringTextChannel(SocketObject socket) : base(socket)
         {
             queue = new Queue<string>();
-            dataReadEvent = new AsyncAutoResetEvent();
         }
 
-        public override async void ConnectionReceived(StreamSocketListener sender, StreamSocketListenerConnectionReceivedEventArgs args)
+        public override async Task Listening(StreamSocket socket)
         {
+            this.streamSocket = socket;
             try
             {
-                socket.ConnectionStatus = ConnectionStatus.Connected;
-                using (DataReader dataReader = new DataReader(args.Socket.InputStream))
+                socketObject.ConnectionStatus = ConnectionStatus.Connected;
+                using (DataReader dataReader = new DataReader(socket.InputStream))
                 {
-                    CancellationToken cancellationToken = socket.CancellationTokenSource.Token;
+                    CancellationToken cancellationToken = socketObject.CancellationTokenSource.Token;
                     //setup
-                    lock (socket.CancellationTokenSource)
+                    lock (socketObject.CancellationTokenSource)
                     {
                         cancellationToken.ThrowIfCancellationRequested();
                         dataReader.InputStreamOptions = InputStreamOptions.Partial;
@@ -43,6 +42,7 @@ namespace Common.Communication.ChannelParser
                     uint bytesRead = await dataReader.LoadAsync(bufferSize).AsTask(cancellationToken).ConfigureAwait(false);
                     while (bytesRead > 0)
                     {
+                        socketObject.BytesRead = bytesRead;
                         queue.Enqueue(dataReader.ReadString(bytesRead));
                         dataReadEvent.Set();
                         bytesRead = await dataReader.LoadAsync(bufferSize).AsTask(cancellationToken).ConfigureAwait(false);
@@ -51,11 +51,12 @@ namespace Common.Communication.ChannelParser
             }
             catch (Exception exception)
             {
-                socket.ConnectionStatus = ConnectionStatus.Failed;
+                socketObject.ConnectionStatus = ConnectionStatus.Failed;
                 Debug.WriteLine(string.Format("Error receiving data: {0}", exception.Message));
             }
         }
-        public override async void ParseData()
+
+        public override async Task ParseData()
         {
             StringBuilder builder = new StringBuilder();
             while (true)
@@ -65,22 +66,41 @@ namespace Common.Communication.ChannelParser
                 {
                     string buffer = queue.Dequeue();
                     string[] lines = buffer.Split(lineBreak);
-                    if (buffer.Length > 1)
-                    {
                         foreach (string line in lines)
                         {
-                            if (!string.IsNullOrWhiteSpace(line))
+                            if (string.IsNullOrWhiteSpace(line) && builder.Length > 0)
                             {
-                                builder.Append(line);
-                                Debug.WriteLine(builder.ToString());
+                                socketObject.PublishMessageReceived(new StringMessageReceivedEventArgs(builder.ToString()));
                                 builder.Clear();
                             }
+                            else
+                        {
+                            builder.Append(line);
                         }
                     }
-                    else
-                        builder.Append(buffer);
                 }
             }
         }
+
+        public override async Task SendData(object data)
+        {
+            using (DataWriter writer = new DataWriter(streamSocket.OutputStream))
+            {
+                string text = data as string;
+                if (!string.IsNullOrEmpty(text))
+                {
+                    socketObject.BytesWritten = writer.WriteString(text);
+                    char last = text[text.Length - 1];
+                    if (last != '\0' && last != '\r' && last != '\n')
+                        socketObject.BytesWritten = writer.WriteString(Environment.NewLine);
+                    await writer.StoreAsync();
+                    await writer.FlushAsync();
+
+                    writer.DetachBuffer();
+                    writer.DetachStream();
+                }
+            }
+        }
+
     }
 }
