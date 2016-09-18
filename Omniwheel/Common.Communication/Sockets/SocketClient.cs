@@ -44,19 +44,8 @@ namespace Common.Communication.Channels
 
         public async Task Disconnect()
         {
-            //if (dataWriter != null)
-            //{
-            //    await dataWriter.FlushAsync();
-            //    dataWriter.DetachStream();
-            //    dataWriter.Dispose();
-            //    dataWriter = null;
-            //}
-            if (streamSocket != null)
-            {
-                await streamSocket.CancelIOAsync();
-                streamSocket.Dispose();
-                streamSocket = null;
-            }
+
+            await Task.Run( () => CancelSocketTask());
             ConnectionStatus = ConnectionStatus.Disconnected;
         }
 

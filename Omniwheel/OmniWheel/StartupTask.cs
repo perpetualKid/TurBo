@@ -59,8 +59,8 @@ namespace OmniWheel
             // Retrieve a reference to a container.
             container = blobClient.GetContainerReference("turtlebot");
             // Create the container if it doesn't already exist.
-            await container.CreateIfNotExistsAsync();
-            await container.SetPermissionsAsync(new BlobContainerPermissions { PublicAccess = BlobContainerPublicAccessType.Container });
+            //await container.CreateIfNotExistsAsync();
+            //await container.SetPermissionsAsync(new BlobContainerPermissions { PublicAccess = BlobContainerPublicAccessType.Container });
 
             Brick brick = await Brick.InitializeInstance("Uart0");
             int version = await brick.GetBrickVersion();

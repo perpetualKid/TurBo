@@ -25,6 +25,7 @@ namespace Common.Communication.Channels
 
         public override async Task Listening(StreamSocket socket)
         {
+            DataReaderLoadOperation loadOperation;
             this.streamSocket = socket;
             try
             {
@@ -39,13 +40,15 @@ namespace Common.Communication.Channels
                         dataReader.InputStreamOptions = InputStreamOptions.Partial;
                     }
 
-                    uint bytesRead = await dataReader.LoadAsync(bufferSize).AsTask(cancellationToken).ConfigureAwait(false);
-                    while (bytesRead > 0)
+                    loadOperation = dataReader.LoadAsync(bufferSize);
+                    uint bytesRead =  await loadOperation.AsTask(cancellationToken).ConfigureAwait(false);
+                    while (bytesRead > 0 && loadOperation.Status == Windows.Foundation.AsyncStatus.Completed)
                     {
                         socketObject.BytesRead = bytesRead;
                         queue.Enqueue(dataReader.ReadString(bytesRead));
                         dataReadEvent.Set();
-                        bytesRead = await dataReader.LoadAsync(bufferSize).AsTask(cancellationToken).ConfigureAwait(false);
+                        loadOperation = dataReader.LoadAsync(bufferSize);
+                        bytesRead = await loadOperation.AsTask(cancellationToken).ConfigureAwait(false);
                     }
                 }
             }

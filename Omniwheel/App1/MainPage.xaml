@@ -12,6 +12,7 @@
         <Button x:Name="button1" Content="Logout" HorizontalAlignment="Left" Margin="95,242,0,0" VerticalAlignment="Top" Click="button1_Click"/>
         <Button x:Name="button2" Content="Upload" HorizontalAlignment="Left" Margin="165,205,0,0" VerticalAlignment="Top" Click="button2_Click"/>
         <Button x:Name="button3" Content="Load Json" HorizontalAlignment="Left" Margin="95,279,0,0" VerticalAlignment="Top" Click="button3_Click"/>
+        <Button x:Name="button4" Content="Disconnect" HorizontalAlignment="Left" Margin="228,279,0,0" VerticalAlignment="Top" Click="button4_Click"/>
 
     </Grid>
 </Page>

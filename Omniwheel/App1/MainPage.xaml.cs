@@ -207,6 +207,8 @@ namespace App1
             picker.ViewMode = Windows.Storage.Pickers.PickerViewMode.Thumbnail;
             picker.SuggestedStartLocation = Windows.Storage.Pickers.PickerLocationId.PicturesLibrary;
             picker.FileTypeFilter.Add(".json");
+            picker.FileTypeFilter.Add(".txt");
+            picker.FileTypeFilter.Add(".csv");
 
             Windows.Storage.StorageFile file = await picker.PickSingleFileAsync();
             if (file != null)
@@ -214,7 +216,7 @@ namespace App1
                 if (socketClient == null)
                     socketClient = new SocketClient();
                 if (socketClient.ConnectionStatus!= ConnectionStatus.Connected)
-                    await socketClient.Connect("legolix", "8027", DataFormat.StringText);
+                    await socketClient.Connect("turbo", "8027", DataFormat.StringText);
                 socketClient.OnMessageReceived += SocketClient_OnMessageReceived;
                 using (var readStream = await file.OpenStreamForReadAsync())
                 {
@@ -229,6 +231,17 @@ namespace App1
         private void SocketClient_OnMessageReceived(object sender, MessageReceivedEventArgs e)
         {
             Debug.WriteLine((e as StringMessageReceivedEventArgs).Message);
+        }
+
+        private async void button4_Click(object sender, RoutedEventArgs e)
+        {
+            if (socketClient != null)
+            {
+                await socketClient.Disconnect();
+                socketClient = null;
+            }
+
+
         }
     }
 }
