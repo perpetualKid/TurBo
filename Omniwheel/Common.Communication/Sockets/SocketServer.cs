@@ -35,7 +35,7 @@ namespace Common.Communication.Channels
             return activeSockets[port];
         }
 
-        public static async Task<SocketServer> AddChannel(int port, DataFormat dataFormat)
+        public static async Task<ChannelBase> AddChannel(int port, DataFormat dataFormat)
         {
             SocketServer instance = Instance(port);
             return await instance.AddChannel(dataFormat);
@@ -55,7 +55,7 @@ namespace Common.Communication.Channels
         public int Port { get { return this.port; } }
         #endregion
         
-        public async Task<SocketServer> AddChannel(DataFormat dataFormat)
+        public async Task<ChannelBase> AddChannel(DataFormat dataFormat)
         {
             if (socketListener != null)
                 throw new InvalidOperationException("Only one Listner can be attached to this port.");
@@ -65,7 +65,7 @@ namespace Common.Communication.Channels
                 channel = ChannelFactory.CreateChannel(this, dataFormat);
                 socketListener = new StreamSocketListener();
                 socketListener.Control.NoDelay = true;
-                socketListener.ConnectionReceived += async (streamSocketListener, streamSocketListenerConnectionReceivedEventArgs) => await channel.Listening(streamSocketListenerConnectionReceivedEventArgs.Socket);
+                socketListener.ConnectionReceived += async (streamSocketListener, streamSocketListenerConnectionReceivedEventArgs) => await channel.Listening(streamSocketListenerConnectionReceivedEventArgs.Socket).ConfigureAwait(false);
                 await socketListener.BindServiceNameAsync(port.ToString()).AsTask().ConfigureAwait(false);
                 this.ConnectionStatus = ConnectionStatus.Listening;
             }
@@ -74,7 +74,7 @@ namespace Common.Communication.Channels
                 Debug.WriteLine(e.Message);
                 this.ConnectionStatus = ConnectionStatus.Failed;
             }
-            return this;
+            return channel;
         }
 
 

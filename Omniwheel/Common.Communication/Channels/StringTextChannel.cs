@@ -41,14 +41,14 @@ namespace Common.Communication.Channels
                     }
 
                     loadOperation = dataReader.LoadAsync(bufferSize);
-                    uint bytesRead =  await loadOperation.AsTask(cancellationToken).ConfigureAwait(false);
-                    while (bytesRead > 0 && loadOperation.Status == Windows.Foundation.AsyncStatus.Completed)
+                    uint bytesAvailable =  await loadOperation.AsTask(cancellationToken).ConfigureAwait(false);
+                    while (bytesAvailable > 0 && loadOperation.Status == Windows.Foundation.AsyncStatus.Completed)
                     {
-                        socketObject.BytesRead = bytesRead;
-                        queue.Enqueue(dataReader.ReadString(bytesRead));
+                        queue.Enqueue(dataReader.ReadString(bytesAvailable));
                         dataReadEvent.Set();
+                        bytesRead += bytesAvailable;
                         loadOperation = dataReader.LoadAsync(bufferSize);
-                        bytesRead = await loadOperation.AsTask(cancellationToken).ConfigureAwait(false);
+                        bytesAvailable = await loadOperation.AsTask(cancellationToken).ConfigureAwait(false);
                     }
                 }
             }
@@ -73,8 +73,8 @@ namespace Common.Communication.Channels
                         {
                             if (string.IsNullOrWhiteSpace(line) && builder.Length > 0)
                             {
-                                socketObject.PublishMessageReceived(new StringMessageReceivedEventArgs(builder.ToString()));
-                                builder.Clear();
+                                PublishMessageReceived(new StringMessageReceivedEventArgs(builder.ToString()));
+                            builder.Clear();
                             }
                             else
                         {
@@ -92,10 +92,10 @@ namespace Common.Communication.Channels
                 string text = data as string;
                 if (!string.IsNullOrEmpty(text))
                 {
-                    socketObject.BytesWritten = writer.WriteString(text);
+                    bytesWritten += writer.WriteString(text);
                     char last = text[text.Length - 1];
                     if (last != '\0' && last != '\r' && last != '\n')
-                        socketObject.BytesWritten = writer.WriteString(Environment.NewLine);
+                        bytesWritten += writer.WriteString(Environment.NewLine);
                     await writer.StoreAsync();
                     await writer.FlushAsync();
 

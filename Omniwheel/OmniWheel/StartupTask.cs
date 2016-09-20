@@ -34,6 +34,7 @@ namespace OmniWheel
         CloudBlobContainer container;
         OneDriveConnector connector;
         SocketServer server;
+        ChannelBase channel;
         int counter;
 
         public async void Run(IBackgroundTaskInstance taskInstance)
@@ -51,9 +52,9 @@ namespace OmniWheel
 
             //            await connector.Reauthorize(clientId, clientSecret, redirectUrl, refreshToken);
 
-            server = await SocketServer.AddChannel(8027, DataFormat.StringText);
+            channel = await SocketServer.AddChannel(8027, DataFormat.StringText);
             //await SocketServer.Instance(8027).AddChannel(DataFormat.String);
-            server.OnMessageReceived += StartupTask_OnStringMessageReceived;
+            channel.OnMessageReceived += StartupTask_OnStringMessageReceived;
             CloudStorageAccount storageAccount = CloudStorageAccount.Parse(storageConnectionString);
             CloudBlobClient blobClient = storageAccount.CreateCloudBlobClient();
             // Retrieve a reference to a container.
@@ -84,7 +85,7 @@ namespace OmniWheel
         private async void StartupTask_OnStringMessageReceived(object sender, MessageReceivedEventArgs e)
         {
             Debug.WriteLine((e as StringMessageReceivedEventArgs).Message);
-            await server.Send(counter++.ToString());
+            await channel.SendData(counter++.ToString());
         }
 
         private async void Touch_OnPressed(object sender, BrickPi.Uwp.Base.SensorEventArgs e)

@@ -215,9 +215,11 @@ namespace App1
             {
                 if (socketClient == null)
                     socketClient = new SocketClient();
-                if (socketClient.ConnectionStatus!= ConnectionStatus.Connected)
-                    await socketClient.Connect("turbo", "8027", DataFormat.StringText);
-                socketClient.OnMessageReceived += SocketClient_OnMessageReceived;
+                if (socketClient.ConnectionStatus != ConnectionStatus.Connected)
+                {
+                    ChannelBase channel = await socketClient.Connect("192.168.0.199", "8027", DataFormat.StringText);
+                    channel.OnMessageReceived += SocketClient_OnMessageReceived;
+                }
                 using (var readStream = await file.OpenStreamForReadAsync())
                 {
                     using (var streamReader = new StreamReader(readStream))

@@ -12,13 +12,10 @@ namespace Common.Communication.Channels
         protected object cancelLock = new Object();
         protected CancellationTokenSource cancellationTokenSource;
         protected ConnectionStatus connectionStatus;
-        protected uint bytesRead;
-        protected uint bytesWritten;
         protected ChannelBase channel;
 
         public event EventHandler<ConnectionStatusChangedEventArgs> OnConnectionStatusChanged;
 
-        public event EventHandler<MessageReceivedEventArgs> OnMessageReceived;
 
         public void CancelSocketTask()
         {
@@ -60,16 +57,7 @@ namespace Common.Communication.Channels
             }
         }
 
-        public uint BytesWritten { get { return bytesWritten; } internal set { bytesWritten += value; } }
-
-        public uint BytesRead { get { return bytesRead; } internal set { bytesRead += value; } }
-
         public ChannelBase Channel { get { return channel; } }
-
-        internal void PublishMessageReceived(MessageReceivedEventArgs eventArgs)
-        {
-            OnMessageReceived?.Invoke(this, eventArgs);
-        }
 
         public abstract Task Send(object data);
 

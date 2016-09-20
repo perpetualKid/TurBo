@@ -108,8 +108,16 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Base\ControllableComponent.cs" />
+    <Compile Include="Communication\NetworkPort.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Util\TraceComponent.cs" />
     <EmbeddedResource Include="Properties\Devices.Control.rd.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Common.Communication\Common.Communication.csproj">
+      <Project>{E4DB5494-C724-4DF6-9DC2-EA51FED0F463}</Project>
+      <Name>Common.Communication</Name>
+    </ProjectReference>
   </ItemGroup>
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '14.0' ">
     <VisualStudioVersion>14.0</VisualStudioVersion>

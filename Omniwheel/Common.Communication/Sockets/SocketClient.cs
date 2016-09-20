@@ -21,7 +21,7 @@ namespace Common.Communication.Channels
             cancellationTokenSource = new CancellationTokenSource();
         }
 
-        public async Task Connect(string remoteServer, string remotePort, DataFormat format)
+        public async Task<ChannelBase> Connect(string remoteServer, string remotePort, DataFormat format)
         {
             try
             {
@@ -40,6 +40,7 @@ namespace Common.Communication.Channels
                 ConnectionStatus = ConnectionStatus.Failed;
                 Debug.WriteLine(string.Format("Error receiving data: {0}", exception.Message));
             }
+            return channel;
         }
 
         public async Task Disconnect()
