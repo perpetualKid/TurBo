@@ -52,7 +52,7 @@ namespace Common.Communication.Channels
 
         public override async Task Send(object data)
         {
-            await channel.SendData(data);
+            await channel.Send(data);
         }
     }
 }

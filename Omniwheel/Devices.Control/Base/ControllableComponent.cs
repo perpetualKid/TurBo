@@ -5,8 +5,11 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Newtonsoft.Json.Linq;
+using Common.Communication;
+using Common.Communication.Channels;
+using Devices.Control.Communication;
 using Windows.Data.Json;
+using Windows.Storage.Streams;
 
 namespace Devices.Control.Base
 {
@@ -15,11 +18,23 @@ namespace Devices.Control.Base
         protected string componentName;
 
         protected static Dictionary<string, ControllableComponent> components = new Dictionary<string, ControllableComponent>();
+        protected static List<CommunicationComponentBase> communicationComponents;
 
+        static ControllableComponent()
+        {
+            communicationComponents = new List<CommunicationComponentBase>();
+        }
 
         public ControllableComponent(string componentName)
         {
             this.componentName = componentName;
+        }
+
+        public static void AddComponent(ControllableComponent component)
+        {
+            components.Add(component.componentName.ToUpper(), component);
+            if (component is CommunicationComponentBase)
+                communicationComponents.Add(component as CommunicationComponentBase);
         }
 
         public string ComponentName { get { return this.componentName; } }
@@ -38,7 +53,7 @@ namespace Devices.Control.Base
         }
 
         #region Text
-        protected static void HandleInput(ControllableComponent sender, string input)
+        protected static async Task HandleInput(ControllableComponent sender, string input)
         {
             string[] commands = input.Split(':');
             string component = ResolveParameter(commands, 0);
@@ -60,10 +75,10 @@ namespace Devices.Control.Base
                 switch (component)
                 {
                     case "HELP":
-                        ListHelp(sender);
+                        await ListHelp(sender);
                         break;
                     case "LIST":
-                        ListComponents(sender);
+                        await ListComponents(sender);
                         break;
                     default:
                         Debug.WriteLine(sender.componentName, "Nothing to do on '{0}'", input);
@@ -73,32 +88,69 @@ namespace Devices.Control.Base
 
         }
 
-        protected static void HandleOutput(ControllableComponent sender, string text)
+        protected static async Task HandleOutput(ControllableComponent sender, string text)
         {
+            List<Task> sendTasks = new List<Task>();
+            foreach(CommunicationComponentBase publisher in communicationComponents)
+            {
+                sendTasks.Add(publisher.Send(text));
+            }
+            await Task.WhenAll(sendTasks).ConfigureAwait(false);
+        }
+
+        protected static Task HandleOutput(ControllableComponent sender, JsonObject json)
+        {
+            throw new NotImplementedException();
             //if (null != dataPortInstance)
             //    dataPortInstance.WriteLine(text);
         }
 
-        public static void ListHelp(ControllableComponent sender)
+        protected static void HandleOutput(ControllableComponent sender, byte[] data)
         {
-            Debug.WriteLine(sender.componentName, "Listing help options.");
-            HandleOutput(sender, "HELP :  Shows this help screen");
-            HandleOutput(sender, "LIST :  Lists the available modules");
+            throw new NotImplementedException();
+            //if (null != dataPortInstance)
+            //    dataPortInstance.WriteLine(text);
         }
 
-        public static void ListComponents(ControllableComponent sender)
+        protected static void HandleOutput(ControllableComponent sender, IRandomAccessStream stream)
         {
-            Debug.WriteLine(sender.componentName, "Listing available components.");
+            throw new NotImplementedException();
+            //if (null != dataPortInstance)
+            //    dataPortInstance.WriteLine(text);
+        }
+        protected static void HandleOutput(ControllableComponent sender, IBuffer data)
+        {
+            throw new NotImplementedException();
+            //if (null != dataPortInstance)
+            //    dataPortInstance.WriteLine(text);
+        }
+
+        public static async Task ListHelp(ControllableComponent sender)
+        {
+            StringBuilder builder = new StringBuilder();
+            builder.Append("HELP :  Shows this help screen");
+            builder.Append(Environment.NewLine);
+            builder.Append("LIST: Lists the available modules");
+            builder.Append(Environment.NewLine);
+            await HandleOutput(sender, builder.ToString());
+        }
+
+        public static async Task ListComponents(ControllableComponent sender)
+        {
+            StringBuilder builder = new StringBuilder();
             foreach (KeyValuePair<string, ControllableComponent> item in components)
             {
-                HandleOutput(sender, "Component " + item.Key);
+                builder.Append(item.Key);
+                builder.Append(Environment.NewLine);
             }
+            await HandleOutput(sender, builder.ToString());
         }
 
         #endregion
 
-        protected static void HandleInput(ControllableComponent sender, JObject jsonObject)
+        protected static void HandleInput(ControllableComponent sender, JsonObject jsonObject)
         {
         }
+
     }
 }

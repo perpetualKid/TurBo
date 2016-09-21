@@ -108,7 +108,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Base\ControllableComponent.cs" />
-    <Compile Include="Communication\NetworkPort.cs" />
+    <Compile Include="Communication\CommunicationComponentBase.cs" />
+    <Compile Include="Communication\NetworkEndpoint.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Util\TraceComponent.cs" />
     <EmbeddedResource Include="Properties\Devices.Control.rd.xml" />

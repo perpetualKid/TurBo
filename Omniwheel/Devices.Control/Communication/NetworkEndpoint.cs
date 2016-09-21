@@ -9,12 +9,13 @@ using Devices.Control.Base;
 
 namespace Devices.Control.Communication
 {
-    public class NetworkPort : ControllableComponent
+    public class NetworkEndpoint : CommunicationComponentBase
     {
-        SocketServer server;
+        private Dictionary<DataFormat, ChannelBase> channels;
 
-        public NetworkPort(int port): base("TCP")
+        public NetworkEndpoint(int port): base("TCP")
         {
+            channels = new Dictionary<DataFormat, ChannelBase>();
         }
 
         private void Server_OnMessageReceived(object sender, MessageReceivedEventArgs e)
@@ -34,8 +35,12 @@ namespace Devices.Control.Communication
 
         public async Task AddChannel(int port, DataFormat format)
         {
-            ChannelBase channel = await SocketServer.AddChannel(port, format).ConfigureAwait(false);
+            channels.Add(format, await SocketServer.AddChannel(port, format).ConfigureAwait(false));
         }
 
+        public override async Task Send(object data)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

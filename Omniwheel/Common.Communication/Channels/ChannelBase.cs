@@ -18,16 +18,17 @@ namespace Common.Communication.Channels
         private Task parseTask;
         protected uint bytesRead;
         protected uint bytesWritten;
-
+        protected DataFormat dataFormat;
         public event EventHandler<ConnectionStatusChangedEventArgs> OnConnectionStatusChanged;
 
         public event EventHandler<MessageReceivedEventArgs> OnMessageReceived;
 
 
         #region base
-        public ChannelBase(SocketObject socket)
+        public ChannelBase(SocketObject socket, DataFormat format)
         {
             this.socketObject = socket;
+            this.dataFormat = format;
             dataReadEvent = new AsyncAutoResetEvent();
             parseTask = Task.Run(async () => await ParseData());
             parseTask.ConfigureAwait(false);
@@ -37,11 +38,14 @@ namespace Common.Communication.Channels
 
         public abstract Task ParseData();
 
-        public abstract Task SendData(object data);
+        public abstract Task Send(object data);
         #endregion
 
         #region public properties
         public StreamSocket StreamSocket { get { return this.streamSocket; } set { this.streamSocket = value; } }
+
+        public DataFormat DataFormat { get { return this.dataFormat; } }
+
         public uint BytesWritten { get { return bytesWritten; } }
 
         public uint BytesRead { get { return bytesRead; } }

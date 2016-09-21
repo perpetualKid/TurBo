@@ -16,9 +16,9 @@ namespace Common.Communication.Channels
     {
         private Queue<string> queue;
         private const uint bufferSize = 512;
-        private readonly char[] lineBreak = { '\r', '\n', '\0' };
+        private static readonly char[] lineBreak = { '\r', '\n', '\0' };
 
-        public StringTextChannel(SocketObject socket) : base(socket)
+        public StringTextChannel(SocketObject socket) : base(socket, DataFormat.StringText)
         {
             queue = new Queue<string>();
         }
@@ -85,7 +85,7 @@ namespace Common.Communication.Channels
             }
         }
 
-        public override async Task SendData(object data)
+        public override async Task Send(object data)
         {
             using (DataWriter writer = new DataWriter(streamSocket.OutputStream))
             {
@@ -104,6 +104,5 @@ namespace Common.Communication.Channels
                 }
             }
         }
-
     }
 }

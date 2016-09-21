@@ -33,7 +33,6 @@ namespace OmniWheel
         string storageConnectionString = "DefaultEndpointsProtocol=https;AccountName=turtlebot;AccountKey=761qXiS3qdsDoA9X7j7yqPi/bAdALBEvuSirEjkeL4cZPTko0A7qmM2puwwYquyoxCw8HFP+htPHIkG06dwsHg==";
         CloudBlobContainer container;
         OneDriveConnector connector;
-        SocketServer server;
         ChannelBase channel;
         int counter;
 
@@ -85,7 +84,7 @@ namespace OmniWheel
         private async void StartupTask_OnStringMessageReceived(object sender, MessageReceivedEventArgs e)
         {
             Debug.WriteLine((e as StringMessageReceivedEventArgs).Message);
-            await channel.SendData(counter++.ToString());
+            await channel.Send(counter++.ToString());
         }
 
         private async void Touch_OnPressed(object sender, BrickPi.Uwp.Base.SensorEventArgs e)

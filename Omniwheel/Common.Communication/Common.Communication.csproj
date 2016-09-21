@@ -110,6 +110,7 @@
     <Compile Include="Channels\ChannelBase.cs" />
     <Compile Include="Channels\ChannelFactory.cs" />
     <Compile Include="Channels\StringTextChannel.cs" />
+    <Compile Include="EnumExtension.cs" />
     <Compile Include="Events.cs" />
     <Compile Include="Sockets\SocketClient.cs" />
     <Compile Include="Sockets\SocketObject.cs" />
