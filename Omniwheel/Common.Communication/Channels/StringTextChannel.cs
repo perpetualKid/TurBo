@@ -73,7 +73,7 @@ namespace Common.Communication.Channels
                         {
                             if (string.IsNullOrWhiteSpace(line) && builder.Length > 0)
                             {
-                                PublishMessageReceived(new StringMessageReceivedEventArgs(builder.ToString()));
+                                PublishMessageReceived(streamSocket, new StringMessageReceivedEventArgs(builder.ToString()));
                             builder.Clear();
                             }
                             else

@@ -30,9 +30,15 @@ namespace Devices.Control.Base
             this.componentName = componentName;
         }
 
-        public static void AddComponent(ControllableComponent component)
+        public async virtual Task InitializeComponent()
+        {
+            await Task.FromResult(default(Task));
+        }
+
+        public static async Task RegisterComponent(ControllableComponent component)
         {
             components.Add(component.componentName.ToUpper(), component);
+            await component.InitializeComponent();
             if (component is CommunicationComponentBase)
                 communicationComponents.Add(component as CommunicationComponentBase);
         }
@@ -93,7 +99,7 @@ namespace Devices.Control.Base
             List<Task> sendTasks = new List<Task>();
             foreach(CommunicationComponentBase publisher in communicationComponents)
             {
-                sendTasks.Add(publisher.Send(text));
+                sendTasks.Add(publisher.Send(sender, text));
             }
             await Task.WhenAll(sendTasks).ConfigureAwait(false);
         }

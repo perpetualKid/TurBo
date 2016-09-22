@@ -18,9 +18,16 @@ namespace Devices.Control.Communication
             channels = new Dictionary<DataFormat, ChannelBase>();
         }
 
-        private void Server_OnMessageReceived(object sender, MessageReceivedEventArgs e)
+        public override async Task InitializeComponent()
         {
-            throw new NotImplementedException();
+            ChannelBase channel = await SocketServer.AddChannel(8027, DataFormat.StringText);
+            channel.OnMessageReceived += Server_OnMessageReceived;
+            channels.Add(channel.DataFormat, channel);
+        }
+
+        private async void Server_OnMessageReceived(object sender, MessageReceivedEventArgs e)
+        {
+            await HandleInput(this, (e as StringMessageReceivedEventArgs).Message);
         }
 
         public override void ComponentHelp()
@@ -38,9 +45,14 @@ namespace Devices.Control.Communication
             channels.Add(format, await SocketServer.AddChannel(port, format).ConfigureAwait(false));
         }
 
-        public override async Task Send(object data)
+        public override async Task Send(ControllableComponent sender, object data)
         {
-            throw new NotImplementedException();
+            List<Task> sendTasks = new List<Task>();
+            foreach (ChannelBase channel in channels.Values)
+            {
+                sendTasks.Add(channel.Send(data));
+            }
+            await Task.WhenAll(sendTasks).ConfigureAwait(false);
         }
     }
 }

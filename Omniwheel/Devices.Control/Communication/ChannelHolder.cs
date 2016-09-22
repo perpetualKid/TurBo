@@ -3,23 +3,20 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Common.Communication.Channels;
 using Devices.Control.Base;
 
-namespace Devices.Control.Util
+namespace Devices.Control.Communication
 {
-    public class TraceComponent : ControllableComponent
+    public class ChannelHolder: ControllableComponent
     {
-        private static TraceComponent instance;
-
-        static TraceComponent()
+        public ChannelHolder(string componentName) : base(componentName)
         {
-            instance = new TraceComponent();
         }
 
-        private TraceComponent(): base("TRACE")
-        {
+        public ChannelBase Channel { get; set; }
 
-        }
+        public CommunicationComponentBase Endpoint { get; set; }
 
         public override void ComponentHelp()
         {
@@ -29,11 +26,6 @@ namespace Devices.Control.Util
         public override void ProcessCommand(ControllableComponent sender, string[] commands)
         {
             throw new NotImplementedException();
-        }
-
-        public static async Task Print(string sender, string text)
-        {
-            await HandleOutput(instance, text);
         }
     }
 }

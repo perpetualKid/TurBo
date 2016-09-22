@@ -50,7 +50,7 @@ namespace Common.Communication.Channels
 
         public uint BytesRead { get { return bytesRead; } }
 
-        protected virtual void PublishMessageReceived(MessageReceivedEventArgs eventArgs)
+        protected virtual void PublishMessageReceived(StreamSocket socket, MessageReceivedEventArgs eventArgs)
         {
             OnMessageReceived?.Invoke(this, eventArgs);
         }

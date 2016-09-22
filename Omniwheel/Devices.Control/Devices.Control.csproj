@@ -108,6 +108,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Base\ControllableComponent.cs" />
+    <Compile Include="Communication\ChannelHolder.cs" />
     <Compile Include="Communication\CommunicationComponentBase.cs" />
     <Compile Include="Communication\NetworkEndpoint.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

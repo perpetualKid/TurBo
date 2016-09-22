@@ -19,6 +19,8 @@ using Windows.Storage.Streams;
 using System.Xml.Serialization;
 using Common.Communication.Channels;
 using Common.Communication;
+using Devices.Control.Communication;
+using Devices.Control.Base;
 
 // The Background Application template is documented at http://go.microsoft.com/fwlink/?LinkID=533884&clcid=0x409
 
@@ -33,7 +35,7 @@ namespace OmniWheel
         string storageConnectionString = "DefaultEndpointsProtocol=https;AccountName=turtlebot;AccountKey=761qXiS3qdsDoA9X7j7yqPi/bAdALBEvuSirEjkeL4cZPTko0A7qmM2puwwYquyoxCw8HFP+htPHIkG06dwsHg==";
         CloudBlobContainer container;
         OneDriveConnector connector;
-        ChannelBase channel;
+//        ChannelBase channel;
         int counter;
 
         public async void Run(IBackgroundTaskInstance taskInstance)
@@ -51,9 +53,10 @@ namespace OmniWheel
 
             //            await connector.Reauthorize(clientId, clientSecret, redirectUrl, refreshToken);
 
-            channel = await SocketServer.AddChannel(8027, DataFormat.StringText);
-            //await SocketServer.Instance(8027).AddChannel(DataFormat.String);
-            channel.OnMessageReceived += StartupTask_OnStringMessageReceived;
+            await ControllableComponent.RegisterComponent(new NetworkEndpoint(8027));
+            //channel = await SocketServer.AddChannel(8027, DataFormat.StringText);
+            ////await SocketServer.Instance(8027).AddChannel(DataFormat.String);
+            //channel.OnMessageReceived += StartupTask_OnStringMessageReceived;
             CloudStorageAccount storageAccount = CloudStorageAccount.Parse(storageConnectionString);
             CloudBlobClient blobClient = storageAccount.CreateCloudBlobClient();
             // Retrieve a reference to a container.
@@ -81,11 +84,11 @@ namespace OmniWheel
             }
         }
 
-        private async void StartupTask_OnStringMessageReceived(object sender, MessageReceivedEventArgs e)
-        {
-            Debug.WriteLine((e as StringMessageReceivedEventArgs).Message);
-            await channel.Send(counter++.ToString());
-        }
+        //private async void StartupTask_OnStringMessageReceived(object sender, MessageReceivedEventArgs e)
+        //{
+        //    Debug.WriteLine((e as StringMessageReceivedEventArgs).Message);
+        //    await channel.Send(counter++.ToString());
+        //}
 
         private async void Touch_OnPressed(object sender, BrickPi.Uwp.Base.SensorEventArgs e)
         {
