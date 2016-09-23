@@ -21,18 +21,20 @@ namespace Common.Communication.Channels
             }
         }
 
-        public static async Task BindChannel(DataFormat dataFormat, SocketObject host, StreamSocket socketStream)
+        public static async Task<ChannelBase> BindChannelAsync(DataFormat dataFormat, SocketObject host, StreamSocket socketStream)
         {
+            ChannelBase channel = null;
             switch (dataFormat)
             {
                 case DataFormat.StringText:
-                    await StringTextChannel.EstablishConnection(host, socketStream);
+                    channel = new StringTextChannel(host);
+                    await channel.BindAsync(socketStream).ConfigureAwait(false);
                     break;
                 default:
                     await Task.CompletedTask;
                     break;
             }
+            return channel;
         }
-
     }
 }

@@ -110,7 +110,7 @@
     <Compile Include="Base\ControllableComponent.cs" />
     <Compile Include="Communication\ChannelHolder.cs" />
     <Compile Include="Communication\CommunicationComponentBase.cs" />
-    <Compile Include="Communication\NetworkEndpoint.cs" />
+    <Compile Include="Communication\NetworkListener.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Util\TraceComponent.cs" />
     <EmbeddedResource Include="Properties\Devices.Control.rd.xml" />

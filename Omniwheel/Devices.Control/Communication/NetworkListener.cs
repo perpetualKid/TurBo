@@ -9,16 +9,16 @@ using Devices.Control.Base;
 
 namespace Devices.Control.Communication
 {
-    public class NetworkEndpoint : CommunicationComponentBase
+    public class NetworkListener : CommunicationComponentBase
     {
         private Dictionary<DataFormat, ChannelBase> channels;
 
-        public NetworkEndpoint(int port): base("TCP")
+        public NetworkListener(int port): base("TCP")
         {
             channels = new Dictionary<DataFormat, ChannelBase>();
         }
 
-        public override async Task InitializeComponent()
+        public override async Task InitializeDefaults()
         {
             await SocketServer.AddChannelListener(8027, DataFormat.StringText);
             SocketServer.OnMessageReceived += Server_OnMessageReceived;

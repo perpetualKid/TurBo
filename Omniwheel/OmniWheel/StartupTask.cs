@@ -53,7 +53,7 @@ namespace OmniWheel
 
             //            await connector.Reauthorize(clientId, clientSecret, redirectUrl, refreshToken);
 
-            await ControllableComponent.RegisterComponent(new NetworkEndpoint(8027));
+            await ControllableComponent.RegisterComponent(new NetworkListener(8027));
             //channel = await SocketServer.AddChannel(8027, DataFormat.StringText);
             ////await SocketServer.Instance(8027).AddChannel(DataFormat.String);
             //channel.OnMessageReceived += StartupTask_OnStringMessageReceived;

@@ -30,7 +30,7 @@ namespace Devices.Control.Base
             this.componentName = componentName;
         }
 
-        public async virtual Task InitializeComponent()
+        public async virtual Task InitializeDefaults()
         {
             await Task.FromResult(default(Task));
         }
@@ -38,7 +38,7 @@ namespace Devices.Control.Base
         public static async Task RegisterComponent(ControllableComponent component)
         {
             components.Add(component.componentName.ToUpper(), component);
-            await component.InitializeComponent();
+            await component.InitializeDefaults();
             if (component is CommunicationComponentBase)
                 communicationComponents.Add(component as CommunicationComponentBase);
         }
