@@ -36,7 +36,7 @@ namespace OmniWheel
         CloudBlobContainer container;
         OneDriveConnector connector;
 //        ChannelBase channel;
-        int counter;
+//        int counter;
 
         public async void Run(IBackgroundTaskInstance taskInstance)
         {

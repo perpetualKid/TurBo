@@ -10,11 +10,12 @@ namespace Devices.Control.Communication
 {
     public class ChannelHolder: ControllableComponent
     {
-        public ChannelHolder(string componentName) : base(componentName)
+        public ChannelHolder(ChannelBase channel) : base("ChannelHolder")
         {
+            this.Channel = channel;
         }
 
-        public ChannelBase Channel { get; set; }
+        public ChannelBase Channel { get; }
 
         public CommunicationComponentBase Endpoint { get; set; }
 

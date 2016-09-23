@@ -20,14 +20,18 @@ namespace Devices.Control.Communication
 
         public override async Task InitializeComponent()
         {
-            ChannelBase channel = await SocketServer.AddChannel(8027, DataFormat.StringText);
-            channel.OnMessageReceived += Server_OnMessageReceived;
-            channels.Add(channel.DataFormat, channel);
+            await SocketServer.AddChannelListener(8027, DataFormat.StringText);
+            SocketServer.OnMessageReceived += Server_OnMessageReceived;
+            //channel.OnMessageReceived += Server_OnMessageReceived;
+            //channels.Add(channel.DataFormat, channel);
+            //ChannelBase channel = await SocketServer.AddChannel(8027, DataFormat.StringText);
+            //channel.OnMessageReceived += Server_OnMessageReceived;
+            //channels.Add(channel.DataFormat, channel);
         }
 
         private async void Server_OnMessageReceived(object sender, MessageReceivedEventArgs e)
         {
-            await HandleInput(this, (e as StringMessageReceivedEventArgs).Message);
+            await HandleInput(new ChannelHolder(sender as ChannelBase), (e as StringMessageReceivedEventArgs).Message);
         }
 
         public override void ComponentHelp()
@@ -40,19 +44,24 @@ namespace Devices.Control.Communication
             throw new NotImplementedException();
         }
 
-        public async Task AddChannel(int port, DataFormat format)
-        {
-            channels.Add(format, await SocketServer.AddChannel(port, format).ConfigureAwait(false));
-        }
+        //public async Task AddChannel(int port, DataFormat format)
+        //{
+        //    //channels.Add(format, await SocketServer.AddChannel(port, format).ConfigureAwait(false));
+        //}
 
         public override async Task Send(ControllableComponent sender, object data)
         {
-            List<Task> sendTasks = new List<Task>();
-            foreach (ChannelBase channel in channels.Values)
+            if (sender is ChannelHolder)
+                await (sender as ChannelHolder).Channel.Send(data);
+            else
             {
-                sendTasks.Add(channel.Send(data));
+                List<Task> sendTasks = new List<Task>();
+                foreach (ChannelBase channel in channels.Values)
+                {
+                    sendTasks.Add(channel.Send(data));
+                }
+                await Task.WhenAll(sendTasks).ConfigureAwait(false);
             }
-            await Task.WhenAll(sendTasks).ConfigureAwait(false);
         }
     }
 }

@@ -31,7 +31,7 @@ namespace Common.Communication.Channels
                 streamSocket.Control.NoDelay = true;
                 await streamSocket.ConnectAsync(hostName, remotePort);
                 ConnectionStatus = ConnectionStatus.Connected;
-                channel = ChannelFactory.CreateChannel(this, format);
+                channel = ChannelFactory.BindChannel(format, this);
                 channel.StreamSocket = streamSocket;
                 Task task = Task.Run(async () => await channel.Listening(streamSocket));
             }

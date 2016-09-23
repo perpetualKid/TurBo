@@ -36,7 +36,7 @@ namespace Common.Communication.Channels
 
         public abstract Task Listening(StreamSocket socket);
 
-        public abstract Task ParseData();
+        protected abstract Task ParseData();
 
         public abstract Task Send(object data);
         #endregion
@@ -50,9 +50,9 @@ namespace Common.Communication.Channels
 
         public uint BytesRead { get { return bytesRead; } }
 
-        protected virtual void PublishMessageReceived(StreamSocket socket, MessageReceivedEventArgs eventArgs)
-        {
-            OnMessageReceived?.Invoke(this, eventArgs);
+        protected virtual void PublishMessageReceived(ChannelBase sender, MessageReceivedEventArgs eventArgs)
+        {   
+            OnMessageReceived?.Invoke(sender, eventArgs);
         }
         #endregion
     }

@@ -16,6 +16,13 @@ namespace Common.Communication.Channels
 
         public event EventHandler<ConnectionStatusChangedEventArgs> OnConnectionStatusChanged;
 
+        public static event EventHandler<MessageReceivedEventArgs> OnMessageReceived;
+
+        public void Instance_OnMessageReceived(object sender, MessageReceivedEventArgs e)
+        {
+            OnMessageReceived?.Invoke(sender, e);
+        }
+
 
         public void CancelSocketTask()
         {
@@ -56,8 +63,6 @@ namespace Common.Communication.Channels
                 }
             }
         }
-
-        public ChannelBase Channel { get { return channel; } }
 
         public abstract Task Send(object data);
 

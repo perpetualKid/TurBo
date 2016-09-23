@@ -35,10 +35,16 @@ namespace Common.Communication.Channels
             return activeSockets[port];
         }
 
-        public static async Task<ChannelBase> AddChannel(int port, DataFormat dataFormat)
+        //public static async Task<ChannelBase> AddChannel(int port, DataFormat dataFormat)
+        //{
+        //    SocketServer instance = Instance(port);
+        //    return await instance.AddChannel(dataFormat);
+        //}
+
+        public static async Task AddChannelListener(int port, DataFormat dataFormat)
         {
             SocketServer instance = Instance(port);
-            return await instance.AddChannel(dataFormat);
+            await instance.BindChannelAsync(dataFormat).ConfigureAwait(false);
         }
         #endregion
 
@@ -55,17 +61,17 @@ namespace Common.Communication.Channels
         public int Port { get { return this.port; } }
         #endregion
         
-        public async Task<ChannelBase> AddChannel(DataFormat dataFormat)
+        private async Task/*<ChannelBase>*/ BindChannelAsync(DataFormat dataFormat)
         {
             if (socketListener != null)
                 throw new InvalidOperationException("Only one Listner can be attached to this port.");
             try
             {
                 this.ConnectionStatus = ConnectionStatus.Connecting;
-                channel = ChannelFactory.CreateChannel(this, dataFormat);
                 socketListener = new StreamSocketListener();
                 socketListener.Control.NoDelay = true;
-                socketListener.ConnectionReceived += async (streamSocketListener, streamSocketListenerConnectionReceivedEventArgs) => await channel.Listening(streamSocketListenerConnectionReceivedEventArgs.Socket).ConfigureAwait(false);
+                socketListener.ConnectionReceived += async (streamSocketListener, streamSocketListenerConnectionReceivedEventArgs) => 
+                    await ChannelFactory.BindChannel(dataFormat, this, streamSocketListenerConnectionReceivedEventArgs.Socket).ConfigureAwait(false);
                 await socketListener.BindServiceNameAsync(port.ToString()).AsTask().ConfigureAwait(false);
                 this.ConnectionStatus = ConnectionStatus.Listening;
             }
@@ -74,7 +80,6 @@ namespace Common.Communication.Channels
                 Debug.WriteLine(e.Message);
                 this.ConnectionStatus = ConnectionStatus.Failed;
             }
-            return channel;
         }
 
 
