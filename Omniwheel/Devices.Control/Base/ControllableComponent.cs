@@ -136,7 +136,7 @@ namespace Devices.Control.Base
             StringBuilder builder = new StringBuilder();
             builder.Append("HELP :  Shows this help screen");
             builder.Append(Environment.NewLine);
-            builder.Append("LIST: Lists the available modules");
+            builder.Append("LIST : Lists the available modules");
             builder.Append(Environment.NewLine);
             await HandleOutput(sender, builder.ToString());
         }
