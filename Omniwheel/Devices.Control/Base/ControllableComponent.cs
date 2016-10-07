@@ -1,12 +1,9 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Common.Communication;
-using Common.Communication.Channels;
 using Devices.Control.Communication;
 using Windows.Data.Json;
 using Windows.Storage.Streams;
@@ -45,9 +42,9 @@ namespace Devices.Control.Base
 
         public string ComponentName { get { return this.componentName; } }
 
-        public abstract void ProcessCommand(ControllableComponent sender, string[] commands);
+        public abstract Task ProcessCommand(ControllableComponent sender, string[] commands);
 
-        public abstract void ComponentHelp();
+        public abstract Task ComponentHelp(ControllableComponent sender);
 
         public static string ResolveParameter(string[] parameterArray, int index)
         {
@@ -69,7 +66,7 @@ namespace Devices.Control.Base
                 try
                 {
                     ControllableComponent processor = components[component] as ControllableComponent;
-                    processor.ProcessCommand(sender, commands);
+                    await processor.ProcessCommand(sender, commands);
                 }
                 catch (Exception ex)
                 {
@@ -83,11 +80,21 @@ namespace Devices.Control.Base
                     case "HELP":
                         await ListHelp(sender);
                         break;
+                    case "HELLO":
+                        await Hello(sender);
+                        break;
                     case "LIST":
                         await ListComponents(sender);
                         break;
+                    case "ECHO":
+                        await Echo(sender, input);
+                        break;
+                    case "EXIT":
+                    case "CLOSE":
+                        await CloseChannel(sender);
+                        break;
                     default:
-                        Debug.WriteLine(sender.componentName, "Nothing to do on '{0}'", input);
+                        Debug.WriteLine("{0} :: Nothing to do on '{1}'", sender.componentName, input);
                         break;
                 }
             }
@@ -97,11 +104,16 @@ namespace Devices.Control.Base
         protected static async Task HandleOutput(ControllableComponent sender, string text)
         {
             List<Task> sendTasks = new List<Task>();
-            foreach(CommunicationComponentBase publisher in communicationComponents)
+            if (sender is ChannelHolder)
+                await (sender as ChannelHolder).Channel.Send(text).ConfigureAwait(false);
+            else
             {
-                sendTasks.Add(publisher.Send(sender, text));
+                foreach (CommunicationComponentBase publisher in communicationComponents)
+                {
+                    sendTasks.Add(publisher.Send(sender, text));
+                }
+                await Task.WhenAll(sendTasks).ConfigureAwait(false);
             }
-            await Task.WhenAll(sendTasks).ConfigureAwait(false);
         }
 
         protected static Task HandleOutput(ControllableComponent sender, JsonObject json)
@@ -131,6 +143,21 @@ namespace Devices.Control.Base
             //    dataPortInstance.WriteLine(text);
         }
 
+        public static async Task Echo(ControllableComponent sender, string input)
+        {
+            await HandleOutput(sender, input);
+        }
+
+        public static async Task Hello(ControllableComponent sender)
+        {
+            StringBuilder builder = new StringBuilder();
+            builder.Append("HELLO. Great to see you here.");
+            builder.Append(Environment.NewLine);
+            builder.Append("Use 'HELP + CRLF' command to get help");
+            builder.Append(Environment.NewLine);
+            await HandleOutput(sender, builder.ToString());
+        }
+
         public static async Task ListHelp(ControllableComponent sender)
         {
             StringBuilder builder = new StringBuilder();
@@ -139,6 +166,17 @@ namespace Devices.Control.Base
             builder.Append("LIST : Lists the available modules");
             builder.Append(Environment.NewLine);
             await HandleOutput(sender, builder.ToString());
+        }
+
+        public static async Task CloseChannel(ControllableComponent sender)
+        {
+            StringBuilder builder = new StringBuilder();
+            builder.Append("BYE. Hope to see you soon again.");
+            builder.Append(Environment.NewLine);
+            await HandleOutput(sender, builder.ToString());
+            if (sender is ChannelHolder)
+                await (sender as ChannelHolder).Channel.Close().ConfigureAwait(false);
+
         }
 
         public static async Task ListComponents(ControllableComponent sender)

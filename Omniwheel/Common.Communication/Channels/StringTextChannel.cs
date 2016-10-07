@@ -17,6 +17,8 @@ namespace Common.Communication.Channels
         private Queue<string> queue;
         private const uint bufferSize = 512;
         private static readonly char[] lineBreak = { '\r', '\n', '\0' };
+        private DataReaderLoadOperation loadOperation;
+
 
         #region instance
         public StringTextChannel(SocketObject socket) : base(socket, DataFormat.StringText)
@@ -29,7 +31,6 @@ namespace Common.Communication.Channels
         internal override async Task BindAsync(StreamSocket socketStream)
         {
             this.ConnectionStatus = ConnectionStatus.Connecting;
-            DataReaderLoadOperation loadOperation;
             this.streamSocket = socketStream;
             try
             {
@@ -43,6 +44,8 @@ namespace Common.Communication.Channels
                         dataReader.InputStreamOptions = InputStreamOptions.Partial;
                     }
                     this.ConnectionStatus = ConnectionStatus.Connected;
+                    queue.Enqueue("HELLO" + Environment.NewLine);
+                    dataReadEvent.Set();
                     loadOperation = dataReader.LoadAsync(bufferSize);
                     uint bytesAvailable = await loadOperation.AsTask(cancellationToken).ConfigureAwait(false);
                     while (bytesAvailable > 0 && loadOperation.Status == Windows.Foundation.AsyncStatus.Completed)
@@ -68,7 +71,6 @@ namespace Common.Communication.Channels
 
         public override async Task Listening(StreamSocket socket)
         {
-            DataReaderLoadOperation loadOperation;
             this.streamSocket = socket;
             try
             {
@@ -146,6 +148,19 @@ namespace Common.Communication.Channels
 
                 writer.DetachBuffer();
                 writer.DetachStream();
+            }
+        }
+
+        public override async Task Close()
+        {
+            if (null != loadOperation)
+            {
+                await Task.Run(() =>
+                {
+                    loadOperation.Cancel();
+                    loadOperation.Close();
+                }
+                );
             }
         }
         #endregion

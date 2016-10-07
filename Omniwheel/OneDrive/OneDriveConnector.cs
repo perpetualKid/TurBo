@@ -11,7 +11,7 @@ using Windows.Web.Http.Headers;
 
 
 
-namespace OmniWheel
+namespace OneDrive
 {
     public sealed class OneDriveConnector
     {
@@ -299,7 +299,7 @@ namespace OmniWheel
 
         }
 
-        private string GetAccessToken(string responseContent)
+        private static string GetAccessToken(string responseContent)
         {
             string identifier = "\"access_token\":\"";
             int startIndex = responseContent.IndexOf(identifier) + identifier.Length;
@@ -307,7 +307,7 @@ namespace OmniWheel
             return responseContent.Substring(startIndex, endIndex - startIndex);
         }
 
-        private string GetRefreshToken(string responseContent)
+        private static string GetRefreshToken(string responseContent)
         {
             string identifier = "\"refresh_token\":\"";
             int startIndex = responseContent.IndexOf(identifier) + identifier.Length;

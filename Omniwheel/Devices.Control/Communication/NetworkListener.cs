@@ -11,43 +11,44 @@ namespace Devices.Control.Communication
 {
     public class NetworkListener : CommunicationComponentBase
     {
-        private Dictionary<DataFormat, ChannelBase> channels;
+        private int port;
+        private DataFormat dataFormat = DataFormat.StringText;
+        private SocketObject instance;
 
-        public NetworkListener(int port): base("TCP")
+        public NetworkListener(int port): base("TCP" + port.ToString())
         {
-            channels = new Dictionary<DataFormat, ChannelBase>();
+            this.port = port;
+        }
+
+        public NetworkListener(int port, DataFormat dataFormat) : this(port)
+        {
+            this.dataFormat = dataFormat;
         }
 
         public override async Task InitializeDefaults()
         {
-            await SocketServer.AddChannelListener(8027, DataFormat.StringText);
-            SocketServer.OnMessageReceived += Server_OnMessageReceived;
-            //channel.OnMessageReceived += Server_OnMessageReceived;
-            //channels.Add(channel.DataFormat, channel);
-            //ChannelBase channel = await SocketServer.AddChannel(8027, DataFormat.StringText);
-            //channel.OnMessageReceived += Server_OnMessageReceived;
-            //channels.Add(channel.DataFormat, channel);
+            this.instance = await SocketServer.RegisterChannelListener(port, dataFormat);
+            instance.OnMessageReceived += Server_OnMessageReceived;
         }
 
+        public override async Task Close(ControllableComponent sender)
+        {
+            await instance.Close().ConfigureAwait(false);
+        }
         private async void Server_OnMessageReceived(object sender, MessageReceivedEventArgs e)
         {
             await HandleInput(new ChannelHolder(sender as ChannelBase), (e as StringMessageReceivedEventArgs).Message);
         }
 
-        public override void ComponentHelp()
+        public override async Task ComponentHelp(ControllableComponent sender)
         {
-            throw new NotImplementedException();
+            await Task.CompletedTask;
         }
 
-        public override void ProcessCommand(ControllableComponent sender, string[] commands)
+        public override async Task ProcessCommand(ControllableComponent sender, string[] commands)
         {
-            throw new NotImplementedException();
+            await Task.CompletedTask;
         }
-
-        //public async Task AddChannel(int port, DataFormat format)
-        //{
-        //    //channels.Add(format, await SocketServer.AddChannel(port, format).ConfigureAwait(false));
-        //}
 
         public override async Task Send(ControllableComponent sender, object data)
         {
@@ -55,12 +56,7 @@ namespace Devices.Control.Communication
                 await (sender as ChannelHolder).Channel.Send(data);
             else
             {
-                List<Task> sendTasks = new List<Task>();
-                foreach (ChannelBase channel in channels.Values)
-                {
-                    sendTasks.Add(channel.Send(data));
-                }
-                await Task.WhenAll(sendTasks).ConfigureAwait(false);
+                //
             }
         }
     }

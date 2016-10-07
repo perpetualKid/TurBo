@@ -15,5 +15,6 @@ namespace Devices.Control.Communication
 
         public abstract Task Send(ControllableComponent sender, object data);
 
+        public abstract Task Close(ControllableComponent sender);
     }
 }

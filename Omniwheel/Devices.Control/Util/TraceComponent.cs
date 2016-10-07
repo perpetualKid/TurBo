@@ -21,13 +21,15 @@ namespace Devices.Control.Util
 
         }
 
-        public override void ComponentHelp()
+        public override async Task ComponentHelp(ControllableComponent sender)
         {
+            await Task.CompletedTask;
             throw new NotImplementedException();
         }
 
-        public override void ProcessCommand(ControllableComponent sender, string[] commands)
+        public override async Task ProcessCommand(ControllableComponent sender, string[] commands)
         {
+            await Task.CompletedTask;
             throw new NotImplementedException();
         }
 

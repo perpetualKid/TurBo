@@ -16,7 +16,7 @@ namespace Common.Communication.Channels
 
         public event EventHandler<ConnectionStatusChangedEventArgs> OnConnectionStatusChanged;
 
-        public static event EventHandler<MessageReceivedEventArgs> OnMessageReceived;
+        public event EventHandler<MessageReceivedEventArgs> OnMessageReceived;
 
         public void Instance_OnMessageReceived(object sender, MessageReceivedEventArgs e)
         {
@@ -66,5 +66,6 @@ namespace Common.Communication.Channels
 
         public abstract Task Send(object data);
 
+        public abstract Task Close();
     }
 }

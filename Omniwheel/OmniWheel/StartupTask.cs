@@ -21,6 +21,7 @@ using Common.Communication.Channels;
 using Common.Communication;
 using Devices.Control.Communication;
 using Devices.Control.Base;
+using OneDrive;
 
 // The Background Application template is documented at http://go.microsoft.com/fwlink/?LinkID=533884&clcid=0x409
 
@@ -53,7 +54,9 @@ namespace OmniWheel
 
             //            await connector.Reauthorize(clientId, clientSecret, redirectUrl, refreshToken);
 
-            await ControllableComponent.RegisterComponent(new NetworkListener(8027));
+            await ControllableComponent.RegisterComponent(new NetworkListener(8027)).ConfigureAwait(false);
+            await ControllableComponent.RegisterComponent(new NetworkListener(8029)).ConfigureAwait(false);
+            await ControllableComponent.RegisterComponent(new OneDriveComponent()).ConfigureAwait(false);
             //channel = await SocketServer.AddChannel(8027, DataFormat.StringText);
             ////await SocketServer.Instance(8027).AddChannel(DataFormat.String);
             //channel.OnMessageReceived += StartupTask_OnStringMessageReceived;
@@ -137,7 +140,7 @@ namespace OmniWheel
         {
             if (null == connector || !connector.isLoggedIn)
             {
-                connector = new OmniWheel.OneDriveConnector();
+                connector = new OneDriveConnector();
                 connector.TokensChangedEvent += Connector_TokensChangedEvent;
                 if (string.IsNullOrWhiteSpace(appSettings.OneDriveRefreshToken))
                     await connector.LoginAsync(clientId, clientSecret, OneDriveRedirectUrl, accessToken);

@@ -45,6 +45,8 @@ namespace Common.Communication.Channels
         protected abstract Task ParseData();
 
         public abstract Task Send(object data);
+
+        public abstract Task Close();
         #endregion
 
         #region public properties

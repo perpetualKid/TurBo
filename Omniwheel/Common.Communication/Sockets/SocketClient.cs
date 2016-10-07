@@ -54,5 +54,10 @@ namespace Common.Communication.Channels
         {
             await channel.Send(data);
         }
+
+        public override async Task Close()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

@@ -35,10 +35,11 @@ namespace Common.Communication.Channels
             return activeSockets[port];
         }
 
-        public static async Task AddChannelListener(int port, DataFormat dataFormat)
+        public static async Task<SocketServer> RegisterChannelListener(int port, DataFormat dataFormat)
         {
             SocketServer instance = Instance(port);
             await instance.BindChannelAsync(dataFormat).ConfigureAwait(false);
+            return instance;
         }
         #endregion
 
@@ -97,6 +98,11 @@ namespace Common.Communication.Channels
         public override async Task Send(object data)
         {
             await channel.Send(data);
+        }
+
+        public override async Task Close()
+        {
+            await StopListening();
         }
 
         //private async void JsonConverter()
