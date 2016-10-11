@@ -2,11 +2,12 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Net;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
 using Common.Communication;
 using Common.Communication.Channels;
-using OmniWheel;
+using OneDrive;
 using Windows.Storage;
 using Windows.Storage.Streams;
 using Windows.UI.Xaml;
@@ -35,17 +36,8 @@ namespace App1
             this.InitializeComponent();
         }
 
-        public const string OneDriveRedirectUrl = "https://login.live.com/oauth20_desktop.srf";
-        public const string OneDriveLoginUrl = "https://login.live.com/oauth20_authorize.srf?client_id={0}&scope={1}&response_type=code&redirect_uri={2}";
-        public const string OneDriveLogoutUrl = "https://login.live.com/oauth20_logout.srf?client_id={0}&redirect_uri={1}";
-        public const string OneDriveScope = "wl.offline_access onedrive.readwrite";
-        public const string OneDriveRootUrl = "https://api.onedrive.com/v1.0/drive/root:";
-        public const string OneDriveTokenUrl = "https://login.live.com/oauth20_token.srf";
-        public const string OneDriveTokenContent = "client_id={0}&redirect_uri={1}&client_secret={2}&{3}={4}&grant_type={5}";
-
         public const string clientId = "a80849fc-d08b-4e3c-910c-8ec92565774f";
         public const string clientSecret = "N4dogjq8kyCQVBLLrwrbrQg";
-        public const string redirectUrl = "urn:ietf:wg:oauth:2.0:oob";
 
         private AppSettings appSettings;
 
@@ -53,16 +45,17 @@ namespace App1
 
         private async Task OneDrive()
         {
-            if (null == connector || !connector.isLoggedIn)
+            if (null == connector || !connector.LoggedIn)
             {
-                connector = new OmniWheel.OneDriveConnector();
+                connector = new OneDriveConnector();
+
                 connector.TokensChangedEvent += Connector_TokensChangedEvent;
                 if (string.IsNullOrWhiteSpace(appSettings.OneDriveRefreshToken))
-                    await connector.LoginAsync(clientId, clientSecret, OneDriveRedirectUrl, accessToken);
+                    await connector.LoginAsync(clientId, clientSecret, accessToken);
                 else
-                    await connector.Reauthorize(clientId, clientSecret, OneDriveRedirectUrl, appSettings.OneDriveRefreshToken);
+                    await connector.Reauthorize(clientId, clientSecret, appSettings.OneDriveRefreshToken);
             }
-            if (connector.isLoggedIn)
+            if (connector.LoggedIn)
             {
                 string folder = "";
                 var files = await connector.ListFilesAsync(folder);
@@ -74,46 +67,17 @@ namespace App1
         private string accessToken = string.Empty;
 
 
-        private async void Connector_TokensChangedEvent(object sender, string e)
+        private async void Connector_TokensChangedEvent(object sender, EventArgs e)
         {
-            appSettings.OneDriveRefreshToken = (sender as OneDriveConnector).refreshToken;
-            appSettings.OneDriveAccessToken = (sender as OneDriveConnector).accessToken;
+            appSettings.OneDriveRefreshToken = (sender as OneDriveConnector).RefreshToken;
+            appSettings.OneDriveAccessToken = (sender as OneDriveConnector).AccessToken;
             await SaveAsync(appSettings, fileName);
-        }
-
-        /// <summary>
-        /// Generates the html for the OneDrive login page
-        /// </summary>
-        /// <returns></returns>
-        public string GenerateOneDrivePage()
-        {
-            // Create OneDrive URL for logging in
-            string uri = string.Format(OneDriveLoginUrl, clientId, OneDriveScope, OneDriveRedirectUrl);
-
-            // Display login status
-            string html = "<b>OneDrive Status:&nbsp;&nbsp;</b><span style='color:Red'>Not Logged In</span><br>";
-
-            html += "<p class='sectionHeader'>Log into OneDrive:</p>";
-            html += "<ol>";
-            html += "<li>Click on this link:  <a href='" + uri + "' target='_blank'>OneDrive Login</a><br>" +
-                "A new window will open.  Log into OneDrive.<br><br></li>";
-            html += "<li>After you're done, you should arrive at a blank page.<br>" +
-                "Copy the URL, paste it into this box, and click Submit.<br>" +
-                "The URL will look something like this: https://login.live.com/oauth20_desktop.srf?code=M6b0ce71e-8961-1395-2435-f78db54f82ae&lc=1033 <br>" +
-                " <form><input type='text' name='codeUrl' size='50'>  <input type='submit' value='Submit'></form></li>";
-            html += "</ol><br><br>";
-
-            return html;
         }
 
         private async void button_Click(object sender, RoutedEventArgs e)
         {
             this.appSettings = await RestoreAsync(fileName);
 
-            if (string.IsNullOrWhiteSpace(appSettings.OneDriveRefreshToken))
-            {
-                string html = GenerateOneDrivePage();
-            }
             await OneDrive();
 
         }
@@ -192,7 +156,7 @@ namespace App1
             picker.FileTypeFilter.Add(".png");
 
             Windows.Storage.StorageFile file = await picker.PickSingleFileAsync();
-            if (file != null && null != connector && connector.isLoggedIn)
+            if (file != null && null != connector && connector.LoggedIn)
             {
                 await connector.UploadFileAsync(file, folder);
             }
@@ -244,6 +208,17 @@ namespace App1
             }
 
 
+        }
+
+        private void button5_Click(object sender, RoutedEventArgs e)
+        {
+            webView.Navigate(new Uri(OneDriveConnector.GenerateOneDriveLoginUrl(clientId)));
+        }
+
+        private void button6_Click(object sender, RoutedEventArgs e)
+        {
+            accessToken = OneDriveConnector.ParseAccessCode(webView.Source);
+            textBox.Text = accessToken;
         }
     }
 }

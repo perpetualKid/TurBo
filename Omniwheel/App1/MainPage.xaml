@@ -13,6 +13,10 @@
         <Button x:Name="button2" Content="Upload" HorizontalAlignment="Left" Margin="165,205,0,0" VerticalAlignment="Top" Click="button2_Click"/>
         <Button x:Name="button3" Content="Load Json" HorizontalAlignment="Left" Margin="95,279,0,0" VerticalAlignment="Top" Click="button3_Click"/>
         <Button x:Name="button4" Content="Disconnect" HorizontalAlignment="Left" Margin="228,279,0,0" VerticalAlignment="Top" Click="button4_Click"/>
+        <Button x:Name="button5" Content="AccessCode" HorizontalAlignment="Left" Margin="87,107,0,0" VerticalAlignment="Top" Click="button5_Click"/>
+        <TextBox x:Name="textBox" HorizontalAlignment="Left" Margin="87,144,0,0" TextWrapping="Wrap" Text="TextBox" VerticalAlignment="Top" Width="618"/>
+        <WebView x:Name="webView" HorizontalAlignment="Left" Height="282" Margin="45,339,0,0" VerticalAlignment="Top" Width="660"/>
+        <Button x:Name="button6" Content="Parse" HorizontalAlignment="Left" Margin="234,107,0,0" VerticalAlignment="Top" Click="button6_Click"/>
 
     </Grid>
 </Page>

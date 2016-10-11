@@ -34,7 +34,7 @@ namespace Devices.Control.Base
 
         public static async Task RegisterComponent(ControllableComponent component)
         {
-            components.Add(component.componentName.ToUpper(), component);
+            components.Add(component.componentName.ToUpperInvariant(), component);
             await component.InitializeDefaults();
             if (component is CommunicationComponentBase)
                 communicationComponents.Add(component as CommunicationComponentBase);
@@ -50,7 +50,7 @@ namespace Devices.Control.Base
         {
             if (null != parameterArray && parameterArray.Length > index && parameterArray[index] != null)
             {
-                return parameterArray[index].ToUpper();
+                return parameterArray[index];
             }
             return null;
         }
@@ -58,8 +58,8 @@ namespace Devices.Control.Base
         #region Text
         protected static async Task HandleInput(ControllableComponent sender, string input)
         {
-            string[] commands = input.Split(':');
-            string component = ResolveParameter(commands, 0);
+            string[] commands = input.Split(':', ' ');
+            string component = ResolveParameter(commands, 0).ToUpperInvariant();
 
             if (components.Keys.Contains(component))
             {
@@ -153,7 +153,7 @@ namespace Devices.Control.Base
             StringBuilder builder = new StringBuilder();
             builder.Append("HELLO. Great to see you here.");
             builder.Append(Environment.NewLine);
-            builder.Append("Use 'HELP + CRLF' command to get help");
+            builder.Append("Use 'HELP + CRLF' command to get help.");
             builder.Append(Environment.NewLine);
             await HandleOutput(sender, builder.ToString());
         }
@@ -161,9 +161,15 @@ namespace Devices.Control.Base
         public static async Task ListHelp(ControllableComponent sender)
         {
             StringBuilder builder = new StringBuilder();
-            builder.Append("HELP :  Shows this help screen");
+            builder.Append("HELP :  Shows this help screen.");
             builder.Append(Environment.NewLine);
-            builder.Append("LIST : Lists the available modules");
+            builder.Append("LIST : Lists the available modules.");
+            builder.Append(Environment.NewLine);
+            builder.Append("HELLO : Returns a simple greeting message. Useful to test communication channel.");
+            builder.Append(Environment.NewLine);
+            builder.Append("ECHO : Echos any text following the ECHO command.");
+            builder.Append(Environment.NewLine);
+            builder.Append("EXIT|CLOSE : Closes the currently used channel.");
             builder.Append(Environment.NewLine);
             await HandleOutput(sender, builder.ToString());
         }

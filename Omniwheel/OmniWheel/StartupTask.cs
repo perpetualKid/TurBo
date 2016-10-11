@@ -35,8 +35,6 @@ namespace OmniWheel
         private readonly string PHOTO_FILE_NAME = "Camera Roll\\photo.jpg";
         string storageConnectionString = "DefaultEndpointsProtocol=https;AccountName=turtlebot;AccountKey=761qXiS3qdsDoA9X7j7yqPi/bAdALBEvuSirEjkeL4cZPTko0A7qmM2puwwYquyoxCw8HFP+htPHIkG06dwsHg==";
         CloudBlobContainer container;
-        OneDriveConnector connector;
-//        ChannelBase channel;
 //        int counter;
 
         public async void Run(IBackgroundTaskInstance taskInstance)
@@ -45,7 +43,7 @@ namespace OmniWheel
 
             this.appSettings = await RestoreAsync(fileName);
 
-            await OneDriveConnect();
+//            await OneDriveConnect();
 
             //            connector = new OmniWheel.OneDriveConnector();
             //            connector.TokensChangedEvent += Connector_TokensChangedEvent;
@@ -100,7 +98,7 @@ namespace OmniWheel
             ImageEncodingProperties imageProperties = ImageEncodingProperties.CreateJpeg();
             await mediaCapture.CapturePhotoToStorageFileAsync(imageProperties, photoFile).AsTask().ConfigureAwait(false);
 
-            await OneDrive(photoFile);
+            //await OneDrive(photoFile);
 
             await mediaCapture.CapturePhotoToStreamAsync(imageProperties, stream).AsTask().ConfigureAwait(false);
             stream.Seek(0);
@@ -114,50 +112,24 @@ namespace OmniWheel
         }
 
 
-        private const string Scopes = "wl.signin onedrive.readwrite";
-
-        // TODO: Replace the below ClientId with your app's ClientId.
-        private const string clientId = "a80849fc-d08b-4e3c-910c-8ec92565774f";
-        private const string clientSecret = "N4dogjq8kyCQVBLLrwrbrQg";
-        private const string redirectUrl = "urn:ietf:wg:oauth:2.0:oob";
-
-        private const string OneDriveRedirectUrl = "https://login.live.com/oauth20_desktop.srf";
-
         private string refreshToken = string.Empty;
         private string accessToken = string.Empty;
 
-        private async Task OneDrive(StorageFile file)
-        {
-            if (null == connector || !connector.isLoggedIn)
-                await OneDriveConnect();
-            if (connector.isLoggedIn)
-            {
-                await connector.UploadFileAsync(file, "/Pics");
-            }
-        }
+        //private async Task OneDrive(StorageFile file)
+        //{
+        //    if (null == connector || !connector.LoggedIn)
+        //        await OneDriveConnect();
+        //    if (connector.LoggedIn)
+        //    {
+        //        await connector.UploadFileAsync(file, "/Pics");
+        //    }
+        //}
 
-        private async Task OneDriveConnect()
-        {
-            if (null == connector || !connector.isLoggedIn)
-            {
-                connector = new OneDriveConnector();
-                connector.TokensChangedEvent += Connector_TokensChangedEvent;
-                if (string.IsNullOrWhiteSpace(appSettings.OneDriveRefreshToken))
-                    await connector.LoginAsync(clientId, clientSecret, OneDriveRedirectUrl, accessToken);
-                else
-                    await connector.Reauthorize(clientId, clientSecret, OneDriveRedirectUrl, appSettings.OneDriveRefreshToken);
-            }
-            if (connector.isLoggedIn)
-            {
-                string folder = "/Pics";
-                var files = await connector.ListFilesAsync(folder);
-            }
-        }
 
-        private async void Connector_TokensChangedEvent(object sender, string e)
+        private async void Connector_TokensChangedEvent(object sender, EventArgs e)
         {
-            appSettings.OneDriveRefreshToken = (sender as OneDriveConnector).refreshToken;
-            appSettings.OneDriveAccessToken = (sender as OneDriveConnector).accessToken;
+            appSettings.OneDriveRefreshToken = (sender as OneDriveConnector).RefreshToken;
+            appSettings.OneDriveAccessToken = (sender as OneDriveConnector).AccessToken;
             await SaveAsync(appSettings, fileName);
         }
 

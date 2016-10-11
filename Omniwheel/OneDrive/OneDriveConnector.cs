@@ -1,10 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
+using System.Net;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Windows.Data.Json;
 using Windows.Foundation;
 using Windows.Storage;
+using Windows.Storage.Streams;
 using Windows.Web.Http;
 using Windows.Web.Http.Filters;
 using Windows.Web.Http.Headers;
@@ -15,45 +20,43 @@ namespace OneDrive
 {
     public sealed class OneDriveConnector
     {
-        /// <summary>
-        /// Is true if currently logged in to OneDrive, false otherwise.
-        /// </summary>
-        public bool isLoggedIn { get; private set; } = false;
-        public string accessToken { get; private set; } = string.Empty;
-        public string refreshToken { get; private set; } = string.Empty;
-
-        private const string LoginUriFormat = "https://login.live.com/oauth20_authorize.srf?client_id={0}&scope=wl.offline_access onedrive.readwrite&response_type=code&redirect_uri={1}";
-        private const string LogoutUriFormat = "https://login.live.com/oauth20_logout.srf?client_id={0}&redirect_uri={1}";
         private const string UploadUrlFormat = "https://api.onedrive.com/v1.0/drive/root:{0}/{1}:/content";
         private const string DeleteUrlFormat = "https://api.onedrive.com/v1.0/drive/root:{0}/{1}";
         private const string ListUrlFormat = "https://api.onedrive.com/v1.0/drive/root:{0}:/children";
         private const string TokenUri = "https://login.live.com/oauth20_token.srf";
         private const string TokenContentFormatAccess = "client_id={0}&redirect_uri={1}&{2}={3}&grant_type={4}";
 
+        private const string OneDriveRedirectUrl = "https://login.live.com/oauth20_desktop.srf";
+        private const string OneDriveLoginUrlFormat = "https://login.live.com/oauth20_authorize.srf?client_id={0}&scope={1}&response_type=code&redirect_uri={2}";
+        private const string OneDriveLogoutUrlFormat = "https://login.live.com/oauth20_logout.srf?client_id={0}&redirect_uri={1}";
+        private const string OneDriveScope = "wl.offline_access onedrive.readwrite";
 
         private HttpClient httpClient;
         private Timer refreshTimer;
-        private string clientId = string.Empty;
-        private string clientSecret = string.Empty;
-        private string redirectUrl = string.Empty;
 
-        public event EventHandler<string> TokensChangedEvent;
+        private string clientId;
+        private string clientSecret;
+        private string redirectUrl;
+
+        public event EventHandler TokensChangedEvent;
+
+        public bool LoggedIn { get; private set; } = false;
+
+        public string AccessToken { get; private set; } = string.Empty;
+
+        public string RefreshToken { get; private set; } = string.Empty;
+
 
         /// <summary>
         /// Instantiates a OneDrive connector object. Requires a call to "login" function to complete authorization.
         /// </summary>
         public OneDriveConnector()
         {
-            var filter = new HttpBaseProtocolFilter();
+            HttpBaseProtocolFilter filter = new HttpBaseProtocolFilter();
             filter.CacheControl.ReadBehavior = HttpCacheReadBehavior.MostRecent;
             filter.CacheControl.WriteBehavior = HttpCacheWriteBehavior.NoCache;
             filter.AllowUI = false;
             httpClient = new HttpClient(filter);
-        }
-
-        public string FormatAccessTokenUriString(string clientId, string redirectUri)
-        {
-            return string.Format(LoginUriFormat, clientId, redirectUri);
         }
 
         /// <summary>
@@ -61,14 +64,13 @@ namespace OneDrive
         /// </summary>
         /// <param name="clientId"></param> Client ID obtained from app registration
         /// <param name="clientSecret"></param> Client secret obtained from app registration
-        /// <param name="redirectUrl"></param> Redirect URL obtained from app registration
         /// <param name="accessCode"></param> Access Code obtained from earlier login prompt.
         /// <returns>The response message given by the server for the request</returns>
-        public IAsyncOperation<HttpResponseMessage> LoginAsync(string clientId, string clientSecret, string redirectUrl, string accessCode)
+        public IAsyncOperation<HttpResponseMessage> LoginAsync(string clientId, string clientSecret, string accessCode)
         {
             this.clientId = clientId;
             this.clientSecret = clientSecret;
-            this.redirectUrl = redirectUrl;
+            this.redirectUrl = OneDriveRedirectUrl;
 
             return Task.Run(async () =>
             {
@@ -86,15 +88,16 @@ namespace OneDrive
         /// <param name="redirectUrl"></param> Redirect URL obtained from app registration
         /// <param name="refreshToken"></param>
         /// <returns>The response message given by the server for the request</returns>
-        public IAsyncOperation<HttpResponseMessage> Reauthorize(string clientIdIn, string clientSecretIn, string redirectUrlIn, string refreshTokenIn)
+        public IAsyncOperation<HttpResponseMessage> Reauthorize(string clientIdIn, string clientSecretIn, string refreshTokenIn)
         {
             clientId = clientIdIn;
             clientSecret = clientSecretIn;
-            redirectUrl = redirectUrlIn;
+            redirectUrl = OneDriveRedirectUrl;
 
             return Task.Run(async () =>
             {
                 HttpResponseMessage response = await GetTokens(refreshTokenIn, "refresh_token", "refresh_token");
+                StartTimer();
                 return response;
             }).AsAsyncOperation<HttpResponseMessage>();
         }
@@ -107,8 +110,7 @@ namespace OneDrive
         {
             return Task.Run(async () =>
             {
-                HttpResponseMessage response = await Reauthorize(clientId, clientSecret, redirectUrl, refreshToken);
-                return response;
+                return await Reauthorize(clientId, clientSecret, RefreshToken);
             }).AsAsyncOperation<HttpResponseMessage>();
         }
 
@@ -118,9 +120,9 @@ namespace OneDrive
         /// <param name="file"></param> The file to upload to OneDrive. The file will be read, and a copy uploaded. The original file object will not be modified.
         /// <param name="destinationPath"></param> The path to the destination on Onedrive. Passing in an empty string will place the file in the root of Onedrive. Other folder paths should be passed in with a leading '/' character, such as "/Documents" or "/Pictures/Random"
         /// <returns>The response message given by the server for the request</returns>
-        public IAsyncOperation<HttpResponseMessage> UploadFileAsync(StorageFile file, string destinationPath)
+        public IAsyncOperation<HttpResponseMessage> UploadFileAsync(StorageFile file, string path)
         {
-            string uploadUri = String.Format(UploadUrlFormat, destinationPath, file.Name);
+            string uploadUri = String.Format(UploadUrlFormat, CorrectOneDrivePath(path), file.Name);
 
             return Task.Run(async () =>
             {
@@ -143,14 +145,41 @@ namespace OneDrive
         }
 
         /// <summary>
+        /// Stores stream content as file on OneDrive. This method is NOT thread safe. It assumes that the contents of the stream will not change during the upload process. 
+        /// </summary>
+        /// <param name="file"></param> The stream to upload to OneDrive. 
+        /// <param name="destinationPath"></param> The path to the destination on Onedrive. Passing in an empty string will place the file in the root of Onedrive. Other folder paths should be passed in with a leading '/' character, such as "/Documents" or "/Pictures/Random"
+        /// <returns>The response message given by the server for the request</returns>
+        public IAsyncOperation<HttpResponseMessage> UploadFileAsync(IInputStream stream, string path, string fileName)
+        {
+            string uploadUri = String.Format(UploadUrlFormat, CorrectOneDrivePath(path), fileName);
+
+            return Task.Run(async () =>
+            {
+                using (HttpStreamContent streamContent = new HttpStreamContent(stream))
+                {
+                    using (HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Put, new Uri(uploadUri)))
+                    {
+                        requestMessage.Content = streamContent;
+
+                        using (HttpResponseMessage response = await httpClient.SendRequestAsync(requestMessage))
+                        {
+                            return response;
+                        }
+                    }
+                }
+            }).AsAsyncOperation<HttpResponseMessage>();
+        }
+
+        /// <summary>
         /// Deletes a file to OneDrive.
         /// </summary>
         /// <param name="fileName"></param> The name of the file to delete
         /// <param name="pathToFile"></param> The path to the file on Onedrive. Passing in an empty string will look for the file in the root of Onedrive. Other folder paths should be passed in with a leading '/' character, such as "/Documents" or "/Pictures/Random"
         /// <returns>The response message given by the server for the request</returns>
-        public IAsyncOperation<HttpResponseMessage> DeleteFileAsync(string fileName, string pathToFile)
+        public IAsyncOperation<HttpResponseMessage> DeleteFileAsync(string fileName, string path)
         {
-            string deleteUri = String.Format(DeleteUrlFormat, pathToFile, fileName);
+            string deleteUri = String.Format(DeleteUrlFormat, CorrectOneDrivePath(path), fileName);
             using (HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Delete, new Uri(deleteUri)))
             {
                 return Task.Run(async () =>
@@ -164,15 +193,15 @@ namespace OneDrive
         }
 
         /// <summary>
-        /// List the names of all the files in a OneDrive folder.
+        /// List the names of all the files and folders in a OneDrive folder.
         /// </summary>
         /// <param name="folderPath"></param> The path to the folder on OneDrive. Passing in an empty string will list the files in the root of Onedrive. Other folder paths should be passed in with a leading '/' character, such as "/Documents" or "/Pictures/Random".
         /// <returns>A key-value pair containing the response message given by the server for the request as the key and a list containing the names of the files as the value</returns>
-        public IAsyncOperation<KeyValuePair<HttpResponseMessage, IList<string>>> ListFilesAsync(string folderPath)
+        public IAsyncOperation<KeyValuePair<HttpResponseMessage, IList<string>>> ListFilesAsync(string path, bool filesOnly = false)
         {
             return Task.Run(async () =>
             {
-                string listUri = String.Format(ListUrlFormat, folderPath);
+                string listUri = String.Format(ListUrlFormat, CorrectOneDrivePath(path));
 
                 using (HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Get, new Uri(listUri)))
                 {
@@ -181,24 +210,22 @@ namespace OneDrive
                         IList<string> files = new List<string>();
                         using (var inputStream = await response.Content.ReadAsInputStreamAsync())
                         {
-                            using (var memStream = new MemoryStream())
+                            using (var memoryStream = new MemoryStream())
                             {
                                 using (Stream testStream = inputStream.AsStreamForRead())
                                 {
-                                    await testStream.CopyToAsync(memStream);
-                                    memStream.Position = 0;
-                                    using (StreamReader reader = new StreamReader(memStream))
+                                    using (StreamReader reader = new StreamReader(inputStream.AsStreamForRead()))
                                     {
-                                        //Get file name
-                                        string result = reader.ReadToEnd();
-                                        string[] parts = result.Split('"');
-
-                                        //For each instance of the "name" field, the following string is the file name
-                                        for (int i = 0; i < parts.Length; i++)
+                                        //Get file and folder names
+                                        string result = await reader.ReadToEndAsync();
+                                        JsonObject json;
+                                        if (JsonObject.TryParse(result, out json) && json.ContainsKey("value"))
                                         {
-                                            if (parts[i].Equals("name"))
+                                            foreach (var item in json["value"].GetArray())
                                             {
-                                                files.Add(parts[i + 2]);
+                                                if (filesOnly && item.GetObject().ContainsKey("folder"))
+                                                    continue;
+                                                files.Add(item.GetObject().GetNamedString("name"));
                                             }
                                         }
                                         return new KeyValuePair<HttpResponseMessage, IList<string>>(response, files);
@@ -220,8 +247,8 @@ namespace OneDrive
             clientId = string.Empty;
             clientSecret = string.Empty;
             redirectUrl = string.Empty;
-            accessToken = string.Empty;
-            refreshToken = string.Empty;
+            AccessToken = string.Empty;
+            RefreshToken = string.Empty;
             if (null != refreshTimer)
                 refreshTimer.Dispose();
             if (null != httpClient)
@@ -229,16 +256,16 @@ namespace OneDrive
                 httpClient.DefaultRequestHeaders.Clear();
                 //httpClient.Dispose();
             }
-            isLoggedIn = false;
+            LoggedIn = false;
 
-            EventHandler<string> handler = TokensChangedEvent;
+            EventHandler handler = TokensChangedEvent;
 
             if (null != handler)
             {
-                handler(this, "Tokens Changed");
+                handler(this, new EventArgs());
             }
 
-            string logoutUri = string.Format(LogoutUriFormat, clientId, redirectUrl);
+            string logoutUri = string.Format(OneDriveLogoutUrlFormat, clientId, redirectUrl);
             using (HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Get, new Uri(logoutUri)))
             {
                 return Task.Run(async () =>
@@ -249,8 +276,57 @@ namespace OneDrive
                     }
                 }).AsAsyncOperation<HttpResponseMessage>();
             }
-
         }
+
+        /// <summary>
+        /// Generates the url for the OneDrive login page
+        /// </summary>
+        /// <returns></returns>
+        public static string GenerateOneDriveLoginUrl(string clientId)
+        {
+            // Create OneDrive URL for logging in
+            return string.Format(OneDriveLoginUrlFormat, clientId, OneDriveScope, OneDriveRedirectUrl);
+        }
+
+        /// <summary>
+        /// Generates the html for the OneDrive login page
+        /// </summary>
+        /// <returns></returns>
+        public static string GenerateOneDriveLoginPage(string clientId)
+        {
+            StringBuilder htmlString = new StringBuilder();
+            htmlString.Append("<p class='sectionHeader'>Log into OneDrive:</p>");
+            htmlString.Append("<ol>");
+            htmlString.Append("<li>Click on this link:  <a href='");
+            htmlString.Append(GenerateOneDriveLoginUrl(clientId));
+            htmlString.Append("' target='_blank'>OneDrive Login</a><br>");
+            htmlString.Append("A new window will open.  Log into OneDrive.<br><br></li>");
+            htmlString.Append("<li>After you're done, you should arrive at a blank page.<br>");
+            htmlString.Append("Copy the URL of the landing page and return to me.<br>");
+            htmlString.Append("The URL will look something like this: https://login.live.com/oauth20_desktop.srf?code=M6b0ce71e-8961-1395-2435-f78db54f82ae&lc=1033 <br>");
+            htmlString.Append("</ol><br><br>");
+
+            return htmlString.ToString();
+        }
+
+        public static string ParseAccessCode(Uri uri)
+        {
+            WwwFormUrlDecoder decoder = new WwwFormUrlDecoder(uri.Query);
+            try
+            {
+                return decoder.GetFirstValueByName("code");
+            }
+            catch (ArgumentException)
+            {
+                return null;
+            }
+        }
+
+        public static string ParseAccessCode(string uriString)
+        {
+            return ParseAccessCode(new Uri(uriString));
+        }
+
 
         private async void ReauthorizeOnTimer(object stateInfo)
         {
@@ -259,25 +335,20 @@ namespace OneDrive
 
         private void StartTimer()
         {
-            //Set up timer to reauthenticate OneDrive login
             TimerCallback callBack = this.ReauthorizeOnTimer;
-            AutoResetEvent autoEvent = new AutoResetEvent(false);
-            TimeSpan dueTime = new TimeSpan(0);
-
-            //use 50 minutes, as the accessToken expires after one hour by default
-            TimeSpan period = new TimeSpan(0, 50, 0);
-            refreshTimer = new Timer(callBack, autoEvent, dueTime, period);
+            //accessToken expires after one hour by default
+            TimeSpan dueTime = new TimeSpan(0, 50, 0);
+            if (null == refreshTimer)
+                refreshTimer = new Timer(callBack, null, dueTime, Timeout.InfiniteTimeSpan);
+            else
+                refreshTimer.Change(dueTime, Timeout.InfiniteTimeSpan);
         }
 
         private async Task<HttpResponseMessage> GetTokens(string accessCodeOrRefreshToken, string requestType, string grantType)
         {
             using (HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Post, new Uri(TokenUri)))
             {
-                string requestContent;
-                //if (requestType == "code")
-                requestContent = string.Format(TokenContentFormatAccess, clientId, redirectUrl, requestType, accessCodeOrRefreshToken, grantType);
-                //else
-                //    requestContent = string.Format(TokenContentFormatRefresh, clientId, redirectUrl, clientSecret, requestType, accessCodeOrRefreshToken, grantType);
+                string requestContent = string.Format(TokenContentFormatAccess, clientId, redirectUrl, requestType, accessCodeOrRefreshToken, grantType);
                 requestMessage.Content = new HttpStringContent(requestContent);
                 requestMessage.Content.Headers.ContentType = new HttpMediaTypeHeaderValue("application/x-www-form-urlencoded");
                 using (HttpResponseMessage responseMessage = await httpClient.SendRequestAsync(requestMessage))
@@ -285,13 +356,17 @@ namespace OneDrive
                     string responseContentString = await responseMessage.Content.ReadAsStringAsync();
                     if (responseMessage.IsSuccessStatusCode)
                     {
-                        accessToken = GetAccessToken(responseContentString);
-                        refreshToken = GetRefreshToken(responseContentString);
-                        httpClient.DefaultRequestHeaders.Authorization = new HttpCredentialsHeaderValue("Bearer", accessToken);
+                        JsonObject json;
+                        if (JsonObject.TryParse(responseContentString, out json))
+                        {
+                            AccessToken = json.GetNamedString("access_token");
+                            RefreshToken = json.GetNamedString("refresh_token");
+                        }
 
-                        TokensChangedEvent?.Invoke(this, "Tokens Changed");
+                        httpClient.DefaultRequestHeaders.Authorization = new HttpCredentialsHeaderValue("Bearer", AccessToken);
+                        TokensChangedEvent?.Invoke(this, new EventArgs());
 
-                        isLoggedIn = true;
+                        LoggedIn = true;
                     }
                     return responseMessage;
                 }
@@ -299,21 +374,16 @@ namespace OneDrive
 
         }
 
-        private static string GetAccessToken(string responseContent)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="path"></param> Passing in an empty string will place the file in the root of Onedrive. Other folder paths should be passed in with a leading '/' character, such as "/Documents" or "/Pictures/Random"
+        /// <returns></returns>
+        private static string CorrectOneDrivePath(string path)
         {
-            string identifier = "\"access_token\":\"";
-            int startIndex = responseContent.IndexOf(identifier) + identifier.Length;
-            int endIndex = responseContent.IndexOf("\"", startIndex);
-            return responseContent.Substring(startIndex, endIndex - startIndex);
+            if (string.IsNullOrWhiteSpace(path) || path == "/")
+                return string.Empty;
+            return path.StartsWith("/") ? path : "/" + path;
         }
-
-        private static string GetRefreshToken(string responseContent)
-        {
-            string identifier = "\"refresh_token\":\"";
-            int startIndex = responseContent.IndexOf(identifier) + identifier.Length;
-            int endIndex = responseContent.IndexOf("\"", startIndex);
-            return responseContent.Substring(startIndex, endIndex - startIndex);
-        }
-
     }
 }
