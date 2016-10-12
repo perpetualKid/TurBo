@@ -57,7 +57,7 @@ namespace Common.Communication.Channels
 
         public override async Task Close()
         {
-            throw new NotImplementedException();
+            await Task.CompletedTask;
         }
     }
 }

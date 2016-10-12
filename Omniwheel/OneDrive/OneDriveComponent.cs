@@ -18,20 +18,19 @@ namespace OneDrive
         public override async Task ComponentHelp(ControllableComponent sender)
         {
             StringBuilder builder = new StringBuilder();
-            builder.Append("HELP :  Shows this help screen.");
+            builder.Append("HELP : Shows this help screen.");
             builder.Append(Environment.NewLine);
             builder.Append("LOGIN:<ClientId>:<ClientSecret>:<AccessCode> : Logging in to OneDrive.");
             builder.Append(Environment.NewLine);
-            builder.Append("LOGOUT|LOGOFF : Logoff from Onedrive.");
+            builder.Append("LOGOUT|LOGOFF : Loging off from Onedrive.");
             builder.Append(Environment.NewLine);
-            builder.Append("LIST|LISTFILES[:<FilesOnly>] : List Folders and Files or Files only.");
+            builder.Append("LIST|LISTFILES[:<Path>[:<FilesOnly|True>]] : List Folders and Files or Files only.");
             builder.Append(Environment.NewLine);
             await HandleOutput(sender, builder.ToString());
         }
 
         public override async Task ProcessCommand(ControllableComponent sender, string[] commands)
         {
-//            string param;
             switch (ResolveParameter(commands, 1).ToUpperInvariant())
             {
                 case "HELP":
@@ -54,8 +53,10 @@ namespace OneDrive
         private async Task OneDriveListFiles(ControllableComponent sender, string[] commands)
         {
             string path = ResolveParameter(commands, 2);
+            string filesOnlyParam = ResolveParameter(commands, 3);
             bool filesOnly = false;
-            bool.TryParse(ResolveParameter(commands, 3), out filesOnly);
+            if (!bool.TryParse(filesOnlyParam, out filesOnly))
+                filesOnly = (!string.IsNullOrWhiteSpace(filesOnlyParam) && filesOnlyParam.ToUpperInvariant() == "FILESONLY");
 
             IList<string> files = await ListFiles(path, filesOnly);
             StringBuilder builder = new StringBuilder();
