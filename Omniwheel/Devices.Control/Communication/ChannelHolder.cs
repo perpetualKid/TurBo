@@ -8,7 +8,7 @@ using Devices.Control.Base;
 
 namespace Devices.Control.Communication
 {
-    public class ChannelHolder: ControllableComponent
+    public class ChannelHolder: Controllable
     {
         public ChannelHolder(ChannelBase channel) : base("ChannelHolder")
         {
@@ -19,13 +19,13 @@ namespace Devices.Control.Communication
 
         public CommunicationComponentBase Endpoint { get; set; }
 
-        public override async Task ComponentHelp(ControllableComponent sender)
+        public override async Task ComponentHelp(Controllable sender)
         {
             await Task.CompletedTask;
             throw new NotImplementedException();
         }
 
-        public override async Task ProcessCommand(ControllableComponent sender, string[] commands)
+        public override async Task ProcessCommand(Controllable sender, string[] commands)
         {
             await Task.CompletedTask;
             throw new NotImplementedException();

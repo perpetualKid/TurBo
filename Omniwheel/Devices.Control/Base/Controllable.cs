@@ -10,19 +10,19 @@ using Windows.Storage.Streams;
 
 namespace Devices.Control.Base
 {
-    public abstract class ControllableComponent
+    public abstract class Controllable
     {
         protected string componentName;
 
-        protected static Dictionary<string, ControllableComponent> components = new Dictionary<string, ControllableComponent>();
+        protected static Dictionary<string, Controllable> components = new Dictionary<string, Controllable>();
         protected static List<CommunicationComponentBase> communicationComponents;
 
-        static ControllableComponent()
+        static Controllable()
         {
             communicationComponents = new List<CommunicationComponentBase>();
         }
 
-        public ControllableComponent(string componentName)
+        public Controllable(string componentName)
         {
             this.componentName = componentName;
         }
@@ -32,19 +32,20 @@ namespace Devices.Control.Base
             await Task.FromResult(default(Task));
         }
 
-        public static async Task RegisterComponent(ControllableComponent component)
+        public static async Task<Controllable> RegisterComponent(Controllable component)
         {
             components.Add(component.componentName.ToUpperInvariant(), component);
             await component.InitializeDefaults();
             if (component is CommunicationComponentBase)
                 communicationComponents.Add(component as CommunicationComponentBase);
+            return component;
         }
 
         public string ComponentName { get { return this.componentName; } }
 
-        public abstract Task ProcessCommand(ControllableComponent sender, string[] commands);
+        public abstract Task ProcessCommand(Controllable sender, string[] commands);
 
-        public abstract Task ComponentHelp(ControllableComponent sender);
+        public abstract Task ComponentHelp(Controllable sender);
 
         public static string ResolveParameter(string[] parameterArray, int index)
         {
@@ -52,11 +53,11 @@ namespace Devices.Control.Base
             {
                 return parameterArray[index];
             }
-            return null;
+            return string.Empty;
         }
 
         #region Text
-        protected static async Task HandleInput(ControllableComponent sender, string input)
+        protected static async Task HandleInput(Controllable sender, string input)
         {
             string[] commands = input.Split(':', ' ');
             string component = ResolveParameter(commands, 0).ToUpperInvariant();
@@ -65,7 +66,7 @@ namespace Devices.Control.Base
             {
                 try
                 {
-                    ControllableComponent processor = components[component] as ControllableComponent;
+                    Controllable processor = components[component] as Controllable;
                     await processor.ProcessCommand(sender, commands);
                 }
                 catch (Exception ex)
@@ -101,7 +102,7 @@ namespace Devices.Control.Base
 
         }
 
-        protected static async Task HandleOutput(ControllableComponent sender, string text)
+        protected static async Task HandleOutput(Controllable sender, string text)
         {
             List<Task> sendTasks = new List<Task>();
             if (sender is ChannelHolder)
@@ -116,39 +117,39 @@ namespace Devices.Control.Base
             }
         }
 
-        protected static Task HandleOutput(ControllableComponent sender, JsonObject json)
+        protected static Task HandleOutput(Controllable sender, JsonObject json)
         {
             throw new NotImplementedException();
             //if (null != dataPortInstance)
             //    dataPortInstance.WriteLine(text);
         }
 
-        protected static void HandleOutput(ControllableComponent sender, byte[] data)
+        protected static void HandleOutput(Controllable sender, byte[] data)
         {
             throw new NotImplementedException();
             //if (null != dataPortInstance)
             //    dataPortInstance.WriteLine(text);
         }
 
-        protected static void HandleOutput(ControllableComponent sender, IRandomAccessStream stream)
+        protected static void HandleOutput(Controllable sender, IRandomAccessStream stream)
         {
             throw new NotImplementedException();
             //if (null != dataPortInstance)
             //    dataPortInstance.WriteLine(text);
         }
-        protected static void HandleOutput(ControllableComponent sender, IBuffer data)
+        protected static void HandleOutput(Controllable sender, IBuffer data)
         {
             throw new NotImplementedException();
             //if (null != dataPortInstance)
             //    dataPortInstance.WriteLine(text);
         }
 
-        public static async Task Echo(ControllableComponent sender, string input)
+        public static async Task Echo(Controllable sender, string input)
         {
             await HandleOutput(sender, input);
         }
 
-        public static async Task Hello(ControllableComponent sender)
+        public static async Task Hello(Controllable sender)
         {
             StringBuilder builder = new StringBuilder();
             builder.Append("HELLO. Great to see you here.");
@@ -158,7 +159,7 @@ namespace Devices.Control.Base
             await HandleOutput(sender, builder.ToString());
         }
 
-        public static async Task ListHelp(ControllableComponent sender)
+        public static async Task ListHelp(Controllable sender)
         {
             StringBuilder builder = new StringBuilder();
             builder.Append("HELP :  Shows this help screen.");
@@ -174,7 +175,7 @@ namespace Devices.Control.Base
             await HandleOutput(sender, builder.ToString());
         }
 
-        public static async Task CloseChannel(ControllableComponent sender)
+        public static async Task CloseChannel(Controllable sender)
         {
             StringBuilder builder = new StringBuilder();
             builder.Append("BYE. Hope to see you soon again.");
@@ -185,10 +186,10 @@ namespace Devices.Control.Base
 
         }
 
-        public static async Task ListComponents(ControllableComponent sender)
+        public static async Task ListComponents(Controllable sender)
         {
             StringBuilder builder = new StringBuilder();
-            foreach (KeyValuePair<string, ControllableComponent> item in components)
+            foreach (KeyValuePair<string, Controllable> item in components)
             {
                 builder.Append(item.Key);
                 builder.Append(Environment.NewLine);
@@ -198,7 +199,7 @@ namespace Devices.Control.Base
 
         #endregion
 
-        protected static void HandleInput(ControllableComponent sender, JsonObject jsonObject)
+        protected static void HandleInput(Controllable sender, JsonObject jsonObject)
         {
         }
 

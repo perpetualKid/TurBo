@@ -7,7 +7,7 @@ using Devices.Control.Base;
 
 namespace Devices.Control.Util
 {
-    public class TraceComponent : ControllableComponent
+    public class TraceComponent : Controllable
     {
         private static TraceComponent instance;
 
@@ -21,13 +21,13 @@ namespace Devices.Control.Util
 
         }
 
-        public override async Task ComponentHelp(ControllableComponent sender)
+        public override async Task ComponentHelp(Controllable sender)
         {
             await Task.CompletedTask;
             throw new NotImplementedException();
         }
 
-        public override async Task ProcessCommand(ControllableComponent sender, string[] commands)
+        public override async Task ProcessCommand(Controllable sender, string[] commands)
         {
             await Task.CompletedTask;
             throw new NotImplementedException();
@@ -36,6 +36,7 @@ namespace Devices.Control.Util
         public static async Task Print(string sender, string text)
         {
             await HandleOutput(instance, text);
+            throw new NotImplementedException();
         }
     }
 }

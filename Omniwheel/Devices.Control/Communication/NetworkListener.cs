@@ -31,7 +31,7 @@ namespace Devices.Control.Communication
             instance.OnMessageReceived += Server_OnMessageReceived;
         }
 
-        public override async Task Close(ControllableComponent sender)
+        public override async Task Close(Controllable sender)
         {
             await instance.Close().ConfigureAwait(false);
         }
@@ -40,17 +40,17 @@ namespace Devices.Control.Communication
             await HandleInput(new ChannelHolder(sender as ChannelBase), (e as StringMessageReceivedEventArgs).Message);
         }
 
-        public override async Task ComponentHelp(ControllableComponent sender)
+        public override async Task ComponentHelp(Controllable sender)
         {
             await Task.CompletedTask;
         }
 
-        public override async Task ProcessCommand(ControllableComponent sender, string[] commands)
+        public override async Task ProcessCommand(Controllable sender, string[] commands)
         {
             await Task.CompletedTask;
         }
 
-        public override async Task Send(ControllableComponent sender, object data)
+        public override async Task Send(Controllable sender, object data)
         {
             if (sender is ChannelHolder)
                 await (sender as ChannelHolder).Channel.Send(data);

@@ -22,6 +22,8 @@ using Common.Communication;
 using Devices.Control.Communication;
 using Devices.Control.Base;
 using OneDrive;
+using Devices.Control.Storage;
+using Microsoft.WindowsAzure.Storage.Shared.Protocol;
 
 // The Background Application template is documented at http://go.microsoft.com/fwlink/?LinkID=533884&clcid=0x409
 
@@ -33,8 +35,10 @@ namespace OmniWheel
         MediaCapture mediaCapture;
         private StorageFile photoFile;
         private readonly string PHOTO_FILE_NAME = "Camera Roll\\photo.jpg";
-        string storageConnectionString = "DefaultEndpointsProtocol=https;AccountName=turtlebot;AccountKey=761qXiS3qdsDoA9X7j7yqPi/bAdALBEvuSirEjkeL4cZPTko0A7qmM2puwwYquyoxCw8HFP+htPHIkG06dwsHg==";
+        string storageConnectionString = "DefaultEndpointsProtocol=https;AccountName=turtlebot;AccountKey=+CQR9tHRV4oIS/1B+z6PdUDQWj/OqEX7YlMRU9bxHxrNDxe9YayklGiAx9r2FC2KWmcUaDXGUfYb7Rj6zGEwnQ==;";
         CloudBlobContainer container;
+
+        OneDriveControllable oneDrive;
 //        int counter;
 
         public async void Run(IBackgroundTaskInstance taskInstance)
@@ -43,28 +47,25 @@ namespace OmniWheel
 
             this.appSettings = await RestoreAsync(fileName);
 
-//            await OneDriveConnect();
+            await Controllable.RegisterComponent(new NetworkListener(8027)).ConfigureAwait(false);
+            await Controllable.RegisterComponent(new NetworkListener(8029)).ConfigureAwait(false);
+            oneDrive = await Controllable.RegisterComponent(new OneDriveControllable()).ConfigureAwait(false) as OneDriveControllable;
 
-            //            connector = new OmniWheel.OneDriveConnector();
-            //            connector.TokensChangedEvent += Connector_TokensChangedEvent;
-            //            accessToken = "Mbfd0a4b1-7543-f3ce-d199-991c52273591";
-            ////            await connector.LoginAsync(clientId, clientSecret, redirectUrl, accessToken);
+            try
+            {
+                //https://github.com/Azure/azure-storage-net/issues/171
+                CloudStorageAccount storageAccount = CloudStorageAccount.Parse(storageConnectionString);
+                CloudBlobClient blobClient = storageAccount.CreateCloudBlobClient();
 
-            //            await connector.Reauthorize(clientId, clientSecret, redirectUrl, refreshToken);
-
-            await ControllableComponent.RegisterComponent(new NetworkListener(8027)).ConfigureAwait(false);
-            await ControllableComponent.RegisterComponent(new NetworkListener(8029)).ConfigureAwait(false);
-            await ControllableComponent.RegisterComponent(new OneDriveComponent()).ConfigureAwait(false);
-            //channel = await SocketServer.AddChannel(8027, DataFormat.StringText);
-            ////await SocketServer.Instance(8027).AddChannel(DataFormat.String);
-            //channel.OnMessageReceived += StartupTask_OnStringMessageReceived;
-            CloudStorageAccount storageAccount = CloudStorageAccount.Parse(storageConnectionString);
-            CloudBlobClient blobClient = storageAccount.CreateCloudBlobClient();
-            // Retrieve a reference to a container.
-            container = blobClient.GetContainerReference("turtlebot");
-            // Create the container if it doesn't already exist.
-            //await container.CreateIfNotExistsAsync();
-            //await container.SetPermissionsAsync(new BlobContainerPermissions { PublicAccess = BlobContainerPublicAccessType.Container });
+                // Retrieve a reference to a container.
+                container = blobClient.GetContainerReference("turtlebot");
+                // Create the container if it doesn't already exist.
+                await container.CreateIfNotExistsAsync();
+                await container.SetPermissionsAsync(new BlobContainerPermissions { PublicAccess = BlobContainerPublicAccessType.Container });
+            }
+            catch (Exception exception)
+            {
+            }
 
             Brick brick = await Brick.InitializeInstance("Uart0");
             int version = await brick.GetBrickVersion();
@@ -85,12 +86,6 @@ namespace OmniWheel
             }
         }
 
-        //private async void StartupTask_OnStringMessageReceived(object sender, MessageReceivedEventArgs e)
-        //{
-        //    Debug.WriteLine((e as StringMessageReceivedEventArgs).Message);
-        //    await channel.Send(counter++.ToString());
-        //}
-
         private async void Touch_OnPressed(object sender, BrickPi.Uwp.Base.SensorEventArgs e)
         {
             InMemoryRandomAccessStream stream = new InMemoryRandomAccessStream();
@@ -98,17 +93,13 @@ namespace OmniWheel
             ImageEncodingProperties imageProperties = ImageEncodingProperties.CreateJpeg();
             await mediaCapture.CapturePhotoToStorageFileAsync(imageProperties, photoFile).AsTask().ConfigureAwait(false);
 
-            //await OneDrive(photoFile);
-
             await mediaCapture.CapturePhotoToStreamAsync(imageProperties, stream).AsTask().ConfigureAwait(false);
             stream.Seek(0);
 
+            await oneDrive.UploadFile(stream, "/Pics", photoFile.Name);
             
-            // Retrieve reference to a blob named "myblob".
-            CloudBlockBlob blockBlob = container.GetBlockBlobReference(photoFile.Name);
-
-            // Create or overwrite the "myblob" blob with contents from a local file.
-            await blockBlob.UploadFromStreamAsync(stream.AsStreamForRead()).ConfigureAwait(false);
+            //CloudBlockBlob blockBlob = container.GetBlockBlobReference(photoFile.Name);
+            //await blockBlob.UploadFromStreamAsync(stream.AsStreamForRead()).ConfigureAwait(false);
         }
 
 
@@ -124,7 +115,6 @@ namespace OmniWheel
         //        await connector.UploadFileAsync(file, "/Pics");
         //    }
         //}
-
 
         private async void Connector_TokensChangedEvent(object sender, EventArgs e)
         {

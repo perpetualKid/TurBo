@@ -7,14 +7,14 @@ using Devices.Control.Base;
 
 namespace Devices.Control.Communication
 {
-    public abstract class CommunicationComponentBase : ControllableComponent
+    public abstract class CommunicationComponentBase : Controllable
     {
         public CommunicationComponentBase(string componentName) : base(componentName)
         {
         }
 
-        public abstract Task Send(ControllableComponent sender, object data);
+        public abstract Task Send(Controllable sender, object data);
 
-        public abstract Task Close(ControllableComponent sender);
+        public abstract Task Close(Controllable sender);
     }
 }

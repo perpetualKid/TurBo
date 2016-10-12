@@ -4,18 +4,21 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Devices.Control.Base;
+using OneDrive;
+using Windows.Storage;
+using Windows.Storage.Streams;
 
-namespace OneDrive
+namespace Devices.Control.Storage
 {
-    public class OneDriveComponent : ControllableComponent
+    public class OneDriveControllable : Controllable
     {
         OneDriveConnector oneDriveConnector;
 
-        public OneDriveComponent() : base("OneDrive")
+        public OneDriveControllable() : base("OneDrive")
         {
         }
 
-        public override async Task ComponentHelp(ControllableComponent sender)
+        public override async Task ComponentHelp(Controllable sender)
         {
             StringBuilder builder = new StringBuilder();
             builder.Append("HELP : Shows this help screen.");
@@ -29,7 +32,7 @@ namespace OneDrive
             await HandleOutput(sender, builder.ToString());
         }
 
-        public override async Task ProcessCommand(ControllableComponent sender, string[] commands)
+        public override async Task ProcessCommand(Controllable sender, string[] commands)
         {
             switch (ResolveParameter(commands, 1).ToUpperInvariant())
             {
@@ -50,7 +53,7 @@ namespace OneDrive
             }
         }
 
-        private async Task OneDriveListFiles(ControllableComponent sender, string[] commands)
+        private async Task OneDriveListFiles(Controllable sender, string[] commands)
         {
             string path = ResolveParameter(commands, 2);
             string filesOnlyParam = ResolveParameter(commands, 3);
@@ -73,6 +76,23 @@ namespace OneDrive
                 await HandleOutput(sender, "No files or folder found.");
         }
 
+        private async Task OneDriveLogin(Controllable sender, string[] commands)
+        {
+            string clientId = ResolveParameter(commands, 2);
+            string clientSecret = ResolveParameter(commands, 3);
+            string accessCode = ResolveParameter(commands, 4);
+
+            await OneDriveLogin(clientId, clientSecret, accessCode);
+            await HandleOutput(sender, "Login " + (oneDriveConnector != null && oneDriveConnector.LoggedIn ? "successful" : "failed"));
+        }
+
+        private async Task OneDriveLogout(Controllable sender, string[] commands)
+        {
+            await OneDriveLogout();
+            await HandleOutput(sender, "Logout " + (oneDriveConnector == null || !oneDriveConnector.LoggedIn ? "successful" : "failed"));
+        }
+
+
         public async Task<IList<string>> ListFiles(string path, bool filesOnly)
         {
             if (null != oneDriveConnector)
@@ -83,34 +103,33 @@ namespace OneDrive
             return null;
         }
 
-
-        private async Task OneDriveLogout(ControllableComponent sender, string[] commands)
-        {
-            await OneDriveLogout();
-            await HandleOutput(sender, "Logout " + (oneDriveConnector == null || !oneDriveConnector.LoggedIn ? "successful" : "failed"));
-        }
-
         public async Task OneDriveLogout()
         {
             if (null != oneDriveConnector)
             await oneDriveConnector.LogoutAsync();
         }
-
-        private async Task OneDriveLogin(ControllableComponent sender, string[] commands)
-        {
-            string clientId = ResolveParameter(commands, 2);
-            string clientSecret = ResolveParameter(commands, 3);
-            string accessCode = ResolveParameter(commands, 4);
-
-            await OneDriveLogin(clientId, clientSecret, accessCode);
-            await HandleOutput(sender, "Login " + (oneDriveConnector != null && oneDriveConnector.LoggedIn ? "successful" : "failed"));
-        }
-
         public async Task OneDriveLogin(string clientId, string clientSecret, string accessCode)
         {
             if (null == oneDriveConnector)
                 oneDriveConnector = new OneDriveConnector();
             await oneDriveConnector.LoginAsync(clientId, clientSecret, accessCode);
         }
+
+        public async Task UploadFile(StorageFile file, string path)
+        {
+            if (null != oneDriveConnector)
+            {
+                await oneDriveConnector.UploadFileAsync(file, path);
+            }
+        }
+
+        public async Task UploadFile(IInputStream stream, string path, string fileName)
+        {
+            if (null != oneDriveConnector)
+            {
+                await oneDriveConnector.UploadFileAsync(stream, path, fileName);
+            }
+        }
+
     }
 }
