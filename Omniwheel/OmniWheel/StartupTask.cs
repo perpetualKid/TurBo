@@ -49,6 +49,7 @@ namespace OmniWheel
 
             await Controllable.RegisterComponent(new NetworkListener(8027)).ConfigureAwait(false);
             await Controllable.RegisterComponent(new NetworkListener(8029)).ConfigureAwait(false);
+            await Controllable.RegisterComponent(new NetworkListener(8031, DataFormat.Json)).ConfigureAwait(false);
             oneDrive = await Controllable.RegisterComponent(new OneDriveControllable()).ConfigureAwait(false) as OneDriveControllable;
 
             try

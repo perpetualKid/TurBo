@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Common.Communication;
 using Devices.Control.Communication;
 using Windows.Data.Json;
 using Windows.Storage.Streams;
@@ -57,8 +58,10 @@ namespace Devices.Control.Base
         }
 
         #region Text
-        protected static async Task HandleInput(Controllable sender, string input)
+        protected static async Task HandleInput(Controllable sender, StringMessageReceivedEventArgs stringMessage)
+//        protected static async Task HandleInput(Controllable sender, string input)
         {
+            string input = stringMessage.Message;
             string[] commands = input.Split(':', ' ');
             string component = ResolveParameter(commands, 0).ToUpperInvariant();
 
@@ -199,8 +202,9 @@ namespace Devices.Control.Base
 
         #endregion
 
-        protected static void HandleInput(Controllable sender, JsonObject jsonObject)
+        protected static async Task HandleInput(Controllable sender, JsonMessageReceivedEventArgs jsonMessage)
         {
+            await Task.CompletedTask;
         }
 
     }

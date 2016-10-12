@@ -181,29 +181,23 @@ namespace OneDrive
                 using (HttpResponseMessage response = await httpClient.SendRequestAsync(requestMessage))
                 {
                     IList<string> files = new List<string>();
-                    using (var inputStream = await response.Content.ReadAsInputStreamAsync())
+                    using (IInputStream inputStream = await response.Content.ReadAsInputStreamAsync())
                     {
-                        using (var memoryStream = new MemoryStream())
+                        using (StreamReader reader = new StreamReader(inputStream.AsStreamForRead()))
                         {
-                            using (Stream testStream = inputStream.AsStreamForRead())
+                            //Get file and folder names
+                            string result = await reader.ReadToEndAsync();
+                            JsonObject json;
+                            if (JsonObject.TryParse(result, out json) && json.ContainsKey("value"))
                             {
-                                using (StreamReader reader = new StreamReader(inputStream.AsStreamForRead()))
+                                foreach (var item in json["value"].GetArray())
                                 {
-                                    //Get file and folder names
-                                    string result = await reader.ReadToEndAsync();
-                                    JsonObject json;
-                                    if (JsonObject.TryParse(result, out json) && json.ContainsKey("value"))
-                                    {
-                                        foreach (var item in json["value"].GetArray())
-                                        {
-                                            if (filesOnly && item.GetObject().ContainsKey("folder"))
-                                                continue;
-                                            files.Add(item.GetObject().GetNamedString("name"));
-                                        }
-                                    }
-                                    return new KeyValuePair<HttpResponseMessage, IList<string>>(response, files);
+                                    if (filesOnly && item.GetObject().ContainsKey("folder"))
+                                        continue;
+                                    files.Add(item.GetObject().GetNamedString("name"));
                                 }
                             }
+                            return new KeyValuePair<HttpResponseMessage, IList<string>>(response, files);
                         }
                     }
                 }

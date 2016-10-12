@@ -38,9 +38,9 @@ namespace Common.Communication.Channels
             parseTask.ConfigureAwait(false);
         }
 
-        public abstract Task Listening(StreamSocket socket);
+        public abstract Task Listening(StreamSocket socketStream);
 
-        internal abstract Task BindAsync(StreamSocket socket);
+        internal abstract Task BindAsync(StreamSocket socketStream);
 
         protected abstract Task ParseData();
 

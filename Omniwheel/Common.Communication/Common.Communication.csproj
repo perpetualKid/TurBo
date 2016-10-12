@@ -109,6 +109,7 @@
   <ItemGroup>
     <Compile Include="Channels\ChannelBase.cs" />
     <Compile Include="Channels\ChannelFactory.cs" />
+    <Compile Include="Channels\JsonChannel.cs" />
     <Compile Include="Channels\StringTextChannel.cs" />
     <Compile Include="EnumExtension.cs" />
     <Compile Include="Events.cs" />

@@ -30,6 +30,10 @@ namespace Common.Communication.Channels
                     channel = new StringTextChannel(host);
                     await channel.BindAsync(socketStream).ConfigureAwait(false);
                     break;
+                case DataFormat.Json:
+                    channel = new JsonChannel(host);
+                    await channel.BindAsync(socketStream).ConfigureAwait(false);
+                    break;
                 default:
                     await Task.CompletedTask;
                     break;

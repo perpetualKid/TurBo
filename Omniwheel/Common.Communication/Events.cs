@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Windows.Data.Json;
 
 namespace Common.Communication
 {
@@ -28,4 +29,18 @@ namespace Common.Communication
 
         public string Message { get { return message; } }
     }
+
+    public class JsonMessageReceivedEventArgs : MessageReceivedEventArgs
+    {
+
+        private JsonObject json;
+
+        public JsonMessageReceivedEventArgs(JsonObject json)
+        {
+            this.json = json;
+        }
+
+        public JsonObject Json { get { return json; } }
+    }
+
 }

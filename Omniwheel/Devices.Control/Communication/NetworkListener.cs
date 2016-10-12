@@ -35,9 +35,12 @@ namespace Devices.Control.Communication
         {
             await instance.Close().ConfigureAwait(false);
         }
+
         private async void Server_OnMessageReceived(object sender, MessageReceivedEventArgs e)
         {
-            await HandleInput(new ChannelHolder(sender as ChannelBase), (e as StringMessageReceivedEventArgs).Message);
+            //            await HandleInput(new ChannelHolder(sender as ChannelBase), (e as StringMessageReceivedEventArgs).Message);
+            dynamic eventArgs = e;
+            await HandleInput(new ChannelHolder(sender as ChannelBase), eventArgs);
         }
 
         public override async Task ComponentHelp(Controllable sender)

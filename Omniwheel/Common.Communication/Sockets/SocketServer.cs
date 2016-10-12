@@ -78,10 +78,6 @@ namespace Common.Communication.Channels
         }
 
 
-        /// <summary>
-        /// Disposes of the TCP socket and sets it to null. 
-        /// Returns false if no socket was listening.
-        /// </summary>
         public async Task StopListening()
         {
             if (socketListener != null)

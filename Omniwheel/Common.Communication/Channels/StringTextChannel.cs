@@ -1,11 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Common.Communication.Channels;
 using Nito.AsyncEx;
 using Windows.Networking.Sockets;
 using Windows.Storage.Streams;
@@ -69,13 +67,13 @@ namespace Common.Communication.Channels
             this.OnMessageReceived -= socketObject.Instance_OnMessageReceived;
         }
 
-        public override async Task Listening(StreamSocket socket)
+        public override async Task Listening(StreamSocket socketStream)
         {
-            this.streamSocket = socket;
+            this.streamSocket = socketStream;
             try
             {
                 socketObject.ConnectionStatus = ConnectionStatus.Connected;
-                using (DataReader dataReader = new DataReader(socket.InputStream))
+                using (DataReader dataReader = new DataReader(socketStream.InputStream))
                 {
                     CancellationToken cancellationToken = socketObject.CancellationTokenSource.Token;
                     //setup
