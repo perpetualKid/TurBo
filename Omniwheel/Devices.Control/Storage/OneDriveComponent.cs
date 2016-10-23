@@ -18,7 +18,7 @@ namespace Devices.Control.Storage
         {
         }
 
-        public override async Task ComponentHelp(MessageContainer data)
+        protected override async Task ComponentHelp(MessageContainer data)
         {
             data.Responses.Add("HELP : Shows this help screen.");
             data.Responses.Add("LOGIN:<ClientId>:<ClientSecret>:<AccessCode> : Logging in to OneDrive.");
@@ -27,7 +27,7 @@ namespace Devices.Control.Storage
             await HandleOutput(data);
         }
 
-        public override async Task ProcessCommand(MessageContainer data)
+        protected override async Task ProcessCommand(MessageContainer data)
         {
             switch (ResolveParameter(data, 1).ToUpperInvariant())
             {
@@ -48,6 +48,7 @@ namespace Devices.Control.Storage
             }
         }
 
+        #region private implementation
         private async Task OneDriveListFiles(MessageContainer data)
         {
             string path = ResolveParameter(data, 2);
@@ -87,8 +88,9 @@ namespace Devices.Control.Storage
             data.Responses.Add("Logout " + (oneDriveConnector == null || !oneDriveConnector.LoggedIn ? "successful" : "failed"));
             await HandleOutput(data);;
         }
+        #endregion
 
-
+        #region public
         public async Task<IList<string>> ListFiles(string path, bool filesOnly)
         {
             if (null != oneDriveConnector)
@@ -126,6 +128,6 @@ namespace Devices.Control.Storage
                 await oneDriveConnector.UploadFileAsync(stream, path, fileName);
             }
         }
-
+        #endregion
     }
 }

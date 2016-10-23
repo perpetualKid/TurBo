@@ -132,6 +132,7 @@ namespace Common.Communication.Channels
                 }
             }
         }
+
         //private async void JsonConverter()
         //{
         //    JsonTextReader jsonReader = new JsonTextReader(new StreamReader(jsonReadStream));

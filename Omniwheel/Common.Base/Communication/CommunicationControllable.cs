@@ -14,6 +14,6 @@ namespace Common.Base.Communication
 
         public abstract Task Send(MessageContainer data);
 
-        public abstract Task Close(MessageContainer data);
+        public abstract Task CloseChannel(Guid sessionId);
     }
 }

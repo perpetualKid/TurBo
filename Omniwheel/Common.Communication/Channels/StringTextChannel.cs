@@ -1,15 +1,15 @@
 ﻿using System;
-using System.Collections.Specialized;
+using System.Collections;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Windows.Networking.Sockets;
 using Windows.Storage.Streams;
-using System.Linq;
-using System.Collections;
 
 namespace Common.Communication.Channels
 {
@@ -107,8 +107,6 @@ namespace Common.Communication.Channels
                     uint bytesAvailable =  await loadOperation.AsTask(cancellationToken).ConfigureAwait(false);
                     while (bytesAvailable > 0 && loadOperation.Status == Windows.Foundation.AsyncStatus.Completed)
                     {
-                        //queue.Enqueue(dataReader.ReadString(bytesAvailable));
-                        //dataReadEvent.Set();
                         bytesRead += bytesAvailable;
                         loadOperation = dataReader.LoadAsync(bufferSize);
                         bytesAvailable = await loadOperation.AsTask(cancellationToken).ConfigureAwait(false);
@@ -127,7 +125,7 @@ namespace Common.Communication.Channels
             using (StreamReader reader = new StreamReader(memoryStream, Encoding.UTF8, true, bufferSize, true))
             {
                 StringBuilder builder = new StringBuilder();
-                await streamAccess.WaitAsync();
+                await streamAccess.WaitAsync().ConfigureAwait(false);
 
                 memoryStream.Position = streamReadPosition;
                 string[] message = reader.GetTokens().ToArray();
@@ -187,7 +185,7 @@ namespace Common.Communication.Channels
                     loadOperation.Cancel();
                     loadOperation.Close();
                 }
-                );
+                ).ConfigureAwait(false);
             }
         }
         #endregion

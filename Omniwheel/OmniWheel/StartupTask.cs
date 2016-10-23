@@ -24,6 +24,7 @@ using OneDrive;
 using Devices.Control.Storage;
 using Microsoft.WindowsAzure.Storage.Shared.Protocol;
 using Common.Base;
+using Windows.Devices.Enumeration;
 
 // The Background Application template is documented at http://go.microsoft.com/fwlink/?LinkID=533884&clcid=0x409
 
@@ -46,11 +47,14 @@ namespace OmniWheel
             BackgroundTaskDeferral deferral = taskInstance.GetDeferral();
 
             this.appSettings = await RestoreAsync(fileName);
+            List<Task> setupTasks = new List<Task>();
 
-            await Controllable.RegisterComponent(new NetworkListener(8027)).ConfigureAwait(false);
-            await Controllable.RegisterComponent(new NetworkListener(8029)).ConfigureAwait(false);
-            await Controllable.RegisterComponent(new NetworkListener(8031, DataFormat.Json)).ConfigureAwait(false);
-            oneDrive = await Controllable.RegisterComponent(new OneDriveControllable()).ConfigureAwait(false) as OneDriveControllable;
+            setupTasks.Add(Controllable.RegisterComponent(new NetworkListener(8027)));
+            setupTasks.Add(Controllable.RegisterComponent(new NetworkListener(8029)));
+            setupTasks.Add(Controllable.RegisterComponent(new NetworkListener(8031, DataFormat.Json)));
+            oneDrive = new OneDriveControllable();
+            setupTasks.Add(Controllable.RegisterComponent(oneDrive));
+            await Task.WhenAll(setupTasks).ConfigureAwait(false);
 
             //try
             //{
@@ -76,8 +80,26 @@ namespace OmniWheel
             touch.OnPressed += Touch_OnPressed;
             await brick.Sensors.Add(touch);
 
+            // Get available devices for capturing pictures
+            var allVideoDevices = await DeviceInformation.FindAllAsync(DeviceClass.VideoCapture);
+
             mediaCapture = new MediaCapture();
-            await mediaCapture.InitializeAsync();
+            //await mediaCapture.InitializeAsync();
+            await mediaCapture.InitializeAsync(new MediaCaptureInitializationSettings
+            {
+                StreamingCaptureMode = StreamingCaptureMode.Video,
+                PhotoCaptureSource = PhotoCaptureSource.Auto,
+                //AudioDeviceId = string.Empty,
+                VideoDeviceId = allVideoDevices[0].Id
+            });
+
+            //var resolutions = mediaCapture.VideoDeviceController.GetAvailableMediaStreamProperties(MediaStreamType.Photo).OrderByDescending( resolution => ((VideoEncodingProperties)resolution).Width);
+            //foreach (var item in resolutions)
+            //{
+            //    Debug.WriteLine((item as VideoEncodingProperties).Width);
+            //}
+
+            //await mediaCapture.VideoDeviceController.SetMediaStreamPropertiesAsync(MediaStreamType.Photo, resolutions.First());
 
             brick.Start();
             while (true)

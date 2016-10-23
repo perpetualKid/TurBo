@@ -26,32 +26,29 @@ namespace Devices.Control.Communication
             this.dataFormat = dataFormat;
         }
 
-        public override async Task InitializeDefaults()
+        protected override async Task InitializeDefaults()
         {
             this.instance = await SocketServer.RegisterChannelListener(port, dataFormat);
             instance.OnMessageReceived += Server_OnMessageReceived;
         }
 
-        public override async Task Close(MessageContainer data)
+        public override async Task CloseChannel(Guid sessionId)
         {
-            await instance.CloseSession(data.SessionId).ConfigureAwait(false);
+            await instance.CloseSession(sessionId).ConfigureAwait(false);
         }
 
         private async void Server_OnMessageReceived(object sender, MessageReceivedEventArgs e)
         {
-            //            await HandleInput(new ChannelHolder(sender as ChannelBase), (e as StringMessageReceivedEventArgs).Message);
-            //dynamic eventArgs = e;
-            //await HandleInput(new ChannelHolder(sender as ChannelBase), eventArgs);
             await HandleInput(new MessageContainer(e.SessionId, this, (e as StringMessageArgs).Parameters));
         }
 
-        public override async Task ComponentHelp(MessageContainer data)
+        protected override async Task ComponentHelp(MessageContainer data)
         {
             await Task.CompletedTask;
         }
 
 
-        public override async Task ProcessCommand(MessageContainer data)
+        protected override async Task ProcessCommand(MessageContainer data)
         {
             await Task.CompletedTask;
         }

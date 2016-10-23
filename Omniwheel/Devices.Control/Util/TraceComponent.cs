@@ -21,14 +21,14 @@ namespace Devices.Control.Util
 
         }
 
-        public override async Task ComponentHelp(MessageContainer data)
+        protected override async Task ComponentHelp(MessageContainer data)
         {
             await Task.CompletedTask;
             throw new NotImplementedException();
         }
 
 
-        public override async Task ProcessCommand(MessageContainer data)
+        protected override async Task ProcessCommand(MessageContainer data)
         {
             await Task.CompletedTask;
             throw new NotImplementedException();

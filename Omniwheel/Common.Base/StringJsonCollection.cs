@@ -25,7 +25,7 @@ namespace Common.Base
 
         public StringJsonCollection(IEnumerable<string> values) : this()
         {
-            array = JsonExtension.EvaluateJsonValue(values).GetArray();
+            array = JsonExtensions.EvaluateJsonValue(values).GetArray();
         }
         #endregion
 
@@ -44,7 +44,13 @@ namespace Common.Base
 
         public void Add(string value)
         {
-            array.Add(JsonExtension.EvaluateJsonValue(value));
+            array.Add(JsonExtensions.EvaluateJsonValue(value));
+        }
+
+        public void Add(IList<string> values)
+        {
+            foreach (string value in values)
+                array.Add(JsonExtensions.EvaluateJsonValue(value));
         }
 
         public void Add(IJsonValue value)

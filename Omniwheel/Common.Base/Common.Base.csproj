@@ -109,7 +109,7 @@
   <ItemGroup>
     <Compile Include="Communication\CommunicationControllable.cs" />
     <Compile Include="Controllable.cs" />
-    <Compile Include="JsonExtension.cs" />
+    <Compile Include="JsonExtensions.cs" />
     <Compile Include="MessageContainer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="StringJsonCollection.cs" />
