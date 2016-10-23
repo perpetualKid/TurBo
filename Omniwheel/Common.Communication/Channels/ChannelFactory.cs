@@ -28,11 +28,11 @@ namespace Common.Communication.Channels
             {
                 case DataFormat.StringText:
                     channel = new StringTextChannel(host);
-                    await channel.BindAsync(socketStream).ConfigureAwait(false);
+                    channel.BindAsync(socketStream);
                     break;
                 case DataFormat.Json:
                     channel = new JsonChannel(host);
-                    await channel.BindAsync(socketStream).ConfigureAwait(false);
+                    channel.BindAsync(socketStream);
                     break;
                 default:
                     await Task.CompletedTask;

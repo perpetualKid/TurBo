@@ -40,12 +40,7 @@ namespace Common.Communication.Channels
             throw new NotImplementedException();
         }
 
-        protected override Task ParseData()
-        {
-            throw new NotImplementedException();
-        }
-
-        internal override async Task BindAsync(StreamSocket socketStream)
+        internal override async void BindAsync(StreamSocket socketStream)
         {
             JsonTextReader jsonReader = new JsonTextReader(new StreamReader(socketStream.InputStream.AsStreamForRead()));
             jsonReader.SupportMultipleContent = true;
@@ -54,6 +49,7 @@ namespace Common.Communication.Channels
             this.ConnectionStatus = ConnectionStatus.Connecting;
             this.streamSocket = socketStream;
 
+            await Task.CompletedTask;
             while (true)
             {
                 //await jsonReadStream.FlushAsync();
@@ -72,7 +68,7 @@ namespace Common.Communication.Channels
                             if (jsonReader.TokenType == JsonToken.StartObject)
                             {
                                 var item = serializer.Deserialize(jsonReader);
-                                PublishMessageReceived(this, new JsonMessageReceivedEventArgs(JsonObject.Parse(item.ToString())));
+                                PublishMessageReceived(this, new JsonMessageArgs(JsonObject.Parse(item.ToString())));
                             }
                             //readPosition = (int)jsonReadStream.Position;
                         }

@@ -20,10 +20,10 @@ using System.Xml.Serialization;
 using Common.Communication.Channels;
 using Common.Communication;
 using Devices.Control.Communication;
-using Devices.Control.Base;
 using OneDrive;
 using Devices.Control.Storage;
 using Microsoft.WindowsAzure.Storage.Shared.Protocol;
+using Common.Base;
 
 // The Background Application template is documented at http://go.microsoft.com/fwlink/?LinkID=533884&clcid=0x409
 
@@ -52,21 +52,21 @@ namespace OmniWheel
             await Controllable.RegisterComponent(new NetworkListener(8031, DataFormat.Json)).ConfigureAwait(false);
             oneDrive = await Controllable.RegisterComponent(new OneDriveControllable()).ConfigureAwait(false) as OneDriveControllable;
 
-            try
-            {
-                //https://github.com/Azure/azure-storage-net/issues/171
-                CloudStorageAccount storageAccount = CloudStorageAccount.Parse(storageConnectionString);
-                CloudBlobClient blobClient = storageAccount.CreateCloudBlobClient();
+            //try
+            //{
+            //    //https://github.com/Azure/azure-storage-net/issues/171
+            //    CloudStorageAccount storageAccount = CloudStorageAccount.Parse(storageConnectionString);
+            //    CloudBlobClient blobClient = storageAccount.CreateCloudBlobClient();
 
-                // Retrieve a reference to a container.
-                container = blobClient.GetContainerReference("turtlebot");
-                // Create the container if it doesn't already exist.
-                await container.CreateIfNotExistsAsync();
-                await container.SetPermissionsAsync(new BlobContainerPermissions { PublicAccess = BlobContainerPublicAccessType.Container });
-            }
-            catch (Exception exception)
-            {
-            }
+            //    // Retrieve a reference to a container.
+            //    container = blobClient.GetContainerReference("turtlebot");
+            //    // Create the container if it doesn't already exist.
+            //    await container.CreateIfNotExistsAsync();
+            //    await container.SetPermissionsAsync(new BlobContainerPermissions { PublicAccess = BlobContainerPublicAccessType.Container });
+            //}
+            //catch (Exception exception)
+            //{
+            //}
 
             Brick brick = await Brick.InitializeInstance("Uart0");
             int version = await brick.GetBrickVersion();

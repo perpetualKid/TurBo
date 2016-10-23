@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Devices.Control.Base;
+using Common.Base;
 using OneDrive;
 using Windows.Storage;
 using Windows.Storage.Streams;
@@ -18,45 +18,40 @@ namespace Devices.Control.Storage
         {
         }
 
-        public override async Task ComponentHelp(Controllable sender)
+        public override async Task ComponentHelp(MessageContainer data)
         {
-            StringBuilder builder = new StringBuilder();
-            builder.Append("HELP : Shows this help screen.");
-            builder.Append(Environment.NewLine);
-            builder.Append("LOGIN:<ClientId>:<ClientSecret>:<AccessCode> : Logging in to OneDrive.");
-            builder.Append(Environment.NewLine);
-            builder.Append("LOGOUT|LOGOFF : Loging off from Onedrive.");
-            builder.Append(Environment.NewLine);
-            builder.Append("LIST|LISTFILES[:<Path>[:<FilesOnly|True>]] : List Folders and Files or Files only.");
-            builder.Append(Environment.NewLine);
-            await HandleOutput(sender, builder.ToString());
+            data.Responses.Add("HELP : Shows this help screen.");
+            data.Responses.Add("LOGIN:<ClientId>:<ClientSecret>:<AccessCode> : Logging in to OneDrive.");
+            data.Responses.Add("LOGOUT|LOGOFF : Loging off from Onedrive.");
+            data.Responses.Add("LIST|LISTFILES[:<Path>[:<FilesOnly|True>]] : List Folders and Files or Files only.");
+            await HandleOutput(data);
         }
 
-        public override async Task ProcessCommand(Controllable sender, string[] commands)
+        public override async Task ProcessCommand(MessageContainer data)
         {
-            switch (ResolveParameter(commands, 1).ToUpperInvariant())
+            switch (ResolveParameter(data, 1).ToUpperInvariant())
             {
                 case "HELP":
-                    await ComponentHelp(sender);
+                    await ComponentHelp(data);
                     break;
                 case "LOGIN":
-                    await OneDriveLogin(sender, commands);
+                    await OneDriveLogin(data);
                     break;
                 case "LOGOUT":
                 case "LOGOFF":
-                    await OneDriveLogout(sender, commands);
+                    await OneDriveLogout(data);
                     break;
                 case "LIST":
                 case "LISTFILES":
-                    await OneDriveListFiles(sender, commands);
+                    await OneDriveListFiles(data);
                     break;
             }
         }
 
-        private async Task OneDriveListFiles(Controllable sender, string[] commands)
+        private async Task OneDriveListFiles(MessageContainer data)
         {
-            string path = ResolveParameter(commands, 2);
-            string filesOnlyParam = ResolveParameter(commands, 3);
+            string path = ResolveParameter(data, 2);
+            string filesOnlyParam = ResolveParameter(data, 3);
             bool filesOnly = false;
             if (!bool.TryParse(filesOnlyParam, out filesOnly))
                 filesOnly = (!string.IsNullOrWhiteSpace(filesOnlyParam) && filesOnlyParam.ToUpperInvariant() == "FILESONLY");
@@ -67,29 +62,30 @@ namespace Devices.Control.Storage
             {
                 foreach (string file in files)
                 {
-                    builder.Append(file);
-                    builder.Append(Environment.NewLine);
+                    data.Responses.Add(file);
                 }
-                await HandleOutput(sender, builder.ToString());
             }
             else
-                await HandleOutput(sender, "No files or folder found.");
+                data.Responses.Add("No files or folder found.");
+            await HandleOutput(data); ;
         }
 
-        private async Task OneDriveLogin(Controllable sender, string[] commands)
+        private async Task OneDriveLogin(MessageContainer data)
         {
-            string clientId = ResolveParameter(commands, 2);
-            string clientSecret = ResolveParameter(commands, 3);
-            string accessCode = ResolveParameter(commands, 4);
+            string clientId = ResolveParameter(data, 2);
+            string clientSecret = ResolveParameter(data, 3);
+            string accessCode = ResolveParameter(data, 4);
 
             await OneDriveLogin(clientId, clientSecret, accessCode);
-            await HandleOutput(sender, "Login " + (oneDriveConnector != null && oneDriveConnector.LoggedIn ? "successful" : "failed"));
+            data.Responses.Add("Login " + (oneDriveConnector != null && oneDriveConnector.LoggedIn ? "successful" : "failed"));
+            await HandleOutput(data); ;
         }
 
-        private async Task OneDriveLogout(Controllable sender, string[] commands)
+        private async Task OneDriveLogout(MessageContainer data)
         {
             await OneDriveLogout();
-            await HandleOutput(sender, "Logout " + (oneDriveConnector == null || !oneDriveConnector.LoggedIn ? "successful" : "failed"));
+            data.Responses.Add("Logout " + (oneDriveConnector == null || !oneDriveConnector.LoggedIn ? "successful" : "failed"));
+            await HandleOutput(data);;
         }
 
 

@@ -12,7 +12,6 @@ namespace Common.Communication.Channels
         protected object cancelLock = new Object();
         protected CancellationTokenSource cancellationTokenSource;
         protected ConnectionStatus connectionStatus;
-        protected ChannelBase channel;
 
         public event EventHandler<ConnectionStatusChangedEventArgs> OnConnectionStatusChanged;
 
@@ -64,8 +63,10 @@ namespace Common.Communication.Channels
             }
         }
 
-        public abstract Task Send(object data);
+        public abstract Task Send(Guid sessionId, object data);
 
         public abstract Task Close();
+
+        public abstract Task CloseSession(Guid sessionId);
     }
 }

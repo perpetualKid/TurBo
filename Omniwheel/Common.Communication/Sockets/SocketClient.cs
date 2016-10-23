@@ -15,6 +15,8 @@ namespace Common.Communication.Channels
     {
         private HostName hostName;
         private StreamSocket streamSocket;
+        private ChannelBase channel;
+
 
         public SocketClient()
         {
@@ -50,12 +52,17 @@ namespace Common.Communication.Channels
             ConnectionStatus = ConnectionStatus.Disconnected;
         }
 
-        public override async Task Send(object data)
+        public override async Task Send(Guid sessionId, object data)
         {
             await channel.Send(data);
         }
 
         public override async Task Close()
+        {
+            await Task.CompletedTask;
+        }
+
+        public override async Task CloseSession(Guid sessionId)
         {
             await Task.CompletedTask;
         }

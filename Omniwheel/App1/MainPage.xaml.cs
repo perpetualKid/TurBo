@@ -187,7 +187,7 @@ namespace App1
                 using (var readStream = await file.OpenStreamForReadAsync())
                 {
                     using (var streamReader = new StreamReader(readStream))
-                        await socketClient.Send(streamReader.ReadToEnd() + Environment.NewLine);
+                        await socketClient.Send(Guid.Empty, streamReader.ReadToEnd() + Environment.NewLine);
                     //await SocketClient.Disconnect();
                 }
                 //                await Task.Run(() => JsonStreamReader.ReadEndless(file.OpenStreamForReadAsync().Result));
@@ -196,7 +196,7 @@ namespace App1
 
         private void SocketClient_OnMessageReceived(object sender, MessageReceivedEventArgs e)
         {
-            Debug.WriteLine((e as StringMessageReceivedEventArgs).Message);
+            Debug.WriteLine((e as StringMessageArgs).Message);
         }
 
         private async void button4_Click(object sender, RoutedEventArgs e)

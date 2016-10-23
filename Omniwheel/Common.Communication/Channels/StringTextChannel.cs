@@ -1,55 +1,74 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Diagnostics;
+using System.IO;
+using System.Runtime.InteropServices.WindowsRuntime;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Nito.AsyncEx;
 using Windows.Networking.Sockets;
 using Windows.Storage.Streams;
+using System.Linq;
+using System.Collections;
 
 namespace Common.Communication.Channels
 {
     public class StringTextChannel : ChannelBase
     {
-        private Queue<string> queue;
-        private const uint bufferSize = 512;
-        private static readonly char[] lineBreak = { '\r', '\n', '\0' };
+        private const int bufferSize = 512;
         private DataReaderLoadOperation loadOperation;
+        private SemaphoreSlim streamAccess;
+
+        private MemoryStream memoryStream;
+        private long streamReadPosition;
+        private long streamWritePosition;
 
 
         #region instance
         public StringTextChannel(SocketObject socket) : base(socket, DataFormat.StringText)
         {
-            queue = new Queue<string>();
+            streamAccess = new SemaphoreSlim(1);
+            memoryStream = new MemoryStream();
             this.OnMessageReceived += socketObject.Instance_OnMessageReceived;
             this.ConnectionStatus = ConnectionStatus.Disconnected;
         }
 
-        internal override async Task BindAsync(StreamSocket socketStream)
+        internal override async void BindAsync(StreamSocket socketStream)
         {
             this.ConnectionStatus = ConnectionStatus.Connecting;
             this.streamSocket = socketStream;
             try
             {
+                cancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(socketObject.CancellationTokenSource.Token);
                 using (DataReader dataReader = new DataReader(socketStream.InputStream))
                 {
-                    CancellationToken cancellationToken = socketObject.CancellationTokenSource.Token;
+                    CancellationToken cancellationToken = cancellationTokenSource.Token;
                     //setup
-                    lock (socketObject.CancellationTokenSource)
-                    {
-                        cancellationToken.ThrowIfCancellationRequested();
-                        dataReader.InputStreamOptions = InputStreamOptions.Partial;
-                    }
+                    cancellationToken.ThrowIfCancellationRequested();
+                    dataReader.InputStreamOptions = InputStreamOptions.Partial;
                     this.ConnectionStatus = ConnectionStatus.Connected;
-                    queue.Enqueue("HELLO" + Environment.NewLine);
-                    dataReadEvent.Set();
+
+                    //Send a Hello message across
+                    await Parse("HELLO" + Environment.NewLine).ConfigureAwait(false);
+
                     loadOperation = dataReader.LoadAsync(bufferSize);
                     uint bytesAvailable = await loadOperation.AsTask(cancellationToken).ConfigureAwait(false);
                     while (bytesAvailable > 0 && loadOperation.Status == Windows.Foundation.AsyncStatus.Completed)
                     {
-                        queue.Enqueue(dataReader.ReadString(bytesAvailable));
-                        dataReadEvent.Set();
+                        await streamAccess.WaitAsync().ConfigureAwait(false);
+                        if (streamWritePosition == streamReadPosition)
+                        {
+                            streamReadPosition = 0;
+                            streamWritePosition = 0;
+                            memoryStream.SetLength(0);
+                        }
+                        memoryStream.Position = streamWritePosition;
+                        byte[] buffer = dataReader.ReadBuffer(bytesAvailable).ToArray();
+                        await memoryStream.WriteAsync(buffer, 0, buffer.Length).ConfigureAwait(false);
+                        streamWritePosition = memoryStream.Position;
+                        streamAccess.Release();
+
+                        await Parse().ConfigureAwait(false);
                         bytesRead += bytesAvailable;
                         loadOperation = dataReader.LoadAsync(bufferSize);
                         bytesAvailable = await loadOperation.AsTask(cancellationToken).ConfigureAwait(false);
@@ -58,6 +77,7 @@ namespace Common.Communication.Channels
                     dataReader.DetachStream();
                 }
             }
+            catch (TaskCanceledException) { }
             catch (Exception exception)
             {
                 socketObject.ConnectionStatus = ConnectionStatus.Failed;
@@ -87,8 +107,8 @@ namespace Common.Communication.Channels
                     uint bytesAvailable =  await loadOperation.AsTask(cancellationToken).ConfigureAwait(false);
                     while (bytesAvailable > 0 && loadOperation.Status == Windows.Foundation.AsyncStatus.Completed)
                     {
-                        queue.Enqueue(dataReader.ReadString(bytesAvailable));
-                        dataReadEvent.Set();
+                        //queue.Enqueue(dataReader.ReadString(bytesAvailable));
+                        //dataReadEvent.Set();
                         bytesRead += bytesAvailable;
                         loadOperation = dataReader.LoadAsync(bufferSize);
                         bytesAvailable = await loadOperation.AsTask(cancellationToken).ConfigureAwait(false);
@@ -102,51 +122,59 @@ namespace Common.Communication.Channels
             }
         }
 
-        protected override async Task ParseData()
+        private async Task Parse()
         {
-            StringBuilder builder = new StringBuilder();
-            while (true)
+            using (StreamReader reader = new StreamReader(memoryStream, Encoding.UTF8, true, bufferSize, true))
             {
-                await dataReadEvent.WaitAsync();
-                while (queue.Count > 0)
-                {
-                    string buffer = queue.Dequeue();
-                    string[] lines = buffer.Split(lineBreak);
-                        foreach (string line in lines)
-                        {
-                        if (string.IsNullOrWhiteSpace(line) && builder.Length > 0)
-                        {
-                            PublishMessageReceived(this, new StringMessageReceivedEventArgs(builder.ToString()));
-                            builder.Clear();
-                        }
-                        else
-                        {
-                            builder.Append(line);
-                        }
-                    }
-                }
+                StringBuilder builder = new StringBuilder();
+                await streamAccess.WaitAsync();
+
+                memoryStream.Position = streamReadPosition;
+                string[] message = reader.GetTokens().ToArray();
+                if (message.Length > 0)
+                    PublishMessageReceived(this, new StringMessageArgs(message));
+
+                streamReadPosition = memoryStream.Position;
+                streamAccess.Release();
             }
+        }
+
+        private async Task Parse(string data)
+        {
+            string[] message = data.GetTokens().ToArray();
+            if (message.Length > 0)
+                PublishMessageReceived(this, new StringMessageArgs(message));
+            await Task.CompletedTask.ConfigureAwait(false);
         }
 
         public override async Task Send(object data)
         {
+            IList textData = data as IList;
+            if (null == textData || textData.Count == 0)
+            {
+                throw new FormatException("Data is invalid or empty and cannot be send as text.");
+            }
             using (DataWriter writer = new DataWriter(streamSocket.OutputStream))
             {
-                string text = data as string;
-                if (string.IsNullOrEmpty(text))
+                foreach (var line in textData)
                 {
-                    throw new FormatException("Data is invalid or empty and cannot be send as text.");
+                    bytesWritten += writer.WriteString(FormatSendData(line));
+                    await writer.StoreAsync();
                 }
-                bytesWritten += writer.WriteString(text);
-                char last = text[text.Length - 1];
-                if (last != '\0' && last != '\r' && last != '\n')
-                    bytesWritten += writer.WriteString(Environment.NewLine);
-                await writer.StoreAsync();
                 await writer.FlushAsync();
-
                 writer.DetachBuffer();
                 writer.DetachStream();
             }
+        }
+
+        private static string FormatSendData(object data)
+        {
+            StringBuilder result = new StringBuilder();
+            result.Append(data?.ToString());
+            char last = result[result.Length - 1];
+            if (last != '\0' && last != '\r' && last != '\n')
+                result.AppendLine();
+            return result.ToString();
         }
 
         public override async Task Close()
@@ -155,6 +183,7 @@ namespace Common.Communication.Channels
             {
                 await Task.Run(() =>
                 {
+                    cancellationTokenSource.Cancel();
                     loadOperation.Cancel();
                     loadOperation.Close();
                 }

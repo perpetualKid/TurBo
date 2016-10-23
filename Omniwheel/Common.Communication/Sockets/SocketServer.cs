@@ -20,6 +20,8 @@ namespace Common.Communication.Channels
 
         private int port;
         private StreamSocketListener socketListener;
+        private Dictionary<Guid, ChannelBase> activeSessions;
+        private AsyncReaderWriterLock activeSessionsLock;
 
         #region static
         public static SocketServer Instance(int port)
@@ -48,6 +50,8 @@ namespace Common.Communication.Channels
         private SocketServer(int port)
         {
             this.port = port;
+            this.activeSessions = new Dictionary<Guid, ChannelBase>();
+            this.activeSessionsLock = new AsyncReaderWriterLock();
             cancellationTokenSource = new CancellationTokenSource();
         }
         #endregion
@@ -65,8 +69,14 @@ namespace Common.Communication.Channels
                 this.ConnectionStatus = ConnectionStatus.Connecting;
                 socketListener = new StreamSocketListener();
                 socketListener.Control.NoDelay = true;
-                socketListener.ConnectionReceived += async (streamSocketListener, streamSocketListenerConnectionReceivedEventArgs) => 
-                   channel = await ChannelFactory.BindChannelAsync(dataFormat, this, streamSocketListenerConnectionReceivedEventArgs.Socket).ConfigureAwait(false);
+                socketListener.ConnectionReceived += async (streamSocketListener, streamSocketListenerConnectionReceivedEventArgs) =>
+                {
+                    using (IDisposable asyncLock = await activeSessionsLock.WriterLockAsync())
+                    {
+                        ChannelBase channel = await ChannelFactory.BindChannelAsync(dataFormat, this, streamSocketListenerConnectionReceivedEventArgs.Socket).ConfigureAwait(false);
+                        activeSessions.Add(channel.SessionId, channel);
+                    }
+                };
                 await socketListener.BindServiceNameAsync(port.ToString()).AsTask().ConfigureAwait(false);
                 this.ConnectionStatus = ConnectionStatus.Listening;
             }
@@ -91,9 +101,17 @@ namespace Common.Communication.Channels
         }
         #endregion
 
-        public override async Task Send(object data)
+        public override async Task Send(Guid sessionId, object data)
         {
-            await channel.Send(data);
+            ChannelBase session;
+            using (IDisposable asyncLock = await activeSessionsLock.ReaderLockAsync())
+            {
+
+                if (activeSessions.TryGetValue(sessionId, out session))
+                {
+                    await session.Send(data);
+                }
+            }
         }
 
         public override async Task Close()
@@ -101,6 +119,19 @@ namespace Common.Communication.Channels
             await StopListening();
         }
 
+        public override async Task CloseSession(Guid sessionId)
+        {
+            ChannelBase session;
+            using (IDisposable asyncLock = await activeSessionsLock.WriterLockAsync())
+            {
+
+                if (activeSessions.TryGetValue(sessionId, out session))
+                {
+                    activeSessions.Remove(sessionId);
+                    await session.Close();
+                }
+            }
+        }
         //private async void JsonConverter()
         //{
         //    JsonTextReader jsonReader = new JsonTextReader(new StreamReader(jsonReadStream));

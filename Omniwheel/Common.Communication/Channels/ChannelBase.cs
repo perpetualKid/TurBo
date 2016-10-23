@@ -1,10 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
-using Common.Communication.Channels;
-using Nito.AsyncEx;
 using Windows.Networking.Sockets;
 
 namespace Common.Communication.Channels
@@ -13,14 +9,15 @@ namespace Common.Communication.Channels
     {
         protected SocketObject socketObject;
         protected StreamSocket streamSocket;
+        protected CancellationTokenSource cancellationTokenSource;
 
-        protected AsyncAutoResetEvent dataReadEvent;
-        private Task parseTask;
         protected uint bytesRead;
         protected uint bytesWritten;
-        protected DataFormat dataFormat;
+        private readonly DataFormat dataFormat;
+        private readonly Guid sessionId;
 
         private ConnectionStatus connectionStatus;
+
 
         #region public events
         public event EventHandler<ConnectionStatusChangedEventArgs> OnConnectionStatusChanged;
@@ -33,16 +30,12 @@ namespace Common.Communication.Channels
         {
             this.socketObject = socket;
             this.dataFormat = format;
-            dataReadEvent = new AsyncAutoResetEvent();
-            parseTask = Task.Run(async () => await ParseData());
-            parseTask.ConfigureAwait(false);
+            this.sessionId = Guid.NewGuid();
         }
 
         public abstract Task Listening(StreamSocket socketStream);
 
-        internal abstract Task BindAsync(StreamSocket socketStream);
-
-        protected abstract Task ParseData();
+        internal abstract void BindAsync(StreamSocket socketStream);
 
         public abstract Task Send(object data);
 
@@ -54,12 +47,16 @@ namespace Common.Communication.Channels
 
         public DataFormat DataFormat { get { return this.dataFormat; } }
 
+        public Guid SessionId { get { return this.sessionId; } }
+             
+
         public uint BytesWritten { get { return bytesWritten; } }
 
         public uint BytesRead { get { return bytesRead; } }
 
         protected virtual void PublishMessageReceived(ChannelBase sender, MessageReceivedEventArgs eventArgs)
-        {   
+        {
+            eventArgs.SessionId = this.sessionId;
             OnMessageReceived?.Invoke(sender, eventArgs);
         }
 
@@ -71,7 +68,7 @@ namespace Common.Communication.Channels
                 if (value != connectionStatus)
                 {
                     connectionStatus = value;
-                    OnConnectionStatusChanged?.Invoke(this, new ConnectionStatusChangedEventArgs { Status = value });
+                    OnConnectionStatusChanged?.Invoke(this, new ConnectionStatusChangedEventArgs { SessionId = this.sessionId, Status = value });
                 }
             }
         }

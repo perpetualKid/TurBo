@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Devices.Control.Base;
+using Common.Base;
 
 namespace Devices.Control.Util
 {
@@ -21,13 +21,14 @@ namespace Devices.Control.Util
 
         }
 
-        public override async Task ComponentHelp(Controllable sender)
+        public override async Task ComponentHelp(MessageContainer data)
         {
             await Task.CompletedTask;
             throw new NotImplementedException();
         }
 
-        public override async Task ProcessCommand(Controllable sender, string[] commands)
+
+        public override async Task ProcessCommand(MessageContainer data)
         {
             await Task.CompletedTask;
             throw new NotImplementedException();
@@ -35,7 +36,7 @@ namespace Devices.Control.Util
 
         public static async Task Print(string sender, string text)
         {
-            await HandleOutput(instance, text);
+            await Task.CompletedTask;
             throw new NotImplementedException();
         }
     }
