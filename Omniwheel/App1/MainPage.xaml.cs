@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using System.Xml.Serialization;
 using Common.Communication;
 using Common.Communication.Channels;
-using OneDrive;
+using Devices.Base;
 using Windows.Storage;
 using Windows.Storage.Streams;
 using Windows.UI.Xaml;

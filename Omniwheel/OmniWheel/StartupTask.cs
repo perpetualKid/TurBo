@@ -20,7 +20,6 @@ using System.Xml.Serialization;
 using Common.Communication.Channels;
 using Common.Communication;
 using Devices.Control.Communication;
-using OneDrive;
 using Devices.Control.Storage;
 using Microsoft.WindowsAzure.Storage.Shared.Protocol;
 using Common.Base;
@@ -139,12 +138,12 @@ namespace OmniWheel
         //    }
         //}
 
-        private async void Connector_TokensChangedEvent(object sender, EventArgs e)
-        {
-            appSettings.OneDriveRefreshToken = (sender as OneDriveConnector).RefreshToken;
-            appSettings.OneDriveAccessToken = (sender as OneDriveConnector).AccessToken;
-            await SaveAsync(appSettings, fileName);
-        }
+        //private async void Connector_TokensChangedEvent(object sender, EventArgs e)
+        //{
+        //    appSettings.OneDriveRefreshToken = (sender as OneDriveConnector).RefreshToken;
+        //    appSettings.OneDriveAccessToken = (sender as OneDriveConnector).AccessToken;
+        //    await SaveAsync(appSettings, fileName);
+        //}
 
         private AppSettings appSettings;
 

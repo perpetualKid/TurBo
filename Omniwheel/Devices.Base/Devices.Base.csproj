@@ -4,11 +4,11 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{3D919A9D-0A54-497A-8250-1E6D6D1B712E}</ProjectGuid>
+    <ProjectGuid>{461F5468-6D3D-4E3C-8FEE-38497AC84A48}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>OneDrive</RootNamespace>
-    <AssemblyName>OneDrive</AssemblyName>
+    <RootNamespace>Devices.Base</RootNamespace>
+    <AssemblyName>Devices.Base</AssemblyName>
     <DefaultLanguage>en-US</DefaultLanguage>
     <TargetPlatformIdentifier>UAP</TargetPlatformIdentifier>
     <TargetPlatformVersion>10.0.14393.0</TargetPlatformVersion>
@@ -108,8 +108,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="OneDriveConnector.cs" />
-    <EmbeddedResource Include="Properties\OneDrive.rd.xml" />
+    <Compile Include="Storage\OneDriveConnector.cs" />
+    <EmbeddedResource Include="Properties\Devices.Base.rd.xml" />
   </ItemGroup>
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '14.0' ">
     <VisualStudioVersion>14.0</VisualStudioVersion>

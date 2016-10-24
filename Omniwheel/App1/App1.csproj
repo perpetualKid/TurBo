@@ -135,13 +135,9 @@
       <Project>{e4db5494-c724-4df6-9dc2-ea51fed0f463}</Project>
       <Name>Common.Communication</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Devices.Control\Devices.Control.csproj">
-      <Project>{0a0156d5-9ed0-462b-907e-6eee522e63d9}</Project>
-      <Name>Devices.Control</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\OneDrive\OneDrive.csproj">
-      <Project>{3d919a9d-0a54-497a-8250-1e6d6d1b712e}</Project>
-      <Name>OneDrive</Name>
+    <ProjectReference Include="..\Devices.Base\Devices.Base.csproj">
+      <Project>{461f5468-6d3d-4e3c-8fee-38497ac84a48}</Project>
+      <Name>Devices.Base</Name>
     </ProjectReference>
   </ItemGroup>
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '14.0' ">

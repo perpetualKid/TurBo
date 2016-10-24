@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Common.Base;
-using OneDrive;
+using Devices.Base;
 using Windows.Storage;
 using Windows.Storage.Streams;
 
@@ -106,11 +105,20 @@ namespace Devices.Control.Storage
             if (null != oneDriveConnector)
             await oneDriveConnector.LogoutAsync();
         }
+
         public async Task OneDriveLogin(string clientId, string clientSecret, string accessCode)
         {
             if (null == oneDriveConnector)
+            {
                 oneDriveConnector = new OneDriveConnector();
+                oneDriveConnector.TokensChangedEvent += OneDriveConnector_TokensChangedEvent;
+            }
             await oneDriveConnector.LoginAsync(clientId, clientSecret, accessCode);
+        }
+
+        private void OneDriveConnector_TokensChangedEvent(object sender, EventArgs e)
+        {
+            throw new System.NotImplementedException();
         }
 
         public async Task UploadFile(StorageFile file, string path)

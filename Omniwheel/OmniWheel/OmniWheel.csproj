@@ -131,10 +131,6 @@
       <Project>{0A0156D5-9ED0-462B-907E-6EEE522E63D9}</Project>
       <Name>Devices.Control</Name>
     </ProjectReference>
-    <ProjectReference Include="..\OneDrive\OneDrive.csproj">
-      <Project>{3d919a9d-0a54-497a-8250-1e6d6d1b712e}</Project>
-      <Name>OneDrive</Name>
-    </ProjectReference>
   </ItemGroup>
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '14.0' ">
     <VisualStudioVersion>14.0</VisualStudioVersion>

@@ -13,7 +13,7 @@ using Windows.Web.Http.Filters;
 using Windows.Web.Http.Headers;
 
 
-namespace OneDrive
+namespace Devices.Base
 {
     public sealed class OneDriveConnector
     {
