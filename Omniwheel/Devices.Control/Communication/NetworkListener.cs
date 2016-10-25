@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Common.Base;
-using Common.Base.Communication;
+using Common.Base.Categories;
 using Common.Communication;
 using Common.Communication.Channels;
 

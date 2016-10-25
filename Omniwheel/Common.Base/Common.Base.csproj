@@ -107,7 +107,8 @@
     <None Include="project.json" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Communication\CommunicationControllable.cs" />
+    <Compile Include="Categories\CommunicationControllable.cs" />
+    <Compile Include="Categories\StorageControllable.cs" />
     <Compile Include="Controllable.cs" />
     <Compile Include="JsonExtensions.cs" />
     <Compile Include="MessageContainer.cs" />

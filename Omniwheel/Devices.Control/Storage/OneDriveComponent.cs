@@ -3,17 +3,18 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 using Common.Base;
+using Common.Base.Categories;
 using Devices.Base;
 using Windows.Storage;
 using Windows.Storage.Streams;
 
 namespace Devices.Control.Storage
 {
-    public class OneDriveControllable : Controllable
+    public class OneDriveComponent : StorageControllable
     {
         OneDriveConnector oneDriveConnector;
 
-        public OneDriveControllable() : base("OneDrive")
+        public OneDriveComponent() : base("OneDrive")
         {
         }
 
@@ -34,21 +35,22 @@ namespace Devices.Control.Storage
                     await ComponentHelp(data);
                     break;
                 case "LOGIN":
-                    await OneDriveLogin(data);
+                case "LOGON":
+                    await ConnectStorage(data);
                     break;
                 case "LOGOUT":
                 case "LOGOFF":
-                    await OneDriveLogout(data);
+                    await DisconnectStorage(data);
                     break;
                 case "LIST":
                 case "LISTFILES":
-                    await OneDriveListFiles(data);
+                    await ListContent(data);
                     break;
             }
         }
 
         #region private implementation
-        private async Task OneDriveListFiles(MessageContainer data)
+        protected override async Task ListContent(MessageContainer data)
         {
             string path = ResolveParameter(data, 2);
             string filesOnlyParam = ResolveParameter(data, 3);
@@ -70,7 +72,7 @@ namespace Devices.Control.Storage
             await HandleOutput(data); ;
         }
 
-        private async Task OneDriveLogin(MessageContainer data)
+        protected override async Task ConnectStorage(MessageContainer data)
         {
             string clientId = ResolveParameter(data, 2);
             string clientSecret = ResolveParameter(data, 3);
@@ -81,12 +83,13 @@ namespace Devices.Control.Storage
             await HandleOutput(data); ;
         }
 
-        private async Task OneDriveLogout(MessageContainer data)
+        protected override async Task DisconnectStorage(MessageContainer data)
         {
             await OneDriveLogout();
             data.Responses.Add("Logout " + (oneDriveConnector == null || !oneDriveConnector.LoggedIn ? "successful" : "failed"));
-            await HandleOutput(data);;
+            await HandleOutput(data); ;
         }
+
         #endregion
 
         #region public
@@ -136,6 +139,7 @@ namespace Devices.Control.Storage
                 await oneDriveConnector.UploadFileAsync(stream, path, fileName);
             }
         }
+
         #endregion
     }
 }

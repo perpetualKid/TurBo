@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
 using System.Threading.Tasks;
-using Common.Base.Communication;
 using System.Linq;
+using Common.Base.Categories;
 
 namespace Common.Base
 {
@@ -76,6 +76,7 @@ namespace Common.Base
                     case "ECHO":
                         await ControllableEcho(data).ConfigureAwait(false);
                         break;
+                    case "BYE":
                     case "EXIT":
                     case "CLOSE":
                         await ControllableCloseChannel(data).ConfigureAwait(false);

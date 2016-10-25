@@ -1,29 +1,22 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Net.Http;
-using Windows.ApplicationModel.Background;
-using BrickPi.Uwp;
-using System.Threading.Tasks;
-using Windows.Media.Capture;
-using Windows.Media.MediaProperties;
-using BrickPi.Uwp.Sensors.NXT;
-using Windows.Storage;
-using BrickPi.Uwp.Base;
 using System.Diagnostics;
-using Microsoft.WindowsAzure.Storage;
-using Microsoft.WindowsAzure.Storage.Blob;
 using System.IO;
-using Windows.Storage.Streams;
+using System.Threading.Tasks;
 using System.Xml.Serialization;
-using Common.Communication.Channels;
+using BrickPi.Uwp;
+using BrickPi.Uwp.Base;
+using BrickPi.Uwp.Sensors.NXT;
+using Common.Base;
 using Common.Communication;
 using Devices.Control.Communication;
 using Devices.Control.Storage;
-using Microsoft.WindowsAzure.Storage.Shared.Protocol;
-using Common.Base;
+using Windows.ApplicationModel.Background;
 using Windows.Devices.Enumeration;
+using Windows.Media.Capture;
+using Windows.Media.MediaProperties;
+using Windows.Storage;
+using Windows.Storage.Streams;
 
 // The Background Application template is documented at http://go.microsoft.com/fwlink/?LinkID=533884&clcid=0x409
 
@@ -35,10 +28,9 @@ namespace OmniWheel
         MediaCapture mediaCapture;
         private StorageFile photoFile;
         private readonly string PHOTO_FILE_NAME = "Camera Roll\\photo.jpg";
-        string storageConnectionString = "DefaultEndpointsProtocol=https;AccountName=turtlebot;AccountKey=+CQR9tHRV4oIS/1B+z6PdUDQWj/OqEX7YlMRU9bxHxrNDxe9YayklGiAx9r2FC2KWmcUaDXGUfYb7Rj6zGEwnQ==;";
-        CloudBlobContainer container;
 
-        OneDriveControllable oneDrive;
+        OneDriveComponent oneDrive;
+        AzureBlobStorageComponent azureBlob;
 //        int counter;
 
         public async void Run(IBackgroundTaskInstance taskInstance)
@@ -51,25 +43,12 @@ namespace OmniWheel
             setupTasks.Add(Controllable.RegisterComponent(new NetworkListener(8027)));
             setupTasks.Add(Controllable.RegisterComponent(new NetworkListener(8029)));
             setupTasks.Add(Controllable.RegisterComponent(new NetworkListener(8031, DataFormat.Json)));
-            oneDrive = new OneDriveControllable();
+            oneDrive = new OneDriveComponent();
             setupTasks.Add(Controllable.RegisterComponent(oneDrive));
+            azureBlob = new AzureBlobStorageComponent();
+            setupTasks.Add(Controllable.RegisterComponent(azureBlob));
             await Task.WhenAll(setupTasks).ConfigureAwait(false);
 
-            //try
-            //{
-            //    //https://github.com/Azure/azure-storage-net/issues/171
-            //    CloudStorageAccount storageAccount = CloudStorageAccount.Parse(storageConnectionString);
-            //    CloudBlobClient blobClient = storageAccount.CreateCloudBlobClient();
-
-            //    // Retrieve a reference to a container.
-            //    container = blobClient.GetContainerReference("turtlebot");
-            //    // Create the container if it doesn't already exist.
-            //    await container.CreateIfNotExistsAsync();
-            //    await container.SetPermissionsAsync(new BlobContainerPermissions { PublicAccess = BlobContainerPublicAccessType.Container });
-            //}
-            //catch (Exception exception)
-            //{
-            //}
 
             Brick brick = await Brick.InitializeInstance("Uart0");
             int version = await brick.GetBrickVersion();

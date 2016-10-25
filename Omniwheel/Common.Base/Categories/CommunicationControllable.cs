@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Common.Base.Communication
+namespace Common.Base.Categories
 {
     public abstract class CommunicationControllable : Controllable
     {

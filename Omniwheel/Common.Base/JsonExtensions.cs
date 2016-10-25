@@ -30,7 +30,7 @@ namespace Common.Base
             else if (value is IList)
             {
                 JsonArray array = new JsonArray();
-                foreach(object item in (value as IList))
+                foreach (object item in (value as IList))
                     array.Add(EvaluateJsonValue(item));
                 return array;
             }
