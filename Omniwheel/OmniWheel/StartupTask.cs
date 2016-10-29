@@ -10,8 +10,10 @@ using BrickPi.Uwp.Sensors.NXT;
 using Common.Base;
 using Common.Communication;
 using Devices.Control.Communication;
+using Devices.Control.Lego;
 using Devices.Control.Storage;
 using Windows.ApplicationModel.Background;
+using Windows.Data.Json;
 using Windows.Devices.Enumeration;
 using Windows.Media.Capture;
 using Windows.Media.MediaProperties;
@@ -22,6 +24,7 @@ using Windows.Storage.Streams;
 
 namespace OmniWheel
 {
+
     public sealed class StartupTask : IBackgroundTask
     {
         NXTTouchSensor touch;
@@ -31,6 +34,8 @@ namespace OmniWheel
 
         OneDriveComponent oneDrive;
         AzureBlobStorageComponent azureBlob;
+        BrickPiComponent brickComponent;
+        Brick brick;
 //        int counter;
 
         public async void Run(IBackgroundTaskInstance taskInstance)
@@ -47,12 +52,14 @@ namespace OmniWheel
             setupTasks.Add(Controllable.RegisterComponent(oneDrive));
             azureBlob = new AzureBlobStorageComponent();
             setupTasks.Add(Controllable.RegisterComponent(azureBlob));
+            brickComponent = new BrickPiComponent();
+            setupTasks.Add(Controllable.RegisterComponent(brickComponent));
             await Task.WhenAll(setupTasks).ConfigureAwait(false);
 
 
-            Brick brick = await Brick.InitializeInstance("Uart0");
-            int version = await brick.GetBrickVersion();
-            Debug.WriteLine("Brick Version: {0}", version);
+            //Brick brick = await Brick.InitializeInstance("Uart0");
+            brick = brickComponent.BrickPi;
+            Debug.WriteLine($"Brick Version: {await brick.GetBrickVersion()}");
 
             touch = new NXTTouchSensor(SensorPort.Port_S1);
             touch.OnPressed += Touch_OnPressed;
@@ -78,6 +85,8 @@ namespace OmniWheel
             //}
 
             //await mediaCapture.VideoDeviceController.SetMediaStreamPropertiesAsync(MediaStreamType.Photo, resolutions.First());
+
+
 
             brick.Start();
             while (true)
