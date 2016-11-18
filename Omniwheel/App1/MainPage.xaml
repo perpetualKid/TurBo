@@ -17,6 +17,11 @@
         <TextBox x:Name="textBox" HorizontalAlignment="Left" Margin="87,144,0,0" TextWrapping="Wrap" Text="TextBox" VerticalAlignment="Top" Width="322"/>
         <WebView x:Name="webView" HorizontalAlignment="Left" Height="380" Margin="45,339,0,0" VerticalAlignment="Top" Width="474"/>
         <Button x:Name="button6" Content="Parse" HorizontalAlignment="Left" Margin="234,107,0,0" VerticalAlignment="Top" Click="button6_Click"/>
+        <SplitView HorizontalAlignment="Left" Height="100" Margin="482,875,0,0" VerticalAlignment="Top">
+            <SplitView.Pane>
+                <Grid/>
+            </SplitView.Pane>
+        </SplitView>
 
     </Grid>
 </Page>

@@ -28,6 +28,7 @@ namespace OmniWheel
     public sealed class StartupTask : IBackgroundTask
     {
         NXTTouchSensor touch;
+        NXTColorSensor color;
         MediaCapture mediaCapture;
         private StorageFile photoFile;
         private readonly string PHOTO_FILE_NAME = "Camera Roll\\photo.jpg";
@@ -65,6 +66,11 @@ namespace OmniWheel
             touch.OnPressed += Touch_OnPressed;
             await brick.Sensors.Add(touch);
 
+
+            color = new NXTColorSensor(SensorPort.Port_S4, SensorType.COLOR_FULL);
+            await brick.Sensors.Add(color);
+            color = new NXTColorSensor(SensorPort.Port_S3, SensorType.COLOR_FULL);
+            await brick.Sensors.Add(color);
             // Get available devices for capturing pictures
             var allVideoDevices = await DeviceInformation.FindAllAsync(DeviceClass.VideoCapture);
 
@@ -92,6 +98,7 @@ namespace OmniWheel
             while (true)
             {
                 brick.Arduino1Led.Toggle();
+                Debug.WriteLine($"Color Raw:{color.RawValue} Name {color.ColorName} ARGB: {color.ColorData}");
                 await Task.Delay(500);
             }
         }
