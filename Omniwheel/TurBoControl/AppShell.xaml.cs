@@ -50,8 +50,8 @@ namespace TurBoControl
                 },
                 new NavigationMenuItem()
                 {
-                    Symbol = Symbol.Accept,
-                    Label = "Another Drill In Page",
+                    Symbol = Symbol.SyncFolder,
+                    Label = "OneDrive Login",
                     DestPage = typeof(OneDriveLoginPage)
                 },
             });

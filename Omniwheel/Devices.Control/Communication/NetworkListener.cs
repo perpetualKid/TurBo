@@ -44,13 +44,13 @@ namespace Devices.Control.Communication
 
         protected override async Task ComponentHelp(MessageContainer data)
         {
-            await Task.CompletedTask;
+            await Task.CompletedTask.ConfigureAwait(false);
         }
 
 
         protected override async Task ProcessCommand(MessageContainer data)
         {
-            await Task.CompletedTask;
+            await Task.CompletedTask.ConfigureAwait(false);
         }
 
         public override async Task Send(MessageContainer data)

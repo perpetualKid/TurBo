@@ -50,7 +50,7 @@
                 <RowDefinition Height="120"/>
             </Grid.RowDefinitions>
             <TextBlock Grid.Row="0" TextWrapping="Wrap">Please complete below webpage to give the aplication permission to access your OneDrive. </TextBlock>
-            <WebView x:Name="webView" Grid.Row="1" Grid.RowSpan="2" LoadCompleted="webView_LoadCompleted" />
+            <WebView x:Name="webView" Grid.Row="1" Grid.RowSpan="2" LoadCompleted="WebView_LoadCompleted" />
             <TextBlock Name="txtAccessToken" Grid.Row="3" IsTextSelectionEnabled="True"></TextBlock>
         </Grid>
 

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
+using System.Text;
 using Devices.Base;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
@@ -41,10 +42,16 @@ namespace TurBoControl.Views
                 DisplayMissingClientIdDialog(e.Parameter);
                 return;
             }
-
-            webView.Navigate(new Uri(OneDriveConnector.GenerateOneDriveLoginUrl(clientId)));
-
             base.OnNavigatedTo(e);
+
+            if (string.IsNullOrWhiteSpace(((App)App.Current).OneDriveAccessToken))
+            {
+                webView.Navigate(new Uri(OneDriveConnector.GenerateOneDriveLoginUrl(clientId)));
+            }
+            else
+            {
+                ShowSuccessMessage();
+            }
         }
 
         private async void DisplayMissingClientIdDialog(object parameter)
@@ -61,10 +68,29 @@ namespace TurBoControl.Views
 
         }
 
-        private void webView_LoadCompleted(object sender, NavigationEventArgs e)
+        private void WebView_LoadCompleted(object sender, NavigationEventArgs e)
         {
-                string accessToken = OneDriveConnector.ParseAccessCode(webView.Source);
-                txtAccessToken.Text = accessToken ?? string.Empty;
+            string accessToken = OneDriveConnector.ParseAccessCode(webView.Source);
+            if (!string.IsNullOrWhiteSpace(accessToken))
+            {
+                ((App)App.Current).OneDriveAccessToken = accessToken;
+                ShowSuccessMessage();
+            }
+        }
+
+        private void ShowSuccessMessage()
+        {
+            string accessToken = ((App)App.Current).OneDriveAccessToken;
+
+            txtAccessToken.Text = accessToken ?? string.Empty;
+
+            StringBuilder htmlString = new StringBuilder();
+            htmlString.Append("<p class='sectionHeader'>Login Successful!</p>");
+            htmlString.Append("<li>You have successfully completed Login to your OneDrive and an AccessToken has been receveid.");
+            htmlString.Append("The AccessToken will be used by your IoT device to store or retrieve data from your OneDrive.<br><br></li>");
+            htmlString.Append("<li>You can now safely navigate away from this page.<br><br></li>");
+            htmlString.Append("<br><br>");
+            webView.NavigateToString(htmlString.ToString());
         }
     }
 }

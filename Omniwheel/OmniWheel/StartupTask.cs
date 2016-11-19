@@ -98,7 +98,7 @@ namespace OmniWheel
             while (true)
             {
                 brick.Arduino1Led.Toggle();
-                Debug.WriteLine($"Color Raw:{color.RawValue} Name {color.ColorName} ARGB: {color.ColorData}");
+//                Debug.WriteLine($"Color Raw:{color.RawValue} Name {color.ColorName} ARGB: {color.ColorData}");
                 await Task.Delay(500);
             }
         }

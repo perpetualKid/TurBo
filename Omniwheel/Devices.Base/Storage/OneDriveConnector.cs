@@ -266,6 +266,8 @@ namespace Devices.Base
         public static string ParseAccessCode(Uri uri)
         {
             const string accessCodeParamName = "code";
+            if (uri == null || string.IsNullOrEmpty(uri.Query))
+                return null;
             try
             {
                 WwwFormUrlDecoder decoder = new WwwFormUrlDecoder(uri.Query);

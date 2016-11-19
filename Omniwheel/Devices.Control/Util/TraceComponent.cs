@@ -23,20 +23,20 @@ namespace Devices.Control.Util
 
         protected override async Task ComponentHelp(MessageContainer data)
         {
-            await Task.CompletedTask;
+            await Task.CompletedTask.ConfigureAwait(false);
             throw new NotImplementedException();
         }
 
 
         protected override async Task ProcessCommand(MessageContainer data)
         {
-            await Task.CompletedTask;
+            await Task.CompletedTask.ConfigureAwait(false);
             throw new NotImplementedException();
         }
 
         public static async Task Print(string sender, string text)
         {
-            await Task.CompletedTask;
+            await Task.CompletedTask.ConfigureAwait(false);
             throw new NotImplementedException();
         }
     }

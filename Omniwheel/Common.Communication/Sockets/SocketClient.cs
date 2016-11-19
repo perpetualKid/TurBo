@@ -59,12 +59,12 @@ namespace Common.Communication.Channels
 
         public override async Task Close()
         {
-            await Task.CompletedTask;
+            await Task.CompletedTask.ConfigureAwait(false);
         }
 
         public override async Task CloseSession(Guid sessionId)
         {
-            await Task.CompletedTask;
+            await Task.CompletedTask.ConfigureAwait(false);
         }
     }
 }

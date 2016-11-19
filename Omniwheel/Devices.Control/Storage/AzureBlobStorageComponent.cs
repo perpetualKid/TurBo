@@ -79,7 +79,7 @@ namespace Devices.Control.Storage
 
         protected override async Task ListContent(MessageContainer data)
         {
-            await Task.CompletedTask;
+            await Task.CompletedTask.ConfigureAwait(false);
         }
 
         public async Task ConnectStorage(string storageConnectionString, string containerName, bool createContainer = true)
@@ -125,7 +125,7 @@ namespace Devices.Control.Storage
                 blobClient = null;
                 storageAccount = null;
             }
-            await Task.CompletedTask;
+            await Task.CompletedTask.ConfigureAwait(false);
         }
     }
 
