@@ -49,7 +49,7 @@ namespace Common.Communication.Channels
             this.ConnectionStatus = ConnectionStatus.Connecting;
             this.streamSocket = socketStream;
 
-            await Task.CompletedTask;
+            await Task.CompletedTask.ConfigureAwait(false);
             while (true)
             {
                 //await jsonReadStream.FlushAsync();

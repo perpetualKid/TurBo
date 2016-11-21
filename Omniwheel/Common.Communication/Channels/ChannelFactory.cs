@@ -35,7 +35,7 @@ namespace Common.Communication.Channels
                     channel.BindAsync(socketStream);
                     break;
                 default:
-                    await Task.CompletedTask;
+                    await Task.CompletedTask.ConfigureAwait(false);
                     break;
             }
             return channel;

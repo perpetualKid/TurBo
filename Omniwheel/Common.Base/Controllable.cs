@@ -11,9 +11,11 @@ namespace Common.Base
     public abstract class Controllable
     {
         protected string componentName;
+        protected string root;
+        protected Controllable parent;
 
-        protected static Dictionary<string, Controllable> components = new Dictionary<string, Controllable>();
-        protected static List<CommunicationControllable> communicationComponents;
+        private static Dictionary<string, Controllable> globalComponents = new Dictionary<string, Controllable>();
+        private static List<CommunicationControllable> communicationComponents;
 
         #region static
         static Controllable()
@@ -23,7 +25,16 @@ namespace Common.Base
 
         public static async Task<Controllable> RegisterComponent(Controllable component)
         {
-            components.Add(component.componentName.ToUpperInvariant(), component);
+            globalComponents.Add(component.ResolveName(), component);
+            await component.InitializeDefaults().ConfigureAwait(false);
+            if (component is CommunicationControllable)
+                communicationComponents.Add(component as CommunicationControllable);
+            return component;
+        }
+
+        public static async Task<Controllable> RegisterComponent(Controllable component, Controllable parent)
+        {
+            globalComponents.Add(component.ResolveName(), component);
             await component.InitializeDefaults().ConfigureAwait(false);
             if (component is CommunicationControllable)
                 communicationComponents.Add(component as CommunicationControllable);
@@ -33,8 +44,8 @@ namespace Common.Base
         public static Controllable GetByName(string name)
         {
             name = name?.ToUpperInvariant();
-            if (components.ContainsKey(name))
-                return components[name] as Controllable;
+            if (globalComponents.ContainsKey(name))
+                return globalComponents[name];
             return null;
         }
 
@@ -48,11 +59,11 @@ namespace Common.Base
             string component = data.Target?.ToUpperInvariant();
             if (string.IsNullOrEmpty(component))
                 throw new ArgumentNullException();
-            if (components.ContainsKey(component))
+            if (globalComponents.ContainsKey(component))
             {
                 try
                 {
-                    Controllable processor = components[component] as Controllable;
+                    Controllable processor = globalComponents[component] as Controllable;
                     await processor.ProcessCommand(data);
                 }
                 catch (Exception ex)
@@ -142,15 +153,22 @@ namespace Common.Base
 
         public static async Task<IList<string>> ListComponents()
         {
-            return await Task.Run(() => components.Keys.ToList()).ConfigureAwait(false);
+            return await Task.Run(() => globalComponents.Keys.ToList()).ConfigureAwait(false);
         }
         #endregion
 
-            #region base instance
+        #region base instance
         public Controllable(string componentName)
         {
             this.componentName = componentName;
         }
+
+        public Controllable(string componentName, Controllable parent)
+        {
+            this.componentName = componentName;
+            this.parent = parent;
+        }
+
 
         protected async virtual Task InitializeDefaults()
         {
@@ -162,6 +180,21 @@ namespace Common.Base
         protected abstract Task ProcessCommand(MessageContainer data);
 
         protected abstract Task ComponentHelp(MessageContainer data);
+        #endregion
+
+        #region helpers
+        private string ResolveName()
+        {
+            StringBuilder builder = new StringBuilder();
+            Controllable item = this;
+            while (item != null)
+            {
+                builder.Insert(0, item.componentName.ToUpperInvariant());
+                builder.Insert(0, ".");
+                item = item.parent;
+            }
+            return builder.Remove(0, 1).ToString();
+        }
         #endregion
 
 

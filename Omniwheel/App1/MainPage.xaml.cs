@@ -24,6 +24,7 @@ namespace App1
         public string OneDriveRefreshToken = "";
     }
 
+
     /// <summary>
     /// An empty page that can be used on its own or navigated to within a Frame.
     /// </summary>
@@ -36,8 +37,8 @@ namespace App1
             this.InitializeComponent();
         }
 
-        public const string clientId = "a80849fc-d08b-4e3c-910c-8ec92565774f";
-        public const string clientSecret = "N4dogjq8kyCQVBLLrwrbrQg";
+        public const string clientId = "";
+        public const string clientSecret = "";
 
         private AppSettings appSettings;
 

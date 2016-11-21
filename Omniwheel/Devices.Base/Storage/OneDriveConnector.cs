@@ -265,10 +265,14 @@ namespace Devices.Base
 
         public static string ParseAccessCode(Uri uri)
         {
-            WwwFormUrlDecoder decoder = new WwwFormUrlDecoder(uri.Query);
+            const string accessCodeParamName = "code";
+            if (uri == null || string.IsNullOrEmpty(uri.Query))
+                return null;
             try
             {
-                return decoder.GetFirstValueByName("code");
+                WwwFormUrlDecoder decoder = new WwwFormUrlDecoder(uri.Query);
+                return decoder?.GetFirstValueByName(accessCodeParamName);
+
             }
             catch (ArgumentException)
             {
