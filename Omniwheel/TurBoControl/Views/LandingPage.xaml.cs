@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
+using Common.Communication;
+using Common.Communication.Channels;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
 using Windows.UI.Xaml;
@@ -20,9 +22,34 @@ namespace TurBoControl.Views
     /// </summary>
     public sealed partial class LandingPage : Page
     {
+        SocketClient socketClient;
+
         public LandingPage()
         {
             this.InitializeComponent();
         }
+
+        private async void Button_Click(object sender, RoutedEventArgs e)
+        {
+            if (socketClient == null)
+                socketClient = new SocketClient();
+            if (socketClient.ConnectionStatus != ConnectionStatus.Connected)
+            {
+                ChannelBase channel = await socketClient.Connect("turbo", "8027", DataFormat.StringText);
+                channel.OnMessageReceived += SocketClient_OnMessageReceived;
+            }
+                    await socketClient.Send(Guid.Empty, "ECHO");
+                //await SocketClient.Disconnect();
+            //                await Task.Run(() => JsonStreamReader.ReadEndless(file.OpenStreamForReadAsync().Result));
+
+        }
+
+        private void SocketClient_OnMessageReceived(object sender, MessageReceivedEventArgs e)
+        {
+            //            string text = (e as StringMessageArgs).Message;
+            System.Diagnostics.Debug.WriteLine((e as StringMessageArgs).Parameters?.Length);
+        }
+
+
     }
 }

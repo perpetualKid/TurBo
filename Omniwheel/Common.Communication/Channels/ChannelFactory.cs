@@ -10,17 +10,6 @@ namespace Common.Communication.Channels
 {
     static class ChannelFactory
     {
-        public static ChannelBase BindChannel(DataFormat dataFormat, SocketObject socket)
-        {
-            switch(dataFormat)
-            {
-                case DataFormat.StringText:
-                    return new StringTextChannel(socket);
-                        default:
-                    return default(ChannelBase);
-            }
-        }
-
         public static async Task<ChannelBase> BindChannelAsync(DataFormat dataFormat, SocketObject host, StreamSocket socketStream)
         {
             ChannelBase channel = null;

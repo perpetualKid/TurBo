@@ -23,7 +23,7 @@ namespace Common.Communication.Channels
             cancellationTokenSource = new CancellationTokenSource();
         }
 
-        public async Task<ChannelBase> Connect(string remoteServer, string remotePort, DataFormat format)
+        public async Task<ChannelBase> Connect(string remoteServer, string remotePort, DataFormat dataFormat)
         {
             try
             {
@@ -33,9 +33,12 @@ namespace Common.Communication.Channels
                 streamSocket.Control.NoDelay = true;
                 await streamSocket.ConnectAsync(hostName, remotePort);
                 ConnectionStatus = ConnectionStatus.Connected;
-                channel = ChannelFactory.BindChannel(format, this);
-                channel.StreamSocket = streamSocket;
-                Task task = Task.Run(async () => await channel.Listening(streamSocket));
+
+                channel = await ChannelFactory.BindChannelAsync(dataFormat, this, streamSocket).ConfigureAwait(false);
+
+                //channel = ChannelFactory.BindChannel(format, this);
+                //channel.StreamSocket = streamSocket;
+                //Task task = Task.Run(async () => await channel.Listening(streamSocket));
             }
             catch (Exception exception)
             {

@@ -7,7 +7,7 @@ using System.Text;
 namespace Common.Communication
 {
 
-    internal enum TokenType
+    internal enum StringTokenType
     {
         Separator,
         SingleQuote,
@@ -15,19 +15,19 @@ namespace Common.Communication
         Value
     }
 
-    internal class Token
+    internal struct StringToken
     {
-        public Token(TokenType type, string value)
+        public StringToken(StringTokenType type, string value)
         {
             Value = value;
             Type = type;
         }
 
-        public String Value { get; private set; }
-        public TokenType Type { get; private set; }
+        public string Value { get; private set; }
+        public StringTokenType Type { get; private set; }
     }
 
-    internal class StreamTokenizer : IEnumerable<Token>
+    internal class StreamTokenizer : IEnumerable<StringToken>
     {
         private TextReader reader;
 
@@ -36,7 +36,7 @@ namespace Common.Communication
             this.reader = reader;
         }
 
-        public IEnumerator<Token> GetEnumerator()
+        public IEnumerator<StringToken> GetEnumerator()
         {
             string line;
             StringBuilder value = new StringBuilder();
@@ -51,20 +51,20 @@ namespace Common.Communication
                         case '"':
                             if (value.Length > 0)
                             {
-                                yield return new Token(TokenType.Value, value.ToString());
+                                yield return new StringToken(StringTokenType.Value, value.ToString());
                                 value.Length = 0;
                             }
-                            yield return new Token(c =='"' ?TokenType.DoubleQoute : TokenType.SingleQuote, c.ToString());
+                            yield return new StringToken(c == '"' ? StringTokenType.DoubleQoute : StringTokenType.SingleQuote, c.ToString());
                             break;
                         case ',':
                         case ':':
                         case ' ':
                             if (value.Length > 0)
                             {
-                                yield return new Token(TokenType.Value, value.ToString());
+                                yield return new StringToken(StringTokenType.Value, value.ToString());
                                 value.Length = 0;
                             }
-                            yield return new Token(TokenType.Separator, c.ToString());
+                            yield return new StringToken(StringTokenType.Separator, c.ToString());
                             break;
                         default:
                             value.Append(c);
@@ -73,10 +73,10 @@ namespace Common.Communication
                 }
                 if (value.Length > 0)
                 {
-                    yield return new Token(TokenType.Value, value.ToString());
+                    yield return new StringToken(StringTokenType.Value, value.ToString());
                     value.Length = 0;
                 }
-                yield return new Token(TokenType.Separator, string.Empty);
+                yield return new StringToken(StringTokenType.Separator, string.Empty);
             }
         }
 
@@ -86,17 +86,15 @@ namespace Common.Communication
         }
     }
 
-    public static class StreamReaderExtensions
+
+    public static class StringTextParserExtensions
     {
         public static IEnumerable<string> GetTokens(this StreamReader reader)
         {
             StreamTokenizer tokenizer = new StreamTokenizer(reader);
             return new StringTextParser(tokenizer);
         }
-    }
 
-    public static class StringExtensions
-    {
         public static IEnumerable<string> GetTokens(this string value)
         {
             StreamTokenizer tokenizer = new StreamTokenizer(new StringReader(value));
@@ -116,14 +114,14 @@ namespace Common.Communication
         public IEnumerator<string> GetEnumerator()
         {
             bool insideQuote = false;
-            TokenType quoteType = TokenType.Separator;
+            StringTokenType quoteType = StringTokenType.Separator;
             StringBuilder result = new StringBuilder();
 
-            foreach (Token token in tokenizer)
+            foreach (StringToken token in tokenizer)
             {
                 switch (token.Type)
                 {
-                    case TokenType.Separator:
+                    case StringTokenType.Separator:
                         if (insideQuote)
                         {
                             result.Append(token.Value);
@@ -135,8 +133,8 @@ namespace Common.Communication
                             result.Length = 0;
                         }
                         break;
-                    case TokenType.SingleQuote:
-                    case TokenType.DoubleQoute:
+                    case StringTokenType.SingleQuote:
+                    case StringTokenType.DoubleQoute:
                         if (!insideQuote)
                         {
                             quoteType = token.Type;
@@ -149,14 +147,14 @@ namespace Common.Communication
                         else if (token.Type == quoteType)
                         {
                             insideQuote = false;
-                            quoteType = TokenType.Separator;
+                            quoteType = StringTokenType.Separator;
                         }
                         else
                         {
                             result.Append(token.Value);
                         }
                         break;
-                    case TokenType.Value:
+                    case StringTokenType.Value:
                         result.Append(token.Value);
                         break;
                     default:

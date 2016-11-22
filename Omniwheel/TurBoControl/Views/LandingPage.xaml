@@ -46,6 +46,8 @@
 
         <ScrollViewer Grid.Row="1" EntranceNavigationTransitionInfo.IsTargetElement="True" IsTabStop="True" Margin="12,4,0,0">
             <StackPanel x:Name="ContentContainer" Margin="12,0,12,0">
+                <Button Name="btnConnect" AutomationProperties.HelpText="Connect to the Device" Content="Connect" Click="Button_Click">
+                </Button>
                 <TextBlock Style="{StaticResource SubtitleTextBlockStyle}">Top-Level Navigation</TextBlock>
                 <TextBlock Style="{StaticResource BodyTextBlockStyle}" Margin="0,4">This sample demonstrates a universal Windows app with top-level navigation.</TextBlock>
 

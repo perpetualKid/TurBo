@@ -118,6 +118,7 @@
     <Compile Include="Sockets\SocketServer.cs" />
     <Compile Include="Enums.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="JsonStreamParser.cs" />
     <Compile Include="StringTextParser.cs" />
     <EmbeddedResource Include="Properties\Common.Communication.rd.xml" />
   </ItemGroup>

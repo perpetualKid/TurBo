@@ -39,7 +39,10 @@ namespace Devices.Control.Communication
 
         private async void Server_OnMessageReceived(object sender, MessageReceivedEventArgs e)
         {
-            await HandleInput(new MessageContainer(e.SessionId, this, (e as StringMessageArgs).Parameters));
+            if (e is StringMessageArgs)
+                await HandleInput(new MessageContainer(e.SessionId, this, (e as StringMessageArgs).Parameters));
+            else if (e is JsonMessageArgs)
+                await HandleInput(new MessageContainer(e.SessionId, this, (e as JsonMessageArgs).Json));
         }
 
         protected override async Task ComponentHelp(MessageContainer data)

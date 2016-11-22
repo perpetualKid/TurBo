@@ -197,7 +197,7 @@ namespace App1
 
         private void SocketClient_OnMessageReceived(object sender, MessageReceivedEventArgs e)
         {
-            Debug.WriteLine((e as StringMessageArgs).Message);
+            Debug.WriteLine((e as StringMessageArgs).Parameters?.Length);
         }
 
         private async void button4_Click(object sender, RoutedEventArgs e)
@@ -207,8 +207,6 @@ namespace App1
                 await socketClient.Disconnect();
                 socketClient = null;
             }
-
-
         }
 
         private void button5_Click(object sender, RoutedEventArgs e)

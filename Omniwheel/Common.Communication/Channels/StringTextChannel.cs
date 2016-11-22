@@ -87,39 +87,6 @@ namespace Common.Communication.Channels
             this.OnMessageReceived -= socketObject.Instance_OnMessageReceived;
         }
 
-        public override async Task Listening(StreamSocket socketStream)
-        {
-            this.streamSocket = socketStream;
-            try
-            {
-                socketObject.ConnectionStatus = ConnectionStatus.Connected;
-                using (DataReader dataReader = new DataReader(socketStream.InputStream))
-                {
-                    CancellationToken cancellationToken = socketObject.CancellationTokenSource.Token;
-                    //setup
-                    lock (socketObject.CancellationTokenSource)
-                    {
-                        cancellationToken.ThrowIfCancellationRequested();
-                        dataReader.InputStreamOptions = InputStreamOptions.Partial;
-                    }
-
-                    loadOperation = dataReader.LoadAsync(bufferSize);
-                    uint bytesAvailable =  await loadOperation.AsTask(cancellationToken).ConfigureAwait(false);
-                    while (bytesAvailable > 0 && loadOperation.Status == Windows.Foundation.AsyncStatus.Completed)
-                    {
-                        bytesRead += bytesAvailable;
-                        loadOperation = dataReader.LoadAsync(bufferSize);
-                        bytesAvailable = await loadOperation.AsTask(cancellationToken).ConfigureAwait(false);
-                    }
-                }
-            }
-            catch (Exception exception)
-            {
-                socketObject.ConnectionStatus = ConnectionStatus.Failed;
-                Debug.WriteLine(string.Format("Error receiving data: {0}", exception.Message));
-            }
-        }
-
         private async Task Parse()
         {
             using (StreamReader reader = new StreamReader(memoryStream, Encoding.UTF8, true, bufferSize, true))
@@ -147,7 +114,11 @@ namespace Common.Communication.Channels
 
         public override async Task Send(object data)
         {
-            IList textData = data as IList;
+            IList textData;
+            if (data is string)
+                textData = new List<string>() { data as string };
+            else
+                textData = data as IList;
             if (null == textData || textData.Count == 0)
             {
                 throw new FormatException("Data is invalid or empty and cannot be send as text.");

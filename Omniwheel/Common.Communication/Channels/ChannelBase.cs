@@ -33,8 +33,6 @@ namespace Common.Communication.Channels
             this.sessionId = Guid.NewGuid();
         }
 
-        public abstract Task Listening(StreamSocket socketStream);
-
         internal abstract void BindAsync(StreamSocket socketStream);
 
         public abstract Task Send(object data);

@@ -29,35 +29,11 @@ namespace Common.Communication
     {
 
         private string[] parameters;
-        private string message;
 
         public StringMessageArgs(string[] lines)
         {
             this.parameters = lines;
         }
-
-        public StringMessageArgs(string message)
-        {
-            this.message = message;
-
-            //StringTextParser parser = new StringTextParser(message);
-            //foreach(string command in parser)
-            //{
-            //    Parameters.Add(command, null);
-            //}
-
-            //string[] commands = message.Split(':', ' ');
-            //foreach (string item in commands)
-            //{
-            //    string[] nameValuePair = item.Split('=');
-            //    if (nameValuePair.Length > 1)
-            //        Parameters.Add(nameValuePair[0], nameValuePair[0]);
-            //    else
-            //        Parameters.Add(item, null);
-            //}
-        }
-
-        public string Message { get { return message; } }
 
         public string[] Parameters { get { return parameters; } }
     }

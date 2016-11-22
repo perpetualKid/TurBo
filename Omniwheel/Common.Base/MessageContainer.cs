@@ -53,6 +53,22 @@ namespace Common.Base
             responses = new StringJsonCollection();
             dataObject.Add(FixedPropertyNames.Responses.ToString(), responses.JsonArray);
         }
+
+        public MessageContainer(Guid sessionId, Controllable origin, JsonObject data) : this(sessionId, origin)
+        {
+            this.dataObject = data;
+            //dataObject.AddValue(FixedPropertyNames.Target.ToString(), data[0]);
+            if (!data.ContainsKey(FixedPropertyNames.Parameters.ToString()))
+            {
+                parameters = new StringJsonCollection();
+                dataObject.Add(FixedPropertyNames.Parameters.ToString(), parameters.JsonArray);
+            }
+            if (!data.ContainsKey(FixedPropertyNames.Responses.ToString()))
+            {
+                responses = new StringJsonCollection();
+                dataObject.Add(FixedPropertyNames.Responses.ToString(), responses.JsonArray);
+            }
+        }
         #endregion
 
         public IList<string> GetText()

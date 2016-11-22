@@ -34,6 +34,7 @@
 
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition />
         </Grid.RowDefinitions>
 
@@ -42,10 +43,19 @@
                 <TextBlock x:Name="HeaderTextBlock" Text="Settings" Style="{StaticResource PageTitleTextBlockStyle}" TextWrapping="NoWrap"/>
             </ctl:PageHeader.HeaderContent>
         </ctl:PageHeader>
-        <TextBlock x:Name="lblClientId" Grid.Row="1" HorizontalAlignment="Left" Margin="10,32,0,0" TextWrapping="Wrap" Text="ClientId (Guid)" VerticalAlignment="Top"/>
 
-        <TextBox x:Name="txtOneDriveClientId" Grid.Row="2" HorizontalAlignment="Left" Margin="10,57,0,0" TextWrapping="Wrap" Text="8981d8dd-22bf-49d2-86ce-57e7c4097fb2" VerticalAlignment="Top" PlaceholderText="OneDrive ClientId" Width="300"/>
-        <TextBlock x:Name="lblCLientSecret" Grid.Row="3" HorizontalAlignment="Left" Margin="10,100,0,0" TextWrapping="Wrap" Text="ClientSecret" VerticalAlignment="Top" Grid.RowSpan="2"/>
-        <TextBox x:Name="txtOneDriveClientSecret" Grid.Row="4" Margin="10,125,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" HorizontalAlignment="Left" Width="300" PlaceholderText="OneDrive ClientSecret" InputScope="Password" Grid.RowSpan="2"/>
+        <StackPanel Margin="0,0,0,0" Grid.Row="1">
+            <TextBlock x:Name="lblClientId" HorizontalAlignment="Left" Margin="10" TextWrapping="Wrap" Text="ClientId (Guid)" VerticalAlignment="Top"/>
+            <TextBox x:Name="txtOneDriveClientId" HorizontalAlignment="Left" Margin="10" TextWrapping="Wrap" Text="8981d8dd-22bf-49d2-86ce-57e7c4097fb2" VerticalAlignment="Top" PlaceholderText="OneDrive ClientId" Width="300"/>
+            <TextBlock x:Name="lblCLientSecret" HorizontalAlignment="Left" Margin="10" TextWrapping="Wrap" Text="ClientSecret" VerticalAlignment="Top"/>
+            <TextBox x:Name="txtOneDriveClientSecret" Margin="10" TextWrapping="Wrap" Text="" VerticalAlignment="Top" HorizontalAlignment="Left" Width="300" PlaceholderText="OneDrive ClientSecret" InputScope="Password" Grid.RowSpan="2"/>
+        </StackPanel>
+        <StackPanel Grid.Row="2">
+            <TextBlock x:Name="lblDeviceIP" HorizontalAlignment="Left" Margin="10" TextWrapping="Wrap" Text="Device Name or IP Address" VerticalAlignment="Top"/>
+            <TextBox x:Name="txtDeviceIP" HorizontalAlignment="Left" Margin="10" TextWrapping="Wrap" Text="" VerticalAlignment="Top" PlaceholderText="127.0.0.1" Width="300" />
+            <TextBlock x:Name="lblDevicePort" HorizontalAlignment="Left" Margin="10" TextWrapping="Wrap" Text="Device Port" VerticalAlignment="Top"/>
+            <TextBox x:Name="txtDevicePort" HorizontalAlignment="Left" Margin="10" TextWrapping="Wrap" Text="" VerticalAlignment="Top" PlaceholderText="8027" Width="300" />
+
+        </StackPanel>
     </Grid>
 </Page>
