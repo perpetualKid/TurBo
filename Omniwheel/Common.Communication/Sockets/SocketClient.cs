@@ -1,13 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Windows.Networking;
 using Windows.Networking.Sockets;
-using Windows.Storage.Streams;
 
 namespace Common.Communication.Channels
 {
@@ -35,10 +31,6 @@ namespace Common.Communication.Channels
                 ConnectionStatus = ConnectionStatus.Connected;
 
                 channel = await ChannelFactory.BindChannelAsync(dataFormat, this, streamSocket).ConfigureAwait(false);
-
-                //channel = ChannelFactory.BindChannel(format, this);
-                //channel.StreamSocket = streamSocket;
-                //Task task = Task.Run(async () => await channel.Listening(streamSocket));
             }
             catch (Exception exception)
             {

@@ -1,16 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Common.Communication.Channels;
-using Newtonsoft.Json;
 using Nito.AsyncEx;
 using Windows.Networking.Sockets;
-using Windows.Storage.Streams;
 
 namespace Common.Communication.Channels
 {
@@ -132,48 +126,6 @@ namespace Common.Communication.Channels
                 }
             }
         }
-
-        //private async void JsonConverter()
-        //{
-        //    JsonTextReader jsonReader = new JsonTextReader(new StreamReader(jsonReadStream));
-        //    jsonReader.SupportMultipleContent = true;
-        //    jsonReader.CloseInput = false;
-
-        //    int writePosition = 0;
-        //    int readPosition = 0;
-
-        //    while (true)
-        //    {
-        //        await jsonReadStream.FlushAsync();
-        //        jsonReadStream.Position = readPosition;
-        //        //                using (JsonTextReader jsonReader = new JsonTextReader(new StreamReader(jsonReadStream.GetInputStreamAt(0).AsStreamForRead())))
-        //        {
-        //            //jsonReader.SupportMultipleContent = true;
-        //            //jsonReader.CloseInput = false;
-        //            var serializer = new JsonSerializer();
-        //            //if (!reader.Read() )//|| reader.TokenType != JsonToken.StartArray)
-        //            //    throw new Exception("Expected start of array in the deserialized json string");
-        //            try
-        //            {
-        //                while (jsonReader.Read())
-        //                {
-        //                    if (jsonReader.TokenType == JsonToken.StartObject)
-        //                    {
-        //                        var item = serializer.Deserialize(jsonReader);
-        //                        OnMessageReceived?.Invoke(this, new MessageReceivedEventArgs(item));
-        //                    }
-        //                    readPosition = (int)jsonReadStream.Position;
-        //                }
-        //            }
-        //            catch (Exception ex)
-        //            {
-        //                Debug.WriteLine(ex.Message);
-        //            }
-
-        //        }
-        //    }
-
-        //}
 
     }
 }

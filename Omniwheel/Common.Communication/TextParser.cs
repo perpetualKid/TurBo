@@ -7,7 +7,7 @@ using System.Text;
 namespace Common.Communication
 {
 
-    internal enum StringTokenType
+    internal enum TextTokenType
     {
         Separator,
         SingleQuote,
@@ -15,19 +15,19 @@ namespace Common.Communication
         Value
     }
 
-    internal struct StringToken
+    internal struct TextToken
     {
-        public StringToken(StringTokenType type, string value)
+        public TextToken(TextTokenType type, string value)
         {
             Value = value;
             Type = type;
         }
 
         public string Value { get; private set; }
-        public StringTokenType Type { get; private set; }
+        public TextTokenType Type { get; private set; }
     }
 
-    internal class StreamTokenizer : IEnumerable<StringToken>
+    internal class StreamTokenizer : IEnumerable<TextToken>
     {
         private TextReader reader;
 
@@ -36,7 +36,7 @@ namespace Common.Communication
             this.reader = reader;
         }
 
-        public IEnumerator<StringToken> GetEnumerator()
+        public IEnumerator<TextToken> GetEnumerator()
         {
             string line;
             StringBuilder value = new StringBuilder();
@@ -51,20 +51,20 @@ namespace Common.Communication
                         case '"':
                             if (value.Length > 0)
                             {
-                                yield return new StringToken(StringTokenType.Value, value.ToString());
+                                yield return new TextToken(TextTokenType.Value, value.ToString());
                                 value.Length = 0;
                             }
-                            yield return new StringToken(c == '"' ? StringTokenType.DoubleQoute : StringTokenType.SingleQuote, c.ToString());
+                            yield return new TextToken(c == '"' ? TextTokenType.DoubleQoute : TextTokenType.SingleQuote, c.ToString());
                             break;
                         case ',':
                         case ':':
                         case ' ':
                             if (value.Length > 0)
                             {
-                                yield return new StringToken(StringTokenType.Value, value.ToString());
+                                yield return new TextToken(TextTokenType.Value, value.ToString());
                                 value.Length = 0;
                             }
-                            yield return new StringToken(StringTokenType.Separator, c.ToString());
+                            yield return new TextToken(TextTokenType.Separator, c.ToString());
                             break;
                         default:
                             value.Append(c);
@@ -73,10 +73,10 @@ namespace Common.Communication
                 }
                 if (value.Length > 0)
                 {
-                    yield return new StringToken(StringTokenType.Value, value.ToString());
+                    yield return new TextToken(TextTokenType.Value, value.ToString());
                     value.Length = 0;
                 }
-                yield return new StringToken(StringTokenType.Separator, string.Empty);
+                yield return new TextToken(TextTokenType.Separator, string.Empty);
             }
         }
 
@@ -87,26 +87,26 @@ namespace Common.Communication
     }
 
 
-    public static class StringTextParserExtensions
+    public static class TextParserExtensions
     {
         public static IEnumerable<string> GetTokens(this StreamReader reader)
         {
             StreamTokenizer tokenizer = new StreamTokenizer(reader);
-            return new StringTextParser(tokenizer);
+            return new TextParser(tokenizer);
         }
 
         public static IEnumerable<string> GetTokens(this string value)
         {
             StreamTokenizer tokenizer = new StreamTokenizer(new StringReader(value));
-            return new StringTextParser(tokenizer);
+            return new TextParser(tokenizer);
         }
     }
 
-    internal class StringTextParser : IEnumerable<String>
+    internal class TextParser : IEnumerable<String>
     {
         private StreamTokenizer tokenizer;
 
-        public StringTextParser(StreamTokenizer tokenizer)
+        public TextParser(StreamTokenizer tokenizer)
         {
             this.tokenizer = tokenizer;
         }
@@ -114,14 +114,14 @@ namespace Common.Communication
         public IEnumerator<string> GetEnumerator()
         {
             bool insideQuote = false;
-            StringTokenType quoteType = StringTokenType.Separator;
+            TextTokenType quoteType = TextTokenType.Separator;
             StringBuilder result = new StringBuilder();
 
-            foreach (StringToken token in tokenizer)
+            foreach (TextToken token in tokenizer)
             {
                 switch (token.Type)
                 {
-                    case StringTokenType.Separator:
+                    case TextTokenType.Separator:
                         if (insideQuote)
                         {
                             result.Append(token.Value);
@@ -133,8 +133,8 @@ namespace Common.Communication
                             result.Length = 0;
                         }
                         break;
-                    case StringTokenType.SingleQuote:
-                    case StringTokenType.DoubleQoute:
+                    case TextTokenType.SingleQuote:
+                    case TextTokenType.DoubleQoute:
                         if (!insideQuote)
                         {
                             quoteType = token.Type;
@@ -147,14 +147,14 @@ namespace Common.Communication
                         else if (token.Type == quoteType)
                         {
                             insideQuote = false;
-                            quoteType = StringTokenType.Separator;
+                            quoteType = TextTokenType.Separator;
                         }
                         else
                         {
                             result.Append(token.Value);
                         }
                         break;
-                    case StringTokenType.Value:
+                    case TextTokenType.Value:
                         result.Append(token.Value);
                         break;
                     default:

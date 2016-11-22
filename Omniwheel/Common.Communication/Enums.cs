@@ -10,7 +10,7 @@ namespace Common.Communication
     public enum DataFormat
     {
         Unknown,
-        StringText,
+        Text,
         Json,
         FrameSize,
     }

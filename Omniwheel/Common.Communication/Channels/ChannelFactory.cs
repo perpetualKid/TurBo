@@ -15,7 +15,7 @@ namespace Common.Communication.Channels
             ChannelBase channel = null;
             switch (dataFormat)
             {
-                case DataFormat.StringText:
+                case DataFormat.Text:
                     channel = new StringTextChannel(host);
                     channel.BindAsync(socketStream);
                     break;

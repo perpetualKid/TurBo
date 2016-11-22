@@ -35,7 +35,7 @@ namespace TurBoControl.Views
                 socketClient = new SocketClient();
             if (socketClient.ConnectionStatus != ConnectionStatus.Connected)
             {
-                ChannelBase channel = await socketClient.Connect("turbo", "8027", DataFormat.StringText);
+                ChannelBase channel = await socketClient.Connect("turbo", "8027", DataFormat.Text);
                 channel.OnMessageReceived += SocketClient_OnMessageReceived;
             }
                     await socketClient.Send(Guid.Empty, "ECHO");

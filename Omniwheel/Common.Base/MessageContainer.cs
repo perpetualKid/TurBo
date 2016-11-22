@@ -71,6 +71,13 @@ namespace Common.Base
         }
         #endregion
 
+        public JsonObject Data { get { return this.dataObject; } }
+
+        public JsonObject GetJson()
+        {
+            return this.dataObject;
+        }
+
         public IList<string> GetText()
         {
             List<string> result = new List<string>();

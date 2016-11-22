@@ -13,7 +13,7 @@ namespace Devices.Control.Communication
     public class NetworkListener : CommunicationControllable
     {
         private int port;
-        private DataFormat dataFormat = DataFormat.StringText;
+        private DataFormat dataFormat = DataFormat.Text;
         private SocketObject instance;
 
         public NetworkListener(int port): base("TCP" + port.ToString())
@@ -58,7 +58,16 @@ namespace Devices.Control.Communication
 
         public override async Task Send(MessageContainer data)
         {
-            await instance.Send(data.SessionId, data.GetText());
+            switch (dataFormat)
+            {
+                case DataFormat.Text:
+                    await instance.Send(data.SessionId, data.GetText());
+                    break;
+                case DataFormat.Json:
+                    await instance.Send(data.SessionId, data.GetJson());
+                    break;
+
+            }
         }
     }
 }
