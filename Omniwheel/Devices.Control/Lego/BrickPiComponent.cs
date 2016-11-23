@@ -26,23 +26,23 @@ namespace Devices.Control.Lego
 
         protected override async Task ComponentHelp(MessageContainer data)
         {
-            data.Responses.Add("HELP : Shows this help screen.");
-            data.Responses.Add("VERSION : Gets the current BrickPi Version. Often used as Health Check.");
-            data.Responses.Add("CONNECT:<StorageConnectionString>|<StorageAccount>:<AccessKey> : Connecting to Azure Blob Storage.");
-            data.Responses.Add("DISCONNECT : Disconnecting from Azure Blob Storage.");
-            data.Responses.Add("LIST|LISTFILES[:<Path>[:<FilesOnly|True>]] : List Folders and Files or Files only.");
+            data.AddMultiPartValue("Help", "HELP : Shows this help screen.");
+            data.AddMultiPartValue("Help", "VERSION : Gets the current BrickPi Version. Often used as Health Check.");
+            data.AddMultiPartValue("Help", "CONNECT:<StorageConnectionString>|<StorageAccount>:<AccessKey> : Connecting to Azure Blob Storage.");
+            data.AddMultiPartValue("Help", "DISCONNECT : Disconnecting from Azure Blob Storage.");
+            data.AddMultiPartValue("Help", "LIST|LISTFILES[:<Path>[:<FilesOnly|True>]] : List Folders and Files or Files only.");
             await HandleOutput(data);
         }
 
         protected async Task BrickPiVersion(MessageContainer data)
         {
-            data.Responses.Add($"BrickPi Version {await brickPi.GetBrickVersion()}");
+            data.AddValue("Version", $"BrickPi Version {await brickPi.GetBrickVersion()}");
             await HandleOutput(data);
         }
 
         protected override async Task ProcessCommand(MessageContainer data)
         {
-            switch (ResolveParameter(data, 1).ToUpperInvariant())
+            switch (ResolveParameter(data, "Action", 1).ToUpperInvariant())
             {
                 case "HELP":
                     await ComponentHelp(data);
@@ -59,33 +59,11 @@ namespace Devices.Control.Lego
         }
 
         #region Command
-        private async Task BrickPiSetArduino1Led(MessageContainer data)
-        {
-            string path = ResolveParameter(data, 2);
-            string filesOnlyParam = ResolveParameter(data, 3);
-            bool filesOnly = false;
-            if (!bool.TryParse(filesOnlyParam, out filesOnly))
-                filesOnly = (!string.IsNullOrWhiteSpace(filesOnlyParam) && filesOnlyParam.ToUpperInvariant() == "FILESONLY");
-
-            data.Responses.Add(await ListComponents().ConfigureAwait(false));
-            await HandleOutput(data).ConfigureAwait(false);
-        }
         #endregion
 
         #region public
         public Brick BrickPi { get { return this.brickPi; } }
 
-        public async Task SetArduinoLed1(bool light)
-        {
-            brickPi.Arduino1Led.Light = light;
-            await Task.CompletedTask.ConfigureAwait(false);
-        }
-
-        public async Task SetArduinoLed2(bool light)
-        {
-            brickPi.Arduino2Led.Light = light;
-            await Task.CompletedTask.ConfigureAwait(false);
-        }
         #endregion
     }
 }

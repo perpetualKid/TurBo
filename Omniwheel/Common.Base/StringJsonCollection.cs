@@ -58,6 +58,27 @@ namespace Common.Base
             array.Add(value);
         }
 
+        public void Add(object value)
+        {
+            array.Add(JsonExtensions.EvaluateJsonValue(value));
+        }
+
+        public void Insert(int index, string value)
+        {
+            array.Insert(index, JsonExtensions.EvaluateJsonValue(value));
+        }
+
+        public void Insert(int index, IJsonValue value)
+        {
+            array.Insert(index, value);
+
+        }
+
+        public void Insert(int index, object value)
+        {
+            array.Insert(index, JsonExtensions.EvaluateJsonValue(value));
+        }
+
         public IEnumerator<string> GetEnumerator()
         {
             foreach (var item in array)

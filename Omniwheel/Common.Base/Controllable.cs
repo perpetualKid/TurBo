@@ -49,11 +49,6 @@ namespace Common.Base
             return null;
         }
 
-        protected static string ResolveParameter(MessageContainer data, int index)
-        {
-            return data.Parameters.GetAtAsString(index) ?? string.Empty;
-        }
-
         /// <summary>
         /// resolve the parameter by name or index
         /// first look if the parameter is found by name in the json data object itself
@@ -69,7 +64,7 @@ namespace Common.Base
 
         protected static async Task HandleInput(MessageContainer data)
         {
-            string component = data.Target?.ToUpperInvariant();
+            string component = ResolveParameter(data, "Target", 0).ToUpperInvariant();
             if (string.IsNullOrEmpty(component))
                 throw new ArgumentNullException("No target component specified.");
             if (globalComponents.ContainsKey(component))
@@ -83,10 +78,14 @@ namespace Common.Base
                 {
                     Debug.WriteLine(data.Target, ex.Message + "::" + ex.StackTrace);
                 }
-            } 
+            }
             else //handle locally
             {
-                switch (component)
+                if (component != "." && component != "ROOT")//assume no root component name given
+                    data.PushParameters();  //and push all parameters back, as this is starting right with the action  
+
+                string action = ResolveParameter(data, "Action", 0).ToUpperInvariant();
+                switch (action)
                 {
                     case "HELP":
                         await ListHelp(data).ConfigureAwait(false);
@@ -124,30 +123,33 @@ namespace Common.Base
 
         private static async Task ControllableEcho(MessageContainer data)
         {
-            data.Responses.Add(data.Parameters.ToList());
+            foreach(string value in data.Parameters)
+            {
+                data.AddMultiPartValue("Echo", value);
+            }
             await HandleOutput(data).ConfigureAwait(false);
         }
 
         private static async Task ControllableHello(MessageContainer data)
         {
-            data.Responses.Add("HELLO. Great to see you here.");
-            data.Responses.Add("Use 'HELP + CRLF' command to get help.");
+            data.AddMultiPartValue("Hello", "HELLO. Great to see you here.");
+            data.AddMultiPartValue("Hello", "Use 'HELP + CRLF' command to get help.");
             await HandleOutput(data).ConfigureAwait(false);
         }
 
         public static async Task ListHelp(MessageContainer data)
         {
-            data.Responses.Add("HELP : Shows this help screen.");
-            data.Responses.Add("LIST : Lists the available modules.");
-            data.Responses.Add("HELLO : Returns a simple greeting message. Useful to test communication channel.");
-            data.Responses.Add("ECHO : Echos any text following the ECHO command.");
-            data.Responses.Add("EXIT|CLOSE : Closes the currently used channel.");
+            data.AddMultiPartValue("Help", "HELP : Shows this help screen.");
+            data.AddMultiPartValue("Help", "LIST : Lists the available modules.");
+            data.AddMultiPartValue("Help", "HELLO : Returns a simple greeting message. Useful to test communication channel.");
+            data.AddMultiPartValue("Help", "ECHO : Echos any text following the ECHO command.");
+            data.AddMultiPartValue("Help", "EXIT|CLOSE : Closes the currently used channel.");
             await HandleOutput(data).ConfigureAwait(false);
         }
 
         private static async Task ControllableCloseChannel(MessageContainer data)
         {
-            data.Responses.Add("BYE. Hope to see you soon again.");
+            data.AddValue("Close", "BYE. Hope to see you soon again.");
             await HandleOutput(data);
             if (data.Origin is CommunicationControllable)
                 await CloseChannel(data.Origin as CommunicationControllable, data.SessionId).ConfigureAwait(false);
@@ -155,7 +157,7 @@ namespace Common.Base
 
         private static async Task ControllableListComponents(MessageContainer data)
         {
-            data.Responses.Add(await ListComponents().ConfigureAwait(false));
+            data.AddValue("List", await ListComponents().ConfigureAwait(false));
             await HandleOutput(data).ConfigureAwait(false);
         }
 

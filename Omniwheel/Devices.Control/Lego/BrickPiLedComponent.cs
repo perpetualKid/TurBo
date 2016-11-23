@@ -20,11 +20,11 @@ namespace Devices.Control.Lego
 
         protected override async Task ComponentHelp(MessageContainer data)
         {
-            data.Responses.Add("LED:HELP : Shows this help screen.");
-            data.Responses.Add("LED:ON|ENABLED : Turns the LED on.");
-            data.Responses.Add("LED:OFF|DISABLED : Turns the LED off.");
-            data.Responses.Add("LED:TOGGLE : Toggle the LED from current status.");
-            data.Responses.Add("LED:STATUS : Returns the current status for the LED.");
+            data.AddMultiPartValue("Help", "LED HELP : Shows this help screen.");
+            data.AddMultiPartValue("Help", "LED ON|ENABLE : Turns the LED on.");
+            data.AddMultiPartValue("Help", "LED OFF|DISABLE : Turns the LED off.");
+            data.AddMultiPartValue("Help", "LED TOGGLE : Toggle the LED from current status.");
+            data.AddMultiPartValue("Help", "LED STATUS : Returns the current status for the LED.");
             await HandleOutput(data).ConfigureAwait(false);
         }
 
@@ -36,11 +36,11 @@ namespace Devices.Control.Lego
                     await ComponentHelp(data).ConfigureAwait(false);
                     break;
                 case "ON":
-                case "ENABLED":
+                case "ENABLE":
                     await SetLed(true).ConfigureAwait(false);
                     break;
                 case "OFF":
-                case "DISABLED":
+                case "DISABLE":
                     await SetLed(false).ConfigureAwait(false);
                     break;
                 case "TOGGLE":
@@ -55,7 +55,7 @@ namespace Devices.Control.Lego
         #region command handling
         private async Task LedComponentGetStatus(MessageContainer data)
         {
-            data.Responses.Add(await GetLedStatus().ConfigureAwait(false) ? "Enabled" : "Disabled");
+            data.AddValue("Status", (await GetLedStatus().ConfigureAwait(false) ? "Enabled" : "Disabled"));
             await HandleOutput(data).ConfigureAwait(false);
         }
         #endregion

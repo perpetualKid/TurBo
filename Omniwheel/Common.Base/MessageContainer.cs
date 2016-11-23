@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Windows.Data.Json;
+using System.Linq;
 
 namespace Common.Base
 {
@@ -16,7 +17,6 @@ namespace Common.Base
 
         private JsonObject dataObject;
         private StringJsonCollection parameters; //shortcut reference to minimize lookups
-        private StringJsonCollection responses; //shortcut reference to minimize lookups
 
         #region public properties
         public Guid SessionId { get; private set; }
@@ -34,14 +34,26 @@ namespace Common.Base
 
         public StringJsonCollection Parameters { get { return parameters; } }
 
-        public StringJsonCollection Responses { get { return responses; } }
-
         public JsonObject JsonData { get { return this.dataObject; } }
 
+        #endregion
+
+        #region public methods
         public IJsonValue GetValueByName(string name)
         {
             return dataObject.GetNamedValue(name, JsonValue.CreateNullValue());
         }
+
+        public void AddValue(string name, object value)
+        {
+            dataObject.AddValue(name, value);
+        }
+
+        public void AddMultiPartValue(string name, object value)
+        {
+            dataObject.AddMultiPartValue(name, value);
+        }
+
         #endregion
 
         #region .ctor
@@ -57,8 +69,6 @@ namespace Common.Base
             data = ResolveParameters(data);
             parameters = new StringJsonCollection(data);
             dataObject.Add(FixedPropertyNames.Parameters.ToString(), parameters.JsonArray);
-            responses = new StringJsonCollection();
-            dataObject.Add(FixedPropertyNames.Responses.ToString(), responses.JsonArray);
         }
 
         private string[] ResolveParameters(string[] data)
@@ -100,15 +110,6 @@ namespace Common.Base
                 parameters = new StringJsonCollection();
                 dataObject.Add(FixedPropertyNames.Parameters.ToString(), parameters.JsonArray);
             }
-            if (data.ContainsKey(FixedPropertyNames.Responses.ToString()))
-            {
-                responses = new StringJsonCollection(data.GetNamedArray(FixedPropertyNames.Responses.ToString()));
-            }
-            else
-            {
-                responses = new StringJsonCollection();
-                dataObject.Add(FixedPropertyNames.Responses.ToString(), responses.JsonArray);
-            }
         }
         #endregion
 
@@ -120,11 +121,27 @@ namespace Common.Base
         public IList<string> GetText()
         {
             List<string> result = new List<string>();
-            foreach (string item in responses)
+            foreach (var item in this.dataObject)
             {
-                result.Add(item);
+                if (Enum.GetNames(typeof(FixedPropertyNames)).Contains(item.Key))
+                    continue;
+                result.Add(item.Value.GetValueString());
             }
             return result;
+        }
+
+        public void PushParameters()
+        {
+            if (this.dataObject.ContainsKey(FixedPropertyNames.Action.ToString()))
+            {
+                IJsonValue value = dataObject.GetNamedValue(FixedPropertyNames.Action.ToString());
+                parameters.Insert(0, value);
+            }
+            if (this.dataObject.ContainsKey(FixedPropertyNames.Target.ToString()))
+            {
+                IJsonValue value = dataObject.GetNamedValue(FixedPropertyNames.Target.ToString());
+                dataObject.SetNamedValue(FixedPropertyNames.Action.ToString(), value);
+            }
         }
     }
 }

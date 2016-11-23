@@ -16,6 +16,17 @@ namespace Common.Base
             json.Add(name, EvaluateJsonValue(value));
         }
 
+        public static void AddMultiPartValue(this JsonObject json, string name, object value)
+        {
+            if (json == null)
+                throw new ArgumentNullException("Json object can not be null.");
+            if (string.IsNullOrWhiteSpace(name))
+                throw new ArgumentNullException("Name parameter can not be null or empty.");
+            if (!json.ContainsKey(name))
+                json.Add(name, new JsonArray());
+            json.GetNamedArray(name).Add(EvaluateJsonValue(value));
+        }
+
         public static IJsonValue EvaluateJsonValue(object value)
         {
             if (value == null)

@@ -20,16 +20,16 @@ namespace Devices.Control.Storage
 
         protected override async Task ComponentHelp(MessageContainer data)
         {
-            data.Responses.Add("HELP : Shows this help screen.");
-            data.Responses.Add("LOGIN:<ClientId>:<ClientSecret>:<AccessCode> : Logging in to OneDrive.");
-            data.Responses.Add("LOGOUT|LOGOFF : Loging off from Onedrive.");
-            data.Responses.Add("LIST|LISTFILES[:<Path>[:<FilesOnly|True>]] : List Folders and Files or Files only.");
+            data.AddMultiPartValue("Help", "HELP : Shows this help screen.");
+            data.AddMultiPartValue("Help", "LOGIN:<ClientId>:<ClientSecret>:<AccessCode> : Logging in to OneDrive.");
+            data.AddMultiPartValue("Help", "LOGOUT|LOGOFF : Loging off from Onedrive.");
+            data.AddMultiPartValue("Help", "LIST|LISTFILES[:<Path>[:<FilesOnly|True>]] : List Folders and Files or Files only.");
             await HandleOutput(data);
         }
 
         protected override async Task ProcessCommand(MessageContainer data)
         {
-            switch (ResolveParameter(data, 1).ToUpperInvariant())
+            switch (ResolveParameter(data, "Action", 1).ToUpperInvariant())
             {
                 case "HELP":
                     await ComponentHelp(data);
@@ -52,8 +52,8 @@ namespace Devices.Control.Storage
         #region private implementation
         protected override async Task ListContent(MessageContainer data)
         {
-            string path = ResolveParameter(data, 2);
-            string filesOnlyParam = ResolveParameter(data, 3);
+            string path = ResolveParameter(data, "Path", 2);
+            string filesOnlyParam = ResolveParameter(data, "FilesOnly", 3);
             bool filesOnly = false;
             if (!bool.TryParse(filesOnlyParam, out filesOnly))
                 filesOnly = (!string.IsNullOrWhiteSpace(filesOnlyParam) && filesOnlyParam.ToUpperInvariant() == "FILESONLY");
@@ -62,31 +62,28 @@ namespace Devices.Control.Storage
             StringBuilder builder = new StringBuilder();
             if (files != null && files.Count > 0)
             {
-                foreach (string file in files)
-                {
-                    data.Responses.Add(file);
-                }
+                data.AddValue("Files", files);
             }
             else
-                data.Responses.Add("No files or folder found.");
+                data.AddValue("EmptyFiles", "No files or folder found.");
             await HandleOutput(data); ;
         }
 
         protected override async Task ConnectStorage(MessageContainer data)
         {
-            string clientId = ResolveParameter(data, 2);
-            string clientSecret = ResolveParameter(data, 3);
-            string accessCode = ResolveParameter(data, 4);
+            string clientId = ResolveParameter(data, "ClientId", 2);
+            string clientSecret = ResolveParameter(data, "ClientSecret", 3);
+            string accessCode = ResolveParameter(data, "AccessCode", 4);
 
             await OneDriveLogin(clientId, clientSecret, accessCode);
-            data.Responses.Add("Login " + (oneDriveConnector != null && oneDriveConnector.LoggedIn ? "successful" : "failed"));
+            data.AddValue("Login", "Login " + (oneDriveConnector != null && oneDriveConnector.LoggedIn ? "successful" : "failed"));
             await HandleOutput(data); ;
         }
 
         protected override async Task DisconnectStorage(MessageContainer data)
         {
             await OneDriveLogout();
-            data.Responses.Add("Logout " + (oneDriveConnector == null || !oneDriveConnector.LoggedIn ? "successful" : "failed"));
+            data.AddValue("Logout", "Logout " + (oneDriveConnector == null || !oneDriveConnector.LoggedIn ? "successful" : "failed"));
             await HandleOutput(data); ;
         }
 

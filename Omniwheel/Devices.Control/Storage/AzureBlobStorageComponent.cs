@@ -23,7 +23,7 @@ namespace Devices.Control.Storage
 
         protected override async Task ProcessCommand(MessageContainer data)
         {
-            switch (ResolveParameter(data, 1).ToUpperInvariant())
+            switch (ResolveParameter(data, "Action", 1).ToUpperInvariant())
             {
                 case "HELP":
                     await ComponentHelp(data);
@@ -43,37 +43,37 @@ namespace Devices.Control.Storage
 
         protected override async Task ComponentHelp(MessageContainer data)
         {
-            data.Responses.Add("HELP : Shows this help screen.");
-            data.Responses.Add("CONNECT:<StorageConnectionString>|<StorageAccount>:<AccessKey> : Connecting to Azure Blob Storage.");
-            data.Responses.Add("DISCONNECT: Disconnecting from Azure Blob Storage.");
-            data.Responses.Add("LIST|LISTFILES[:<Path>[:<FilesOnly|True>]] : List Folders and Files or Files only.");
+            data.AddMultiPartValue("Help", "HELP : Shows this help screen.");
+            data.AddMultiPartValue("Help", "CONNECT:<StorageConnectionString>|<StorageAccount>:<AccessKey> : Connecting to Azure Blob Storage.");
+            data.AddMultiPartValue("Help", "DISCONNECT: Disconnecting from Azure Blob Storage.");
+            data.AddMultiPartValue("Help", "LIST|LISTFILES[:<Path>[:<FilesOnly|True>]] : List Folders and Files or Files only.");
             await HandleOutput(data);
         }
 
         protected override async Task ConnectStorage(MessageContainer data)
         {
             string containerName;
-            string connectionString = ResolveParameter(data, 2);
+            string connectionString = ResolveParameter(data, "ConnectionString", 2);
             if (CloudStorageAccount.TryParse(connectionString, out storageAccount))
             {
-                containerName = ResolveParameter(data, 3); 
+                containerName = ResolveParameter(data, "ContainerName", 3); 
                 await ConnectStorage(connectionString, containerName);
             }
             else
             {
-                string storageAccount = ResolveParameter(data, 2);
-                string accessKey = ResolveParameter(data, 3);
-                containerName = ResolveParameter(data, 3);
+                string storageAccount = ResolveParameter(data, "StorageAccount", 2);
+                string accessKey = ResolveParameter(data, "AccessKey", 3);
+                containerName = ResolveParameter(data, "ContainerName", 4);
                 await ConnectStorage(storageAccount, accessKey, containerName);
             }
-            data.Responses.Add("Connect " + (blobClient != null ? "successful" : "failed"));
+            data.AddValue("Connect", "Connect " + (blobClient != null ? "successful" : "failed"));
             await HandleOutput(data); ;
         }
 
         protected override async Task DisconnectStorage(MessageContainer data)
         {
             await DisconnectStorage();
-            data.Responses.Add("Disconnect " + (blobClient != null ? "successful" : "failed"));
+            data.AddValue("Disconnect", "Disconnect " + (blobClient != null ? "successful" : "failed"));
             await HandleOutput(data); ;
         }
 
