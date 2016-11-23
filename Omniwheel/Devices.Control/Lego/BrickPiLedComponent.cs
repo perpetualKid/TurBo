@@ -20,7 +20,7 @@ namespace Devices.Control.Lego
 
         protected override async Task ComponentHelp(MessageContainer data)
         {
-            data.Responses.Add("HELP : Shows this help screen.");
+            data.Responses.Add("LED:HELP : Shows this help screen.");
             data.Responses.Add("LED:ON|ENABLED : Turns the LED on.");
             data.Responses.Add("LED:OFF|DISABLED : Turns the LED off.");
             data.Responses.Add("LED:TOGGLE : Toggle the LED from current status.");
@@ -30,7 +30,7 @@ namespace Devices.Control.Lego
 
         protected override async Task ProcessCommand(MessageContainer data)
         {
-            switch (ResolveParameter(data, 1).ToUpperInvariant())
+            switch (ResolveParameter(data, "Action", 1).ToUpperInvariant())
             {
                 case "HELP":
                     await ComponentHelp(data).ConfigureAwait(false);

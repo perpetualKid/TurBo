@@ -54,11 +54,24 @@ namespace Common.Base
             return data.Parameters.GetAtAsString(index) ?? string.Empty;
         }
 
+        /// <summary>
+        /// resolve the parameter by name or index
+        /// first look if the parameter is found by name in the json data object itself
+        /// if not found by name, try the parameter array by index 
+        /// </summary>
+        /// <returns></returns>
+        protected static string ResolveParameter(MessageContainer data, string name,  int index)
+        {
+            if (data.JsonData.ContainsKey(name))
+                return data.JsonData.GetNamedValue(name).GetValueString();
+            return data.Parameters.GetAtAsString(index) ?? string.Empty;
+        }
+
         protected static async Task HandleInput(MessageContainer data)
         {
             string component = data.Target?.ToUpperInvariant();
             if (string.IsNullOrEmpty(component))
-                throw new ArgumentNullException();
+                throw new ArgumentNullException("No target component specified.");
             if (globalComponents.ContainsKey(component))
             {
                 try
