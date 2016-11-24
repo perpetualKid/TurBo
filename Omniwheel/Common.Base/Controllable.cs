@@ -116,7 +116,7 @@ namespace Common.Base
             List<Task> sendTasks = new List<Task>();
             foreach (CommunicationControllable publisher in communicationComponents)
             {
-                sendTasks.Add(publisher.Send(data));
+                sendTasks.Add(publisher.Respond(data));
             }
             await Task.WhenAll(sendTasks).ConfigureAwait(false);
         }

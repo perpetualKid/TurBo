@@ -35,7 +35,7 @@ namespace TurBoControl.Views
 
         protected override void OnNavigatedTo(NavigationEventArgs e)
         {
-            string clientId = settings.Values["OneDriveClientId"] as string ?? string.Empty;
+            string clientId = settings.Values[nameof(DeviceSettingNames.OneDriveClientId)] as string ?? string.Empty;
             Guid clientIdGuid; 
             if (string.IsNullOrWhiteSpace(clientId) || !Guid.TryParse(clientId, out clientIdGuid))
             {

@@ -114,7 +114,7 @@
     <Compile Include="EnumExtension.cs" />
     <Compile Include="Events.cs" />
     <Compile Include="Sockets\SocketClient.cs" />
-    <Compile Include="Sockets\SocketObject.cs" />
+    <Compile Include="Sockets\SocketBase.cs" />
     <Compile Include="Sockets\SocketServer.cs" />
     <Compile Include="Enums.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

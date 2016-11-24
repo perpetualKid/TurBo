@@ -7,7 +7,7 @@ using Windows.Networking.Sockets;
 
 namespace Common.Communication.Channels
 {
-    public class SocketClient: SocketObject
+    public class SocketClient: SocketBase
     {
         private HostName hostName;
         private StreamSocket streamSocket;
@@ -27,7 +27,7 @@ namespace Common.Communication.Channels
                 hostName = new HostName(remoteServer);
                 streamSocket = new StreamSocket();
                 streamSocket.Control.NoDelay = true;
-                await streamSocket.ConnectAsync(hostName, remotePort);
+                await streamSocket.ConnectAsync(hostName, remotePort).AsTask().ConfigureAwait(false);
                 ConnectionStatus = ConnectionStatus.Connected;
 
                 channel = await ChannelFactory.BindChannelAsync(dataFormat, this, streamSocket).ConfigureAwait(false);
@@ -43,13 +43,13 @@ namespace Common.Communication.Channels
         public async Task Disconnect()
         {
 
-            await Task.Run( () => CancelSocketTask());
+            await Task.Run(() => CancelSocketTask()).ConfigureAwait(false); ;
             ConnectionStatus = ConnectionStatus.Disconnected;
         }
 
         public override async Task Send(Guid sessionId, object data)
         {
-            await channel.Send(data);
+            await channel.Send(data).ConfigureAwait(false);
         }
 
         public override async Task Close()

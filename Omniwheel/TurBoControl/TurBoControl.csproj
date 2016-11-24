@@ -98,11 +98,13 @@
     <Compile Include="AppShell.xaml.cs">
       <DependentUpon>AppShell.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Controller\DeviceConnection.cs" />
     <Compile Include="Controls\NavigationMenuListView.cs" />
     <Compile Include="Controls\PageHeader.xaml.cs">
       <DependentUpon>PageHeader.xaml</DependentUpon>
     </Compile>
     <Compile Include="Controls\NavigationMenuItem.cs" />
+    <Compile Include="Enums.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Views\AppSettingsPage.xaml.cs">
       <DependentUpon>AppSettingsPage.xaml</DependentUpon>
@@ -161,6 +163,10 @@
     </Page>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Common.Base\Common.Base.csproj">
+      <Project>{d28be39c-6c27-464d-8ce8-50c2174fd394}</Project>
+      <Name>Common.Base</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Common.Communication\Common.Communication.csproj">
       <Project>{e4db5494-c724-4df6-9dc2-ea51fed0f463}</Project>
       <Name>Common.Communication</Name>

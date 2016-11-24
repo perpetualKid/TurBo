@@ -15,7 +15,7 @@ namespace Common.Communication.Channels
 {
     public class JsonChannel : ChannelBase
     {
-        public JsonChannel(SocketObject socket) : base(socket, DataFormat.Json)
+        public JsonChannel(SocketBase socket) : base(socket, DataFormat.Json)
         {
             streamAccess = new SemaphoreSlim(1);
             memoryStream = new MemoryStream();
@@ -33,8 +33,8 @@ namespace Common.Communication.Channels
             }
             using (DataWriter writer = new DataWriter(streamSocket.OutputStream))
             {
-                    bytesWritten += writer.WriteString(jsonData.ToString());
-                    await writer.StoreAsync();
+                bytesWritten += writer.WriteString(jsonData.ToString());
+                await writer.StoreAsync();
                 await writer.FlushAsync();
                 writer.DetachBuffer();
                 writer.DetachStream();
@@ -56,7 +56,7 @@ namespace Common.Communication.Channels
                     PublishMessageReceived(this, new JsonMessageArgs(item));
                 }
 
-                streamReadPosition = parser.ReadPosition;//memoryStream.Position;
+                streamReadPosition = parser.ReadPosition;
                 streamAccess.Release();
             }
         }

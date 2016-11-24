@@ -51,8 +51,8 @@
             <TextBox x:Name="txtOneDriveClientSecret" Margin="10" TextWrapping="Wrap" Text="" VerticalAlignment="Top" HorizontalAlignment="Left" Width="300" PlaceholderText="OneDrive ClientSecret" InputScope="Password" Grid.RowSpan="2"/>
         </StackPanel>
         <StackPanel Grid.Row="2">
-            <TextBlock x:Name="lblDeviceIP" HorizontalAlignment="Left" Margin="10" TextWrapping="Wrap" Text="Device Name or IP Address" VerticalAlignment="Top"/>
-            <TextBox x:Name="txtDeviceIP" HorizontalAlignment="Left" Margin="10" TextWrapping="Wrap" Text="" VerticalAlignment="Top" PlaceholderText="127.0.0.1" Width="300" />
+            <TextBlock x:Name="lblDeviceHost" HorizontalAlignment="Left" Margin="10" TextWrapping="Wrap" Text="Device Name or IP Address" VerticalAlignment="Top"/>
+            <TextBox x:Name="txtDeviceHost" HorizontalAlignment="Left" Margin="10" TextWrapping="Wrap" Text="" VerticalAlignment="Top" PlaceholderText="127.0.0.1" Width="300" />
             <TextBlock x:Name="lblDevicePort" HorizontalAlignment="Left" Margin="10" TextWrapping="Wrap" Text="Device Port" VerticalAlignment="Top"/>
             <TextBox x:Name="txtDevicePort" HorizontalAlignment="Left" Margin="10" TextWrapping="Wrap" Text="" VerticalAlignment="Top" PlaceholderText="8027" Width="300" />
 

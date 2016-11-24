@@ -1,4 +1,5 @@
 ﻿using System;
+using TurBoControl.Controller;
 using TurBoControl.Views;
 using Windows.ApplicationModel;
 using Windows.ApplicationModel.Activation;
@@ -103,5 +104,7 @@ namespace TurBoControl
         }
 
         public string OneDriveAccessToken { get; set; }
+
+        public DeviceConnection DeviceConnection { get { return DeviceConnection.Instance; } }
     }
 }

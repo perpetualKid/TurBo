@@ -12,7 +12,6 @@ namespace Common.Base
             Target,
             Action,
             Parameters,
-            Responses,
         }
 
         private JsonObject dataObject;
@@ -23,11 +22,11 @@ namespace Common.Base
 
         public string Target
         {
-            get { return dataObject.GetNamedString(FixedPropertyNames.Target.ToString()); }
+            get { return dataObject.GetNamedString(nameof(FixedPropertyNames.Target)); }
         }
         public string Action
         {
-            get { return dataObject.GetNamedString(FixedPropertyNames.Action.ToString()); }
+            get { return dataObject.GetNamedString(nameof(FixedPropertyNames.Action)); }
         }
 
         public Controllable Origin { get; private set; }
@@ -68,7 +67,7 @@ namespace Common.Base
             this.dataObject = new JsonObject();
             data = ResolveParameters(data);
             parameters = new StringJsonCollection(data);
-            dataObject.Add(FixedPropertyNames.Parameters.ToString(), parameters.JsonArray);
+            dataObject.Add(nameof(FixedPropertyNames.Parameters), parameters.JsonArray);
         }
 
         private string[] ResolveParameters(string[] data)
@@ -86,9 +85,9 @@ namespace Common.Base
                 else
                 {
                     if (i == 0)
-                        dataObject.AddValue(FixedPropertyNames.Target.ToString(), item);
+                        dataObject.AddValue(nameof(FixedPropertyNames.Target), item);
                     else if (i == 1)
-                        dataObject.AddValue(FixedPropertyNames.Action.ToString(), item);
+                        dataObject.AddValue(nameof(FixedPropertyNames.Action), item);
                     else
                     {
                         result.Add(item);
@@ -101,21 +100,23 @@ namespace Common.Base
         public MessageContainer(Guid sessionId, Controllable origin, JsonObject data) : this(sessionId, origin)
         {
             this.dataObject = data;
-            if (data.ContainsKey(FixedPropertyNames.Parameters.ToString()))
+            if (data.ContainsKey(nameof(FixedPropertyNames.Parameters)))
             {
-                parameters = new StringJsonCollection(data.GetNamedArray(FixedPropertyNames.Parameters.ToString()));
+                parameters = new StringJsonCollection(data.GetNamedArray(nameof(FixedPropertyNames.Parameters)));
             }
             else
             {
                 parameters = new StringJsonCollection();
-                dataObject.Add(FixedPropertyNames.Parameters.ToString(), parameters.JsonArray);
+                dataObject.Add(nameof(FixedPropertyNames.Parameters), parameters.JsonArray);
             }
         }
         #endregion
 
         public JsonObject GetJson()
         {
-            return this.dataObject;
+            JsonObject result = this.dataObject;
+            result.Remove(nameof(FixedPropertyNames.Parameters));
+            return result;
         }
 
         public IList<string> GetText()
@@ -132,15 +133,15 @@ namespace Common.Base
 
         public void PushParameters()
         {
-            if (this.dataObject.ContainsKey(FixedPropertyNames.Action.ToString()))
+            if (this.dataObject.ContainsKey(nameof(FixedPropertyNames.Action)))
             {
-                IJsonValue value = dataObject.GetNamedValue(FixedPropertyNames.Action.ToString());
+                IJsonValue value = dataObject.GetNamedValue(nameof(FixedPropertyNames.Action));
                 parameters.Insert(0, value);
             }
-            if (this.dataObject.ContainsKey(FixedPropertyNames.Target.ToString()))
+            if (this.dataObject.ContainsKey(nameof(FixedPropertyNames.Target)))
             {
-                IJsonValue value = dataObject.GetNamedValue(FixedPropertyNames.Target.ToString());
-                dataObject.SetNamedValue(FixedPropertyNames.Action.ToString(), value);
+                IJsonValue value = dataObject.GetNamedValue(nameof(FixedPropertyNames.Target));
+                dataObject.SetNamedValue(nameof(FixedPropertyNames.Action), value);
             }
         }
     }

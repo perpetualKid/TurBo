@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace Common.Communication.Channels
 {
-    public abstract class SocketObject
+    public abstract class SocketBase
     {
         protected object cancelLock = new Object();
         protected CancellationTokenSource cancellationTokenSource;

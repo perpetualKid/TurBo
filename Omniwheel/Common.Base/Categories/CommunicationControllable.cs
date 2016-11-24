@@ -12,7 +12,7 @@ namespace Common.Base.Categories
         {
         }
 
-        public abstract Task Send(MessageContainer data);
+        public abstract Task Respond(MessageContainer data);
 
         public abstract Task CloseChannel(Guid sessionId);
     }

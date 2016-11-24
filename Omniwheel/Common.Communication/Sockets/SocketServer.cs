@@ -8,7 +8,7 @@ using Windows.Networking.Sockets;
 
 namespace Common.Communication.Channels
 {
-    public class SocketServer: SocketObject
+    public class SocketServer: SocketBase
     {
         private static Dictionary<int, SocketServer> activeSockets = new Dictionary<int, SocketServer>();
 
@@ -65,7 +65,7 @@ namespace Common.Communication.Channels
                 socketListener.Control.NoDelay = true;
                 socketListener.ConnectionReceived += async (streamSocketListener, streamSocketListenerConnectionReceivedEventArgs) =>
                 {
-                    using (IDisposable asyncLock = await activeSessionsLock.WriterLockAsync())
+                    using (IDisposable asyncLock = await activeSessionsLock.WriterLockAsync().ConfigureAwait(false))
                     {
                         ChannelBase channel = await ChannelFactory.BindChannelAsync(dataFormat, this, streamSocketListenerConnectionReceivedEventArgs.Socket).ConfigureAwait(false);
                         activeSessions.Add(channel.SessionId, channel);
@@ -87,7 +87,7 @@ namespace Common.Communication.Channels
             if (socketListener != null)
             {
                 CancelSocketTask();
-                await socketListener.CancelIOAsync();
+                await socketListener.CancelIOAsync().AsTask().ConfigureAwait(false);
                 socketListener.Dispose();
                 socketListener = null;
                 ConnectionStatus = ConnectionStatus.Disconnected;
@@ -98,31 +98,31 @@ namespace Common.Communication.Channels
         public override async Task Send(Guid sessionId, object data)
         {
             ChannelBase session;
-            using (IDisposable asyncLock = await activeSessionsLock.ReaderLockAsync())
+            using (IDisposable asyncLock = await activeSessionsLock.ReaderLockAsync().ConfigureAwait(false))
             {
 
                 if (activeSessions.TryGetValue(sessionId, out session))
                 {
-                    await session.Send(data);
+                    await session.Send(data).ConfigureAwait(false);
                 }
             }
         }
 
         public override async Task Close()
         {
-            await StopListening();
+            await StopListening().ConfigureAwait(false);
         }
 
         public override async Task CloseSession(Guid sessionId)
         {
             ChannelBase session;
-            using (IDisposable asyncLock = await activeSessionsLock.WriterLockAsync())
+            using (IDisposable asyncLock = await activeSessionsLock.WriterLockAsync().ConfigureAwait(false))
             {
 
                 if (activeSessions.TryGetValue(sessionId, out session))
                 {
                     activeSessions.Remove(sessionId);
-                    await session.Close();
+                    await session.Close().ConfigureAwait(false);
                 }
             }
         }

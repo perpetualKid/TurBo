@@ -10,7 +10,7 @@ namespace Common.Communication.Channels
 {
     static class ChannelFactory
     {
-        public static async Task<ChannelBase> BindChannelAsync(DataFormat dataFormat, SocketObject host, StreamSocket socketStream)
+        public static async Task<ChannelBase> BindChannelAsync(DataFormat dataFormat, SocketBase host, StreamSocket socketStream)
         {
             ChannelBase channel = null;
             switch (dataFormat)

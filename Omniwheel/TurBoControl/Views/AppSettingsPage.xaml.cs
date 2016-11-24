@@ -47,14 +47,22 @@ namespace TurBoControl.Views
 
         private void LoadSettings()
         {
-            txtOneDriveClientId.Text = settings.Values["OneDriveClientId"] as string ?? string.Empty;
-            txtOneDriveClientSecret.Text = settings.Values["OneDriveClientSecret"] as string ?? string.Empty;
+            txtOneDriveClientId.Text = settings.Values[nameof(DeviceSettingNames.OneDriveClientId)] as string ?? string.Empty;
+            txtOneDriveClientSecret.Text = settings.Values[nameof(DeviceSettingNames.OneDriveClientSecret)] as string ?? string.Empty;
+
+            txtDeviceHost.Text = settings.Values[nameof(DeviceSettingNames.DeviceHost)] as string ?? string.Empty;
+            txtDevicePort.Text = settings.Values[nameof(DeviceSettingNames.DevicePort)] as string ?? string.Empty;
+            
         }
 
         private void SaveSettings()
         {
-            settings.Values["OneDriveClientId"] = txtOneDriveClientId.Text;
-            settings.Values["OneDriveClientSecret"] = txtOneDriveClientSecret.Text;
+            settings.Values[nameof(DeviceSettingNames.OneDriveClientId)] = txtOneDriveClientId.Text;
+            settings.Values[nameof(DeviceSettingNames.OneDriveClientSecret)] = txtOneDriveClientSecret.Text;
+
+            settings.Values[nameof(DeviceSettingNames.DeviceHost)] = txtDeviceHost.Text;
+            settings.Values[nameof(DeviceSettingNames.DevicePort)] = txtDevicePort.Text;
+
         }
     }
 }

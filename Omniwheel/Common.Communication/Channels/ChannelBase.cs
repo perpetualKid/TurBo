@@ -12,7 +12,7 @@ namespace Common.Communication.Channels
 {
     public abstract class ChannelBase
     {
-        protected SocketObject socketObject;
+        protected SocketBase socketObject;
         protected StreamSocket streamSocket;
         protected CancellationTokenSource cancellationTokenSource;
 
@@ -38,7 +38,7 @@ namespace Common.Communication.Channels
         #endregion
 
         #region base
-        public ChannelBase(SocketObject socket, DataFormat format)
+        public ChannelBase(SocketBase socket, DataFormat format)
         {
             this.socketObject = socket;
             this.dataFormat = format;
@@ -95,6 +95,7 @@ namespace Common.Communication.Channels
                 socketObject.ConnectionStatus = ConnectionStatus.Failed;
                 Debug.WriteLine(string.Format("Error receiving data: {0}", exception.Message));
             }
+            await socketObject.CloseSession(this.sessionId); 
             this.ConnectionStatus = ConnectionStatus.Disconnected;
             this.OnMessageReceived -= socketObject.Instance_OnMessageReceived;
         }

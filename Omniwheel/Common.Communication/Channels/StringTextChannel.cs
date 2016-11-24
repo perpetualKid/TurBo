@@ -15,7 +15,7 @@ namespace Common.Communication.Channels
     {
 
         #region instance
-        public StringTextChannel(SocketObject socket) : base(socket, DataFormat.Text)
+        public StringTextChannel(SocketBase socket) : base(socket, DataFormat.Text)
         {
             streamAccess = new SemaphoreSlim(1);
             memoryStream = new MemoryStream();

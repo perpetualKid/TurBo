@@ -44,7 +44,7 @@ namespace Devices.Control.Lego
                     await SetLed(false).ConfigureAwait(false);
                     break;
                 case "TOGGLE":
-                    await ToogleLed().ConfigureAwait(false);
+                    await LedComponentToogle(data).ConfigureAwait(false);
                     break;
                 case "STATUS":
                     await LedComponentGetStatus(data).ConfigureAwait(false);
@@ -55,6 +55,12 @@ namespace Devices.Control.Lego
         #region command handling
         private async Task LedComponentGetStatus(MessageContainer data)
         {
+            data.AddValue("Status", (await GetLedStatus().ConfigureAwait(false) ? "Enabled" : "Disabled"));
+            await HandleOutput(data).ConfigureAwait(false);
+        }
+        private async Task LedComponentToogle(MessageContainer data)
+        {
+            await ToogleLed().ConfigureAwait(false);
             data.AddValue("Status", (await GetLedStatus().ConfigureAwait(false) ? "Enabled" : "Disabled"));
             await HandleOutput(data).ConfigureAwait(false);
         }

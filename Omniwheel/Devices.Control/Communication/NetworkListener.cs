@@ -14,7 +14,7 @@ namespace Devices.Control.Communication
     {
         private int port;
         private DataFormat dataFormat = DataFormat.Text;
-        private SocketObject instance;
+        private SocketBase instance;
 
         public NetworkListener(int port): base("TCP" + port.ToString())
         {
@@ -56,7 +56,7 @@ namespace Devices.Control.Communication
             await Task.CompletedTask.ConfigureAwait(false);
         }
 
-        public override async Task Send(MessageContainer data)
+        public override async Task Respond(MessageContainer data)
         {
             switch (dataFormat)
             {
