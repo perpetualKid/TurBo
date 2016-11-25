@@ -6,21 +6,33 @@ using System.Threading.Tasks;
 using Common.Communication;
 using Common.Communication.Channels;
 using Windows.Data.Json;
+using Common.Base;
 
 namespace TurBoControl.Controller
 {
     public class DeviceConnection
     {
-        private SocketClient socketClient;
+        public enum FixedNames
+        {
+            Target,
+            Sender,
+            Action,
+        }
+
         private static DeviceConnection instance;
+        private SocketClient socketClient;
+        private Dictionary<string, System.Delegate> eventRoutingTable;
 
         public event EventHandler<ConnectionStatusChangedEventArgs> OnConnectionStatusChanged;
+        public delegate void DataReceivedEventHandler(JsonObject data);
 
         private DeviceConnection()
         {
+            eventRoutingTable = new Dictionary<string, Delegate>();
             this.socketClient = new SocketClient();
             socketClient.OnConnectionStatusChanged += SocketClient_OnConnectionStatusChanged;
         }
+
         #region event handling
         private void SocketClient_OnConnectionStatusChanged(object sender, ConnectionStatusChangedEventArgs e)
         {
@@ -29,8 +41,29 @@ namespace TurBoControl.Controller
 
         private void SocketClient_OnMessageReceived(object sender, MessageReceivedEventArgs e)
         {
-            System.Diagnostics.Debug.WriteLine((e as JsonMessageArgs).Json.ToString());
-            //TODO need to correlate back to the requestor
+            JsonObject json = (e as JsonMessageArgs).Json;
+            if (json.ContainsKey(nameof(FixedNames.Sender)))
+                ((DataReceivedEventHandler)(eventRoutingTable[json.GetNamedString(nameof(FixedNames.Sender))])).Invoke(json);
+        }
+
+        public void RegisterOnDataReceivedEvent(string name, DataReceivedEventHandler handler)
+        {
+            lock (eventRoutingTable)
+            {
+                if (!eventRoutingTable.ContainsKey(name))
+                    eventRoutingTable.Add(name, null);
+                eventRoutingTable[name] = (DataReceivedEventHandler)eventRoutingTable[name] + handler;
+            }
+        }
+
+        public void UnRegisterOnDataReceivedEvent(string name, DataReceivedEventHandler handler)
+        {
+            lock (eventRoutingTable)
+            {
+                if (!eventRoutingTable.ContainsKey(name))
+                    eventRoutingTable.Add(name, null);
+                eventRoutingTable[name] = (DataReceivedEventHandler)eventRoutingTable[name] - handler;
+            }
         }
         #endregion
 
@@ -56,8 +89,9 @@ namespace TurBoControl.Controller
             }
         }
 
-        public async Task Send(JsonObject data)
+        public async Task Send(string sender, JsonObject data)
         {
+            data.AddValue(nameof(FixedNames.Sender), sender);
             if (socketClient.ConnectionStatus == ConnectionStatus.Connected)
             {
                 await socketClient.Send(Guid.Empty, data);

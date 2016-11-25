@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using BrickPi.Uwp;
+﻿using System.Threading.Tasks;
 using BrickPi.Uwp.Base;
 using Common.Base;
 
@@ -58,11 +53,11 @@ namespace Devices.Control.Lego
             data.AddValue("Status", (await GetLedStatus().ConfigureAwait(false) ? "Enabled" : "Disabled"));
             await HandleOutput(data).ConfigureAwait(false);
         }
+
         private async Task LedComponentToogle(MessageContainer data)
         {
             await ToogleLed().ConfigureAwait(false);
-            data.AddValue("Status", (await GetLedStatus().ConfigureAwait(false) ? "Enabled" : "Disabled"));
-            await HandleOutput(data).ConfigureAwait(false);
+            await LedComponentGetStatus(data).ConfigureAwait(false);
         }
         #endregion
 

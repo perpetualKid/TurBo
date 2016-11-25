@@ -71,6 +71,8 @@ namespace OmniWheel
             await brick.Sensors.Add(color);
             color = new NXTColorSensor(SensorPort.Port_S3, SensorType.COLOR_FULL);
             await brick.Sensors.Add(color);
+            await brickComponent.RegisterSensors();
+
             // Get available devices for capturing pictures
             var allVideoDevices = await DeviceInformation.FindAllAsync(DeviceClass.VideoCapture);
 

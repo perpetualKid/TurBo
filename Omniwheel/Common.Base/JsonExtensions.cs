@@ -37,7 +37,7 @@ namespace Common.Base
                 return JsonValue.CreateBooleanValue((bool)value);
             else if (value is int || value is double || value is float || value is long ||
                 value is sbyte || value is short || value is uint || value is ulong || value is ushort)
-                return JsonValue.CreateNumberValue((double)value);
+                return JsonValue.CreateNumberValue((dynamic)value);
             else if (value is IList)
             {
                 JsonArray array = new JsonArray();
@@ -46,7 +46,7 @@ namespace Common.Base
                 return array;
             }
             else
-                return JsonValue.CreateNullValue();
+                return JsonValue.CreateStringValue(value.ToString());
         }
 
         public static string GetValueString(this IJsonValue value)

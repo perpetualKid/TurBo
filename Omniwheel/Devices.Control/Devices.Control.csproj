@@ -110,6 +110,7 @@
     <Compile Include="Communication\NetworkListener.cs" />
     <Compile Include="Lego\BrickPiComponent.cs" />
     <Compile Include="Lego\BrickPiLedComponent.cs" />
+    <Compile Include="Lego\NXTColorSensorComponent.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Storage\AzureBlobStorageComponent.cs" />
     <Compile Include="Storage\OneDriveComponent.cs" />

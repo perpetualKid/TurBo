@@ -99,6 +99,9 @@ namespace Common.Base
                     case "ECHO":
                         await ControllableEcho(data).ConfigureAwait(false);
                         break;
+                    case "DATETIME":
+                        await ControllableDateTime(data).ConfigureAwait(false);
+                        break;
                     case "BYE":
                     case "EXIT":
                     case "CLOSE":
@@ -130,6 +133,12 @@ namespace Common.Base
             await HandleOutput(data).ConfigureAwait(false);
         }
 
+        private static async Task ControllableDateTime(MessageContainer data)
+        {
+            data.AddValue("DateTime", DateTime.Now.ToString());
+            await HandleOutput(data).ConfigureAwait(false);
+        }
+
         private static async Task ControllableHello(MessageContainer data)
         {
             data.AddMultiPartValue("Hello", "HELLO. Great to see you here.");
@@ -143,6 +152,7 @@ namespace Common.Base
             data.AddMultiPartValue("Help", "LIST : Lists the available modules.");
             data.AddMultiPartValue("Help", "HELLO : Returns a simple greeting message. Useful to test communication channel.");
             data.AddMultiPartValue("Help", "ECHO : Echos any text following the ECHO command.");
+            data.AddMultiPartValue("Help", "DATETIME : Gets the current System Date/Time on the Device.");
             data.AddMultiPartValue("Help", "EXIT|CLOSE : Closes the currently used channel.");
             await HandleOutput(data).ConfigureAwait(false);
         }
@@ -150,7 +160,7 @@ namespace Common.Base
         private static async Task ControllableCloseChannel(MessageContainer data)
         {
             data.AddValue("Close", "BYE. Hope to see you soon again.");
-            await HandleOutput(data);
+            await HandleOutput(data).ConfigureAwait(false);
             if (data.Origin is CommunicationControllable)
                 await CloseChannel(data.Origin as CommunicationControllable, data.SessionId).ConfigureAwait(false);
         }
