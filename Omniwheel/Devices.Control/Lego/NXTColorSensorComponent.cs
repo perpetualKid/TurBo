@@ -7,7 +7,7 @@ namespace Devices.Control.Lego
 {
     public class NXTColorSensorComponent : Controllable
     {
-        NXTColorSensor colorSensor;
+        private NXTColorSensor colorSensor;
 
         public NXTColorSensorComponent(string componentName, Controllable parent, NXTColorSensor colorSensor) : base(componentName, parent)
         {

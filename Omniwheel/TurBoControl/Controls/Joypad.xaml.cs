@@ -9,9 +9,9 @@ namespace TurBoControl.Controls
 {
     public class JoypadEventArgs : EventArgs
     {
-        public double Angle { get; set; }
+        public int Angle { get; set; }
 
-        public double Distance { get; set; }
+        public int Distance { get; set; }
     }
 
     public sealed partial class Joypad : UserControl
@@ -19,71 +19,71 @@ namespace TurBoControl.Controls
         /// <summary>Current angle in degrees from 0 to 360</summary>
 
         public static readonly DependencyProperty AngleProperty =
-            DependencyProperty.Register(nameof(Angle), typeof(double), typeof(Joypad), null);
+            DependencyProperty.Register(nameof(Angle), typeof(int), typeof(Joypad), new PropertyMetadata(0));
 
         /// <summary>Current distance (or "power"), from 0 to 100</summary>
         public static readonly DependencyProperty DistanceProperty =
-            DependencyProperty.Register(nameof(Distance), typeof(double), typeof(Joypad), null);
+            DependencyProperty.Register(nameof(Distance), typeof(int), typeof(Joypad), new PropertyMetadata(0));
 
         /// <summary>How often should be raised StickMove event in degrees</summary>
-        public static readonly DependencyProperty AngleStepProperty =
-            DependencyProperty.Register(nameof(AngleMoveThreshold), typeof(double), typeof(Joypad), new PropertyMetadata(1.0));
+        public static readonly DependencyProperty AngleChangeThresholdProperty =
+            DependencyProperty.Register(nameof(AngleChangeThreshold), typeof(int), typeof(Joypad), new PropertyMetadata(10));
 
         /// <summary>How often should be raised StickMove event in distance units</summary>
-        public static readonly DependencyProperty DistanceStepProperty =
-            DependencyProperty.Register(nameof(DistanceMoveThreshold), typeof(double), typeof(Joypad), new PropertyMetadata(1.0));
+        public static readonly DependencyProperty DistanceChangeThresholdProperty =
+            DependencyProperty.Register(nameof(DistanceChangeThreshold), typeof(int), typeof(Joypad), new PropertyMetadata(10));
 
-        /// <summary>Indicates whether the joystick knob resets its place after being released</summary>
-        public static readonly DependencyProperty ResetKnobAfterReleaseProperty =
-            DependencyProperty.Register(nameof(ResetKnobAfterRelease), typeof(bool), typeof(Joypad), new PropertyMetadata(true));
+        /// <summary>Indicates whether the joypad knob resets its place after being released</summary>
+        public static readonly DependencyProperty DisableResetOnReleaseProperty =
+            DependencyProperty.Register(nameof(DisableResetOnRelease), typeof(bool), typeof(Joypad), null);
 
         /// <summary>Current angle in degrees from 0 to 360</summary>
-        public double Angle
+        public int Angle
         {
-            get { return Convert.ToDouble(GetValue(AngleProperty)); }
+            get { return Convert.ToInt32(GetValue(AngleProperty)); }
             private set { SetValue(AngleProperty, value); }
         }
 
         /// <summary>current distance (or "power"), from 0 to 100</summary>
-        public double Distance
+        public int Distance
         {
-            get { return Convert.ToDouble(GetValue(DistanceProperty)); }
+            get { return Convert.ToInt32(GetValue(DistanceProperty)); }
             private set { SetValue(DistanceProperty, value); }
         }
 
-        /// <summary>Movement Delta Threshold before Events are raised</summary>
-        public double AngleMoveThreshold
+        /// <summary>Angle change delta before a Move events is raised</summary>
+        public int AngleChangeThreshold
         {
-            get { return Convert.ToDouble(GetValue(AngleStepProperty)); }
+            get { return Convert.ToInt32(GetValue(AngleChangeThresholdProperty)); }
             set
             {
                 if (value < 1)
                     value = 1;
                 else if (value > 90)
                     value = 90;
-                SetValue(AngleStepProperty, Math.Round(value));
+                SetValue(AngleChangeThresholdProperty, value);
             }
         }
 
-        /// <summary>How often should be raised StickMove event in distance units</summary>
-        public double DistanceMoveThreshold
+        /// <summary>Distance change delta before a Move event is raised </summary>
+        public int DistanceChangeThreshold
         {
-            get { return Convert.ToDouble(GetValue(DistanceStepProperty)); }
+            get { return Convert.ToInt32(GetValue(DistanceChangeThresholdProperty)); }
             set
             {
                 if (value < 1)
                     value = 1;
                 else if (value > 50)
                     value = 50;
-                SetValue(DistanceStepProperty, value);
+                SetValue(DistanceChangeThresholdProperty, value);
             }
         }
 
         /// <summary>Indicates whether the joypad knob resets its place after being released</summary>
-        public bool ResetKnobAfterRelease
+        public bool DisableResetOnRelease
         {
-            get { return Convert.ToBoolean(GetValue(ResetKnobAfterReleaseProperty)); }
-            set { SetValue(ResetKnobAfterReleaseProperty, value); }
+            get { return Convert.ToBoolean(GetValue(DisableResetOnReleaseProperty)); }
+            set { SetValue(DisableResetOnReleaseProperty, value); }
         }
 
         /// <summary>This event fires whenever the joypad moves</summary>
@@ -96,7 +96,7 @@ namespace TurBoControl.Controls
         public event EventHandler Captured;
 
         private Point startPosition;
-        private double previousAngle, previousDistance;
+        private int previousAngle, previousDistance;
         private bool pointerCaptured;
 
         public Joypad()
@@ -113,13 +113,17 @@ namespace TurBoControl.Controls
             Knob.ReleasePointerCapture(e.Pointer);
             pointerCaptured = false;
             Released?.Invoke(this, new JoypadEventArgs { Angle = Angle, Distance = Distance });
-            centerKnob.Begin();
+            if (!this.DisableResetOnRelease)
+            {
+                centerKnob.Begin();
+            }
         }
 
         private void Knob_PointerPressed(object sender, PointerRoutedEventArgs e)
         {
             startPosition = e.GetCurrentPoint(Base).Position;
-            previousAngle = previousDistance = 0;
+            startPosition.X -= knobPosition.X;
+            startPosition.Y -= knobPosition.Y;
 
             Captured?.Invoke(this, EventArgs.Empty);
             pointerCaptured = Knob.CapturePointer(e.Pointer);
@@ -145,7 +149,7 @@ namespace TurBoControl.Controls
 
             double angle = Math.Atan2(deltaPos.Y, deltaPos.X);
 
-            double distance = Math.Round(Math.Sqrt(deltaPos.X * deltaPos.X + deltaPos.Y * deltaPos.Y) / 135 * 100);
+            int distance = (int)Math.Round(Math.Sqrt(deltaPos.X * deltaPos.X + deltaPos.Y * deltaPos.Y) / 135 * 100);
             if (distance > 100)
             {
                 distance = 100;
@@ -156,13 +160,13 @@ namespace TurBoControl.Controls
             angle = angle * 180 / Math.PI;
             angle = Math.Round((angle + 450) % 360); //turn 90deg to ensure 0 is up, and values are 0-359
 
-            Angle = angle;
+            Angle = (int)angle;
             Distance = distance;
 
             knobPosition.X = deltaPos.X;
             knobPosition.Y = deltaPos.Y;
 
-            if ((Math.Abs(previousAngle - angle) < AngleMoveThreshold) && (Math.Abs(previousDistance - distance) < DistanceMoveThreshold))
+            if ((Math.Abs(previousAngle - angle) < AngleChangeThreshold) && (Math.Abs(previousDistance - distance) < DistanceChangeThreshold))
                 return;
 
             Moved?.Invoke(this, new JoypadEventArgs { Angle = Angle, Distance = Distance });

@@ -107,7 +107,9 @@
     <None Include="project.json" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Carriage\TriangularHolonomicDrive.cs" />
     <Compile Include="Communication\NetworkListener.cs" />
+    <Compile Include="Lego\DriveComponent.cs" />
     <Compile Include="Lego\BrickPiComponent.cs" />
     <Compile Include="Lego\BrickPiLedComponent.cs" />
     <Compile Include="Lego\NXTColorSensorComponent.cs" />
@@ -131,6 +133,7 @@
       <Name>Devices.Base</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '14.0' ">
     <VisualStudioVersion>14.0</VisualStudioVersion>
   </PropertyGroup>

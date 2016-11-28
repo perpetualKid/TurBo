@@ -33,21 +33,21 @@ namespace OmniWheel
         private StorageFile photoFile;
         private readonly string PHOTO_FILE_NAME = "Camera Roll\\photo.jpg";
 
-        OneDriveComponent oneDrive;
-        AzureBlobStorageComponent azureBlob;
-        BrickPiComponent brickComponent;
-        Brick brick;
+        private OneDriveComponent oneDrive;
+        private AzureBlobStorageComponent azureBlob;
+        private BrickPiComponent brickComponent;
+        private Brick brick;
+        private DriveComponent omniDrive;
 //        int counter;
 
         public async void Run(IBackgroundTaskInstance taskInstance)
         {
             BackgroundTaskDeferral deferral = taskInstance.GetDeferral();
 
-            this.appSettings = await RestoreAsync(fileName);
+            this.appSettings = await RestoreAsync(fileName).ConfigureAwait(false);
             List<Task> setupTasks = new List<Task>();
 
             setupTasks.Add(Controllable.RegisterComponent(new NetworkListener(8027)));
-            setupTasks.Add(Controllable.RegisterComponent(new NetworkListener(8029)));
             setupTasks.Add(Controllable.RegisterComponent(new NetworkListener(8031, DataFormat.Json)));
             oneDrive = new OneDriveComponent();
             setupTasks.Add(Controllable.RegisterComponent(oneDrive));
@@ -57,24 +57,22 @@ namespace OmniWheel
             setupTasks.Add(Controllable.RegisterComponent(brickComponent));
             await Task.WhenAll(setupTasks).ConfigureAwait(false);
 
-
-            //Brick brick = await Brick.InitializeInstance("Uart0");
             brick = brickComponent.BrickPi;
-            Debug.WriteLine($"Brick Version: {await brick.GetBrickVersion()}");
+            Debug.WriteLine($"Brick Version: {await brick.GetBrickVersion().ConfigureAwait(false)}");
 
             touch = new NXTTouchSensor(SensorPort.Port_S1);
             touch.OnPressed += Touch_OnPressed;
-            await brick.Sensors.Add(touch);
-
-
+            await brick.Sensors.Add(touch).ConfigureAwait(false);
             color = new NXTColorSensor(SensorPort.Port_S4, SensorType.COLOR_FULL);
-            await brick.Sensors.Add(color);
+            await brick.Sensors.Add(color).ConfigureAwait(false);
             color = new NXTColorSensor(SensorPort.Port_S3, SensorType.COLOR_FULL);
-            await brick.Sensors.Add(color);
+            await brick.Sensors.Add(color).ConfigureAwait(false);
             await brickComponent.RegisterSensors();
-
+            omniDrive = new DriveComponent("Drive", brickComponent, brick.Motors[MotorPort.Port_MA], brick.Motors[MotorPort.Port_MD], brick.Motors[MotorPort.Port_MB]);
+            await Controllable.RegisterComponent(omniDrive).ConfigureAwait(false);
+            
             // Get available devices for capturing pictures
-            var allVideoDevices = await DeviceInformation.FindAllAsync(DeviceClass.VideoCapture);
+            var allVideoDevices = await DeviceInformation.FindAllAsync(DeviceClass.VideoCapture).AsTask<DeviceInformationCollection>().ConfigureAwait(false);
 
             mediaCapture = new MediaCapture();
             //await mediaCapture.InitializeAsync();
@@ -84,7 +82,7 @@ namespace OmniWheel
                 PhotoCaptureSource = PhotoCaptureSource.Auto,
                 //AudioDeviceId = string.Empty,
                 VideoDeviceId = allVideoDevices[0].Id
-            });
+            }).AsTask().ConfigureAwait(false);
 
             //var resolutions = mediaCapture.VideoDeviceController.GetAvailableMediaStreamProperties(MediaStreamType.Photo).OrderByDescending( resolution => ((VideoEncodingProperties)resolution).Width);
             //foreach (var item in resolutions)
@@ -101,7 +99,7 @@ namespace OmniWheel
             {
                 brick.Arduino1Led.Toggle();
 //                Debug.WriteLine($"Color Raw:{color.RawValue} Name {color.ColorName} ARGB: {color.ColorData}");
-                await Task.Delay(500);
+                await Task.Delay(500).ConfigureAwait(false);
             }
         }
 

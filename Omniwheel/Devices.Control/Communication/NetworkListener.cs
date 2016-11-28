@@ -47,13 +47,40 @@ namespace Devices.Control.Communication
 
         protected override async Task ComponentHelp(MessageContainer data)
         {
-            await Task.CompletedTask.ConfigureAwait(false);
+            data.AddMultiPartValue("Help", "LISTENER HELP : Shows this help screen.");
+            data.AddMultiPartValue("Help", "LISTENER DATAFORMAT : Returns the data format this channel uses.");
+            data.AddMultiPartValue("Help", "LISTENER PORT : Returns the port number for this channel.");
+            await HandleOutput(data).ConfigureAwait(false);
         }
 
 
         protected override async Task ProcessCommand(MessageContainer data)
         {
-            await Task.CompletedTask.ConfigureAwait(false);
+            switch (ResolveParameter(data, "Action", 1).ToUpperInvariant())
+            {
+                case "HELP":
+                    await ComponentHelp(data).ConfigureAwait(false);
+                    break;
+                case "FORMAT":
+                case "DATAFORMAT":
+                    await ListenerGetDataFormat(data).ConfigureAwait(false);
+                    break;
+                case "PORT":
+                    await ListenerGetPort(data).ConfigureAwait(false);
+                    break;
+            }
+        }
+
+        private async Task ListenerGetDataFormat(MessageContainer data)
+        {
+            data.AddValue("DataFormat", this.dataFormat.ToString());
+            await HandleOutput(data).ConfigureAwait(false);
+        }
+
+        private async Task ListenerGetPort(MessageContainer data)
+        {
+            data.AddValue("Port", this.port);
+            await HandleOutput(data).ConfigureAwait(false);
         }
 
         public override async Task Respond(MessageContainer data)
