@@ -101,9 +101,45 @@ namespace TurBoControl.Views
 
         }
 
-        private void Joypad_Moved(object sender, Controls.JoypadEventArgs e)
+        private async void Joypad_Moved(object sender, Controls.JoypadEventArgs e)
         {
             JoypadValues.Text = $"Force: {e.Distance} Angle: {e.Angle}";
+            if (DeviceConnection.Instance.ConnectionStatus == Common.Communication.ConnectionStatus.Connected)
+            {
+                JsonObject move = new JsonObject();
+                move.AddValue("Target", "BrickPi.Drive");
+                move.AddValue("Action", "Move");
+                move.AddValue("Direction", e.Angle);
+                move.AddValue("Velocity", e.Distance);
+                move.AddValue("Rotation", 0);
+                await DeviceConnection.Instance.Send("LandingPage", move);
+
+            }
+        }
+
+        private async void Joypad_Released(object sender, Controls.JoypadEventArgs e)
+        {
+            if (DeviceConnection.Instance.ConnectionStatus == Common.Communication.ConnectionStatus.Connected)
+            {
+                JsonObject stop = new JsonObject();
+                stop.AddValue("Target", "BrickPi.Drive");
+                stop.AddValue("Action", "Stop");
+                await DeviceConnection.Instance.Send("LandingPage", stop);
+
+            }
+        }
+
+        private async void Joypad_Captured(object sender, EventArgs e)
+        {
+            if (DeviceConnection.Instance.ConnectionStatus == Common.Communication.ConnectionStatus.Connected)
+            {
+                JsonObject start = new JsonObject();
+                start.AddValue("Target", "BrickPi.Drive");
+                start.AddValue("Action", "Start");
+                await DeviceConnection.Instance.Send("LandingPage", start);
+
+            }
+
         }
     }
 }

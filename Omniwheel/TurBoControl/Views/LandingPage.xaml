@@ -49,9 +49,8 @@
                 <Button Name="btnConnect" AutomationProperties.HelpText="Connect to the Device" Content="Connect" Click="Button_Click">
                 </Button>
                 <Ellipse x:Name="ellColor" HorizontalAlignment="Left" Height="50" VerticalAlignment="Top" Width="50"/>
-                <c:Joypad Width="200" Height="200" Canvas.ZIndex="1" Moved="Joypad_Moved"/>
+                <c:Joypad Width="200" Height="200" Canvas.ZIndex="1" Moved="Joypad_Moved" Released="Joypad_Released" Captured="Joypad_Captured"/>
                 <TextBlock Name="JoypadValues">Test</TextBlock>
-                <c:Joypad Width="200" Height="200" Canvas.ZIndex="1"/>
                 <TextBlock Style="{StaticResource SubtitleTextBlockStyle}">Top-Level Navigation</TextBlock>
                 <TextBlock Style="{StaticResource BodyTextBlockStyle}" Margin="0,4">This sample demonstrates a universal Windows app with top-level navigation.</TextBlock>
 
