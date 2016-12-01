@@ -28,10 +28,7 @@ namespace Devices.Control.Media
         protected override async Task ComponentHelp(MessageContainer data)
         {
             data.AddMultiPartValue("Help", "CAMERA HELP : Shows this help screen.");
-            data.AddMultiPartValue("Help", "CAMERA ON|ENABLE : Turns the LED on.");
-            data.AddMultiPartValue("Help", "CAMERA OFF|DISABLE : Turns the LED off.");
-            data.AddMultiPartValue("Help", "CAMERA TOGGLE : Toggle the LED from current status.");
-            data.AddMultiPartValue("Help", "CAMERA CAPTURE : Takes a picture and returns as .");
+            data.AddMultiPartValue("Help", "CAMERA CAPTURE : Takes a picture and returns as Base64 string.");
             await HandleOutput(data).ConfigureAwait(false);
         }
 
@@ -52,7 +49,7 @@ namespace Devices.Control.Media
         private async Task CameraComponentCapture(MessageContainer data)
         {
             string imageBase64 = string.Empty;
-            using (IRandomAccessStream stream = await CaptureMediaStream().ConfigureAwait(false))
+            using (IRandomAccessStream stream = await CaptureMediaStream(ImageEncodingProperties.CreateJpeg()).ConfigureAwait(false))
             {
                 byte[] bytes = new byte[stream.Size];
                 using (DataReader reader = new DataReader(stream))
@@ -68,10 +65,10 @@ namespace Devices.Control.Media
         #endregion
 
         #region public
-        public async Task<IRandomAccessStream> CaptureMediaStream()
+        public async Task<IRandomAccessStream> CaptureMediaStream(ImageEncodingProperties encoding)
         {
             InMemoryRandomAccessStream stream = new InMemoryRandomAccessStream();
-            ImageEncodingProperties imageProperties = ImageEncodingProperties.CreateJpeg();
+            ImageEncodingProperties imageProperties = encoding;
             await mediaCapture.CapturePhotoToStreamAsync(imageProperties, stream).AsTask().ConfigureAwait(false);
             stream.Seek(0);
             return stream;

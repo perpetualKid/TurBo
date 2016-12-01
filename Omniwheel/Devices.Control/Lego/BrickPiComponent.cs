@@ -14,6 +14,7 @@ namespace Devices.Control.Lego
     public class BrickPiComponent : Controllable
     {
         private Brick brickPi;
+        private int version;
 
         public BrickPiComponent() : base("BrickPi")
         {
@@ -22,9 +23,10 @@ namespace Devices.Control.Lego
 
         protected override async Task InitializeDefaults()
         {
-            brickPi = await Brick.InitializeInstance("Uart0");
-            await RegisterComponent(new BrickPiLedComponent("LED1", this, brickPi.Arduino1Led));
-            await RegisterComponent(new BrickPiLedComponent("LED2", this, brickPi.Arduino2Led));
+            brickPi = await Brick.InitializeInstance("Uart0").ConfigureAwait(false);
+            version = await brickPi.GetBrickVersion().ConfigureAwait(false);
+            await RegisterComponent(new BrickPiLedComponent("LED1", this, brickPi.Arduino1Led)).ConfigureAwait(false);
+            await RegisterComponent(new BrickPiLedComponent("LED2", this, brickPi.Arduino2Led)).ConfigureAwait(false);
         }
 
         public async Task RegisterSensors()
@@ -38,7 +40,7 @@ namespace Devices.Control.Lego
                     case SensorType.COLOR_GREEN:
                     case SensorType.COLOR_RED:
                     case SensorType.COLOR_FULL:
-                        await RegisterComponent(new NXTColorSensorComponent("NXTColor." + sensor.SensorPort.ToString(), this, sensor as NXTColorSensor));
+                        await RegisterComponent(new NXTColorSensorComponent("NXTColor." + sensor.SensorPort.ToString(), this, sensor as NXTColorSensor)).ConfigureAwait(false);
                         break;
 
                 }
@@ -52,7 +54,7 @@ namespace Devices.Control.Lego
             data.AddMultiPartValue("Help", "CONNECT:<StorageConnectionString>|<StorageAccount>:<AccessKey> : Connecting to Azure Blob Storage.");
             data.AddMultiPartValue("Help", "DISCONNECT : Disconnecting from Azure Blob Storage.");
             data.AddMultiPartValue("Help", "LIST|LISTFILES[:<Path>[:<FilesOnly|True>]] : List Folders and Files or Files only.");
-            await HandleOutput(data);
+            await HandleOutput(data).ConfigureAwait(false);
         }
 
         protected override async Task ProcessCommand(MessageContainer data)
@@ -84,6 +86,8 @@ namespace Devices.Control.Lego
 
         #region public
         public Brick BrickPi { get { return this.brickPi; } }
+
+        public int Version { get { return this.version; } }
 
         #endregion
     }

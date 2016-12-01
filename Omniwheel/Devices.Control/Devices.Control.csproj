@@ -115,6 +115,7 @@
     <Compile Include="Lego\NXTColorSensorComponent.cs" />
     <Compile Include="Media\CameraComponent.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Storage\AppSettingsComponent.cs" />
     <Compile Include="Storage\AzureBlobStorageComponent.cs" />
     <Compile Include="Storage\OneDriveComponent.cs" />
     <Compile Include="Util\TraceComponent.cs" />

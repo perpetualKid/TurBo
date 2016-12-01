@@ -69,9 +69,12 @@ namespace Common.Communication.Channels
         {
             StringBuilder result = new StringBuilder();
             result.Append(data?.ToString());
-            char last = result[result.Length - 1];
-            if (last != '\0' && last != '\r' && last != '\n')
-                result.AppendLine();
+            if (result.Length != 0)
+            {
+                char last = result[result.Length - 1];
+                if (last != '\0' && last != '\r' && last != '\n')
+                    result.AppendLine();
+            }
             return result.ToString();
         }
         #endregion

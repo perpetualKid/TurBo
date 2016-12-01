@@ -29,8 +29,6 @@ namespace OmniWheel
     public sealed class StartupTask : IBackgroundTask
     {
         NXTTouchSensor touch;
-        NXTColorSensor color;
-        MediaCapture mediaCapture;
         private StorageFile photoFile;
         private readonly string PHOTO_FILE_NAME = "Camera Roll\\photo.jpg";
 
@@ -40,13 +38,14 @@ namespace OmniWheel
         private Brick brick;
         private DriveComponent omniDrive;
         private CameraComponent camera;
-//        int counter;
+        //        int counter;
+        BackgroundTaskDeferral deferral;
 
         public async void Run(IBackgroundTaskInstance taskInstance)
         {
-            BackgroundTaskDeferral deferral = taskInstance.GetDeferral();
+            deferral = taskInstance.GetDeferral();
+            taskInstance.Canceled += TaskInstance_Canceled;
 
-            this.appSettings = await RestoreAsync(fileName).ConfigureAwait(false);
             List<Task> setupTasks = new List<Task>();
 
             setupTasks.Add(Controllable.RegisterComponent(new NetworkListener(8027)));
@@ -57,14 +56,16 @@ namespace OmniWheel
             setupTasks.Add(Controllable.RegisterComponent(azureBlob));
             brickComponent = new BrickPiComponent();
             setupTasks.Add(Controllable.RegisterComponent(brickComponent));
+            setupTasks.Add(Controllable.RegisterComponent(new AppSettingsComponent()));
             await Task.WhenAll(setupTasks).ConfigureAwait(false);
 
             brick = brickComponent.BrickPi;
-            Debug.WriteLine($"Brick Version: {await brick.GetBrickVersion().ConfigureAwait(false)}");
+            Debug.WriteLine($"Brick Version: {brickComponent.Version}");
 
             touch = new NXTTouchSensor(SensorPort.Port_S1);
             touch.OnPressed += Touch_OnPressed;
             await brick.Sensors.Add(touch).ConfigureAwait(false);
+            NXTColorSensor color;
             color = new NXTColorSensor(SensorPort.Port_S4, SensorType.COLOR_FULL);
             await brick.Sensors.Add(color).ConfigureAwait(false);
             color = new NXTColorSensor(SensorPort.Port_S3, SensorType.COLOR_FULL);
@@ -77,8 +78,8 @@ namespace OmniWheel
             await Controllable.RegisterComponent(camera).ConfigureAwait(false);
 
             // Get available devices for capturing pictures
-            var allVideoDevices = await DeviceInformation.FindAllAsync(DeviceClass.VideoCapture).AsTask<DeviceInformationCollection>().ConfigureAwait(false);
-            mediaCapture = new MediaCapture();
+            //            var allVideoDevices = await DeviceInformation.FindAllAsync(DeviceClass.VideoCapture).AsTask<DeviceInformationCollection>().ConfigureAwait(false);
+            //            mediaCapture = new MediaCapture();
 
 
             //await mediaCapture.InitializeAsync(new MediaCaptureInitializationSettings
@@ -100,26 +101,42 @@ namespace OmniWheel
 
 
             brick.Start();
-            while (true)
+            //while (true)
+            //{
+            //    brick.Arduino1Led.Toggle();
+            //    await Task.Delay(500).ConfigureAwait(false);
+            //}
+        }
+
+        private void TaskInstance_Canceled(IBackgroundTaskInstance sender, BackgroundTaskCancellationReason reason)
+        {
+            //a few reasons that you may be interested in.
+            switch (reason)
             {
-                brick.Arduino1Led.Toggle();
-//                Debug.WriteLine($"Color Raw:{color.RawValue} Name {color.ColorName} ARGB: {color.ColorData}");
-                await Task.Delay(500).ConfigureAwait(false);
+                case BackgroundTaskCancellationReason.Abort:
+                    //app unregistered background task (amoung other reasons).
+                    break;
+                case BackgroundTaskCancellationReason.Terminating:
+                    //system shutdown
+                    break;
+                case BackgroundTaskCancellationReason.ConditionLoss:
+                    break;
+                case BackgroundTaskCancellationReason.SystemPolicy:
+                    break;
             }
+            deferral.Complete();
         }
 
         private async void Touch_OnPressed(object sender, BrickPi.Uwp.Base.SensorEventArgs e)
         {
-            InMemoryRandomAccessStream stream = new InMemoryRandomAccessStream();
-            photoFile = await KnownFolders.PicturesLibrary.CreateFileAsync(PHOTO_FILE_NAME, CreationCollisionOption.GenerateUniqueName);
-            ImageEncodingProperties imageProperties = ImageEncodingProperties.CreateJpeg();
+            using (IRandomAccessStream stream = await camera.CaptureMediaStream(ImageEncodingProperties.CreateJpeg()).ConfigureAwait(false))
+            {
+                photoFile = await KnownFolders.PicturesLibrary.CreateFileAsync(PHOTO_FILE_NAME, CreationCollisionOption.GenerateUniqueName);
+                await oneDrive.UploadFile(stream, "/Pics", photoFile.Name);
+            }
             //await mediaCapture.CapturePhotoToStorageFileAsync(imageProperties, photoFile).AsTask().ConfigureAwait(false);
 
-            await mediaCapture.CapturePhotoToStreamAsync(imageProperties, stream).AsTask().ConfigureAwait(false);
-            stream.Seek(0);
 
-            await oneDrive.UploadFile(stream, "/Pics", photoFile.Name);
-            
             //CloudBlockBlob blockBlob = container.GetBlockBlobReference(photoFile.Name);
             //await blockBlob.UploadFromStreamAsync(stream.AsStreamForRead()).ConfigureAwait(false);
         }
@@ -144,86 +161,6 @@ namespace OmniWheel
         //    appSettings.OneDriveAccessToken = (sender as OneDriveConnector).AccessToken;
         //    await SaveAsync(appSettings, fileName);
         //}
-
-        private AppSettings appSettings;
-
-        private static readonly StorageFolder SettingsFolder = ApplicationData.Current.LocalFolder;
-        private string fileName = "Settings.xml";
-
-        /// <summary>
-        /// Save the settings to a file
-        /// </summary>
-        /// <param name="settings">Settings object to save</param>
-        /// <param name="filename">Name of file to save to</param>
-        /// <returns></returns>
-        private static async Task SaveAsync(AppSettings settings, string filename)
-        {
-            StorageFile sessionFile = await SettingsFolder.CreateFileAsync(filename, CreationCollisionOption.ReplaceExisting);
-            using (IRandomAccessStream sessionRandomAccess = await sessionFile.OpenAsync(FileAccessMode.ReadWrite))
-            {
-                using (IOutputStream sessionOutputStream = sessionRandomAccess.GetOutputStreamAt(0))
-                {
-                    var serializer = new XmlSerializer(typeof(AppSettings), new Type[] { typeof(AppSettings) });
-                    serializer.Serialize(sessionOutputStream.AsStreamForWrite(), settings);
-                    await sessionOutputStream.FlushAsync();
-                }
-            }
-        }
-
-        /// <summary>
-        /// Load the settings from a file
-        /// </summary>
-        /// <param name="filename">Name of settings file</param>
-        /// <returns></returns>
-        private static async Task<AppSettings> RestoreAsync(string filename)
-        {
-            try
-            {
-                //var test = await SettingsFolder.TryGetItemAsync(filename);
-                //if (test != null)
-                //{
-                //    using (Stream readStream = await SettingsFolder.OpenStreamForReadAsync(filename))
-                //    {
-                //        var serializer = new XmlSerializer(typeof(AppSettings));
-                //        //                    readStream.Seek(0, SeekOrigin.Begin);
-                //        //                    return (AppSettings)serializer.Deserialize(sessionInputStream.AsStreamForRead());
-                //        var temp = serializer.Deserialize(readStream);
-                //        return (AppSettings)temp;
-                //    }
-                //}
-                StorageFile sessionFile = await SettingsFolder.CreateFileAsync(filename, CreationCollisionOption.OpenIfExists);
-                if (sessionFile == null)
-                { 
-                    AppSettings result = new AppSettings();
-                    await SaveAsync(result, filename);
-                    return result;
-                }
-//                using (IInputStream sessionInputStream = await sessionFile.OpenReadAsync())
-                using (Stream readStream = await sessionFile.OpenStreamForReadAsync())
-                {
-                    var serializer = new XmlSerializer(typeof(AppSettings));
-//                    readStream.Seek(0, SeekOrigin.Begin);
-//                    return (AppSettings)serializer.Deserialize(sessionInputStream.AsStreamForRead());
-                    var temp = serializer.Deserialize(readStream);
-                    return (AppSettings)temp;
-                }
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine("AppSettings.RestoreAsync(): " + ex.Message);
-                // If settings.xml file is corrupted and cannot be read - behave as if it does not exist.
-                AppSettings result = new AppSettings();
-                await SaveAsync(result, filename);
-                return result;
-            }
-        }
-    }
-
-    public struct AppSettings
-    {
-        // Obtained from OneDrive Login
-        public string OneDriveAccessToken;
-        public string OneDriveRefreshToken;
     }
 }
 

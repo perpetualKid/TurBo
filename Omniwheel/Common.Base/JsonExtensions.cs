@@ -38,10 +38,10 @@ namespace Common.Base
             else if (value is int || value is double || value is float || value is long ||
                 value is sbyte || value is short || value is uint || value is ulong || value is ushort)
                 return JsonValue.CreateNumberValue((dynamic)value);
-            else if (value is IList)
+            else if (value is IEnumerable)
             {
                 JsonArray array = new JsonArray();
-                foreach (object item in (value as IList))
+                foreach (object item in (value as IEnumerable))
                     array.Add(EvaluateJsonValue(item));
                 return array;
             }
