@@ -79,7 +79,7 @@ namespace TurBoControl.Controller
 
         public ConnectionStatus ConnectionStatus { get { return socketClient.ConnectionStatus; } }
 
-        public async Task Connect(string host, string port)
+        public async Task<bool> Connect(string host, string port)
         {
             if (socketClient.ConnectionStatus != ConnectionStatus.Connected)
             {
@@ -87,6 +87,7 @@ namespace TurBoControl.Controller
                 if (channel?.ConnectionStatus == ConnectionStatus.Connected)
                     channel.OnMessageReceived += SocketClient_OnMessageReceived;
             }
+            return socketClient.ConnectionStatus == ConnectionStatus.Connected;
         }
 
         public async Task Send(string sender, JsonObject data)

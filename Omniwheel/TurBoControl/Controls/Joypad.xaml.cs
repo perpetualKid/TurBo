@@ -160,7 +160,7 @@ namespace TurBoControl.Controls
             }
 
             angle *= -radian2Degree;    //counterclockwise
-            angle = Math.Round((270 + angle) % 360); //turn 90deg to ensure 0 is up, and values are 0-359
+            angle = (int)((270 + angle) % 360); //turn 90deg to ensure 0 is up, and values are 0-359
 
             Angle = (int)angle;
             Distance = distance;

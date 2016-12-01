@@ -10,6 +10,11 @@ using Windows.UI.Core;
 using Windows.ApplicationModel.Core;
 using Windows.UI.Xaml.Navigation;
 using Windows.UI;
+using Windows.UI.Xaml.Controls.Primitives;
+using System.Threading.Tasks;
+using Windows.UI.Xaml.Media.Imaging;
+using Windows.Storage.Streams;
+using System.Runtime.InteropServices.WindowsRuntime;
 
 namespace TurBoControl.Views
 {
@@ -18,6 +23,7 @@ namespace TurBoControl.Views
     /// </summary>
     public sealed partial class LandingPage : Page
     {
+
         ApplicationDataContainer settings;
 
         public LandingPage()
@@ -40,26 +46,7 @@ namespace TurBoControl.Views
 
         private async void Button_Click(object sender, RoutedEventArgs e)
         {
-
-            string deviceHost = settings.Values[nameof(DeviceSettingNames.DeviceHost)] as string ?? string.Empty;
-            string devicePort = settings.Values[nameof(DeviceSettingNames.DevicePort)] as string ?? string.Empty;
-
-            if (string.IsNullOrWhiteSpace(deviceHost) || string.IsNullOrWhiteSpace(devicePort))
-            {
-                DisplayMissingHostParameters(e.OriginalSource);
-                return;
-            }
-
-            await DeviceConnection.Instance.Connect(deviceHost, devicePort);
-            JsonObject hello = new JsonObject();
-            hello.AddValue("Target", "BrickPi.NxtColor.Port_S3");
-            hello.AddValue("Action", "ARGB");
-            await DeviceConnection.Instance.Send("LandingPage", hello);
-            ellColor.Fill = new SolidColorBrush(Colors.White);
-                //await socketClient.Send(Guid.Empty, "ECHO");
-                //await SocketClient.Disconnect();
-            //                await Task.Run(() => JsonStreamReader.ReadEndless(file.OpenStreamForReadAsync().Result));
-
+            await Connect(sender);
         }
 
         private async void Instance_OnDataReceived(JsonObject data)
@@ -84,10 +71,61 @@ namespace TurBoControl.Views
                 });
 
             }
-            System.Diagnostics.Debug.WriteLine(data.Stringify());
+            else if (data.ContainsKey("Target") && data.GetNamedString("Target").ToUpperInvariant() == "FrontCamera".ToUpperInvariant() &&
+                data.ContainsKey("Action") && data.GetNamedString("Action").ToUpperInvariant() == "Capture".ToUpperInvariant())
+            {
+                await CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(CoreDispatcherPriority.Normal, async () =>
+                {
+                    byte[] buffer = Convert.FromBase64String(data.GetNamedString("ImageBase64"));
+                    BitmapImage image = new BitmapImage();
+                    using (InMemoryRandomAccessStream stream = new InMemoryRandomAccessStream())
+                    {
+                        await stream.WriteAsync(buffer.AsBuffer());
+                        stream.Seek(0);
+                        await image.SetSourceAsync(stream);
+                    }
+                    imageFrontCamera.Source = image;
+                });
+            }
         }
 
-        private async void DisplayMissingHostParameters(object parameter)
+        private async Task Connect(object sender)
+        {
+            string deviceHost = settings.Values[nameof(DeviceSettingNames.DeviceHost)] as string ?? string.Empty;
+            string devicePort = settings.Values[nameof(DeviceSettingNames.DevicePort)] as string ?? string.Empty;
+
+            ConnectionFlyoutText.Text = $"Please wait while trying to connect to device \"{deviceHost}\" on port \"{devicePort}\".";
+            ConnectionFlyoutText.MaxWidth = Window.Current.CoreWindow.Bounds.Width;
+            ConnectionFlyout.ShowAt(btnConnect as FrameworkElement);
+
+            if (string.IsNullOrWhiteSpace(deviceHost) || string.IsNullOrWhiteSpace(devicePort))
+            {
+                DisplayMissingHostParametersDialog(sender);
+                return;
+            }
+
+            if (!await DeviceConnection.Instance.Connect(deviceHost, devicePort))
+            {
+                ConnectionFlyout.Hide();
+                DisplayConnectionFailedDialog(sender, deviceHost, devicePort);
+                return;
+            }
+            //JsonObject hello = new JsonObject();
+            //hello.AddValue("Target", "BrickPi.NxtColor.Port_S3");
+            //hello.AddValue("Action", "ARGB");
+            //await DeviceConnection.Instance.Send("LandingPage", hello);
+            //ellColor.Fill = new SolidColorBrush(Colors.White);
+            JsonObject imageCapture = new JsonObject();
+            imageCapture.AddValue("Target", "FrontCamera");
+            imageCapture.AddValue("Action", "Capture");
+            await DeviceConnection.Instance.Send("LandingPage", imageCapture);
+            //await socketClient.Send(Guid.Empty, "ECHO");
+            //await SocketClient.Disconnect();
+            //                await Task.Run(() => JsonStreamReader.ReadEndless(file.OpenStreamForReadAsync().Result));
+            ConnectionFlyout.Hide();
+        }
+
+        private async void DisplayMissingHostParametersDialog(object parameter)
         {
             ContentDialog missingHostParameters = new ContentDialog()
             {
@@ -98,8 +136,32 @@ namespace TurBoControl.Views
 
             ContentDialogResult result = await missingHostParameters.ShowAsync();
             this.Frame.Navigate(typeof(AppSettingsPage), parameter, new Windows.UI.Xaml.Media.Animation.DrillInNavigationTransitionInfo());
-
         }
+
+        private async void DisplayConnectionFailedDialog(object parameter, string deviceHost, string devicePort)
+        {
+            ContentDialog connectionFailed = new ContentDialog()
+            {
+                Title = "Connection failed",
+                Content = $"Connection to \"{deviceHost}\" on port \"{devicePort}\" failed or could not be established. Please check the device is active and the connection parameters are correct.\r\n\r\nClick Retry to try again, or Settings to open the Application Settings.",
+                PrimaryButtonText = "Retry",
+                SecondaryButtonText = "Settings"
+            };
+
+            ContentDialogResult result = await connectionFailed.ShowAsync();
+            switch (result)
+            {
+                case ContentDialogResult.None:
+                    break;
+                case ContentDialogResult.Primary:
+                    await Connect(parameter);
+                    break;
+                case ContentDialogResult.Secondary:
+                    this.Frame.Navigate(typeof(AppSettingsPage), parameter, new Windows.UI.Xaml.Media.Animation.DrillInNavigationTransitionInfo());
+                    break;
+            }
+        }
+
 
         private async void Joypad_Moved(object sender, Controls.JoypadEventArgs e)
         {

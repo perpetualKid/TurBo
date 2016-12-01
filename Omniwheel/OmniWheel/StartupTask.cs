@@ -11,6 +11,7 @@ using Common.Base;
 using Common.Communication;
 using Devices.Control.Communication;
 using Devices.Control.Lego;
+using Devices.Control.Media;
 using Devices.Control.Storage;
 using Windows.ApplicationModel.Background;
 using Windows.Data.Json;
@@ -38,6 +39,7 @@ namespace OmniWheel
         private BrickPiComponent brickComponent;
         private Brick brick;
         private DriveComponent omniDrive;
+        private CameraComponent camera;
 //        int counter;
 
         public async void Run(IBackgroundTaskInstance taskInstance)
@@ -70,19 +72,22 @@ namespace OmniWheel
             await brickComponent.RegisterSensors();
             omniDrive = new DriveComponent("Drive", brickComponent, brick.Motors[MotorPort.Port_MA], brick.Motors[MotorPort.Port_MD], brick.Motors[MotorPort.Port_MB]);
             await Controllable.RegisterComponent(omniDrive).ConfigureAwait(false);
-            
+
+            camera = new CameraComponent("FrontCamera", new MediaCapture());
+            await Controllable.RegisterComponent(camera).ConfigureAwait(false);
+
             // Get available devices for capturing pictures
             var allVideoDevices = await DeviceInformation.FindAllAsync(DeviceClass.VideoCapture).AsTask<DeviceInformationCollection>().ConfigureAwait(false);
-
             mediaCapture = new MediaCapture();
-            //await mediaCapture.InitializeAsync();
-            await mediaCapture.InitializeAsync(new MediaCaptureInitializationSettings
-            {
-                StreamingCaptureMode = StreamingCaptureMode.Video,
-                PhotoCaptureSource = PhotoCaptureSource.Auto,
-                //AudioDeviceId = string.Empty,
-                VideoDeviceId = allVideoDevices[0].Id
-            }).AsTask().ConfigureAwait(false);
+
+
+            //await mediaCapture.InitializeAsync(new MediaCaptureInitializationSettings
+            //{
+            //    StreamingCaptureMode = StreamingCaptureMode.Video,
+            //    PhotoCaptureSource = PhotoCaptureSource.Auto,
+            //    //AudioDeviceId = string.Empty,
+            //    VideoDeviceId = allVideoDevices[0].Id
+            //}).AsTask().ConfigureAwait(false);
 
             //var resolutions = mediaCapture.VideoDeviceController.GetAvailableMediaStreamProperties(MediaStreamType.Photo).OrderByDescending( resolution => ((VideoEncodingProperties)resolution).Width);
             //foreach (var item in resolutions)
@@ -108,7 +113,7 @@ namespace OmniWheel
             InMemoryRandomAccessStream stream = new InMemoryRandomAccessStream();
             photoFile = await KnownFolders.PicturesLibrary.CreateFileAsync(PHOTO_FILE_NAME, CreationCollisionOption.GenerateUniqueName);
             ImageEncodingProperties imageProperties = ImageEncodingProperties.CreateJpeg();
-            await mediaCapture.CapturePhotoToStorageFileAsync(imageProperties, photoFile).AsTask().ConfigureAwait(false);
+            //await mediaCapture.CapturePhotoToStorageFileAsync(imageProperties, photoFile).AsTask().ConfigureAwait(false);
 
             await mediaCapture.CapturePhotoToStreamAsync(imageProperties, stream).AsTask().ConfigureAwait(false);
             stream.Seek(0);
