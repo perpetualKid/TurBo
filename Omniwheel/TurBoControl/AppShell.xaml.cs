@@ -54,6 +54,12 @@ namespace TurBoControl
                     Label = "OneDrive Login",
                     DestPage = typeof(OneDriveLoginPage)
                 },
+                new NavigationMenuItem()
+                {
+                    Symbol = Symbol.RotateCamera,
+                    Label = "Onboard Camera",
+                    DestPage = typeof(OnboardCameraPage)
+                },
             });
 
         public static AppShell Current = null;

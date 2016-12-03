@@ -25,22 +25,30 @@ namespace TurBoControl.Views
     {
 
         ApplicationDataContainer settings;
+        ImageSourceController imageSource;
 
         public LandingPage()
         {
             this.InitializeComponent();
             settings = ApplicationData.Current.LocalSettings;
+            imageSource = new ImageSourceController();
+            imageSource.OnImageReceived += ImageSource_OnImageReceived;
+        }
+
+        private void ImageSource_OnImageReceived(object sender, EventArgs e)
+        {
+            imageFrontCamera.Source = imageSource.CurrentImage;
         }
 
         protected override void OnNavigatedTo(NavigationEventArgs e)
         {
-            DeviceConnection.Instance.RegisterOnDataReceivedEvent("LandingPage", Instance_OnDataReceived);
+            DeviceConnectionController.Instance.RegisterOnDataReceivedEvent("LandingPage", Instance_OnDataReceived);
             base.OnNavigatedTo(e);
         }
 
         protected override void OnNavigatedFrom(NavigationEventArgs e)
         {
-            DeviceConnection.Instance.UnRegisterOnDataReceivedEvent("LandingPage", Instance_OnDataReceived);
+            DeviceConnectionController.Instance.UnRegisterOnDataReceivedEvent("LandingPage", Instance_OnDataReceived);
             base.OnNavigatedFrom(e);
         }
 
@@ -104,7 +112,7 @@ namespace TurBoControl.Views
                 return;
             }
 
-            if (!await DeviceConnection.Instance.Connect(deviceHost, devicePort))
+            if (!await DeviceConnectionController.Instance.Connect(deviceHost, devicePort))
             {
                 ConnectionFlyout.Hide();
                 DisplayConnectionFailedDialog(sender, deviceHost, devicePort);
@@ -115,14 +123,11 @@ namespace TurBoControl.Views
             //hello.AddValue("Action", "ARGB");
             //await DeviceConnection.Instance.Send("LandingPage", hello);
             //ellColor.Fill = new SolidColorBrush(Colors.White);
-            JsonObject imageCapture = new JsonObject();
-            imageCapture.AddValue("Target", "FrontCamera");
-            imageCapture.AddValue("Action", "Capture");
-            await DeviceConnection.Instance.Send("LandingPage", imageCapture);
             //await socketClient.Send(Guid.Empty, "ECHO");
             //await SocketClient.Disconnect();
             //                await Task.Run(() => JsonStreamReader.ReadEndless(file.OpenStreamForReadAsync().Result));
             ConnectionFlyout.Hide();
+            await imageSource.CaptureDeviceImage();
         }
 
         private async void DisplayMissingHostParametersDialog(object parameter)
@@ -166,7 +171,7 @@ namespace TurBoControl.Views
         private async void Joypad_Moved(object sender, Controls.JoypadEventArgs e)
         {
             JoypadValues.Text = $"Force: {e.Distance} Angle: {e.Angle}";
-            if (DeviceConnection.Instance.ConnectionStatus == Common.Communication.ConnectionStatus.Connected)
+            if (DeviceConnectionController.Instance.ConnectionStatus == Common.Communication.ConnectionStatus.Connected)
             {
                 JsonObject move = new JsonObject();
                 move.AddValue("Target", "BrickPi.Drive");
@@ -174,31 +179,31 @@ namespace TurBoControl.Views
                 move.AddValue("Direction", e.Angle);
                 move.AddValue("Velocity", e.Distance);
                 move.AddValue("Rotation", 0);
-                await DeviceConnection.Instance.Send("LandingPage", move);
+                await DeviceConnectionController.Instance.Send("LandingPage", move);
 
             }
         }
 
         private async void Joypad_Released(object sender, Controls.JoypadEventArgs e)
         {
-            if (DeviceConnection.Instance.ConnectionStatus == Common.Communication.ConnectionStatus.Connected)
+            if (DeviceConnectionController.Instance.ConnectionStatus == Common.Communication.ConnectionStatus.Connected)
             {
                 JsonObject stop = new JsonObject();
                 stop.AddValue("Target", "BrickPi.Drive");
                 stop.AddValue("Action", "Stop");
-                await DeviceConnection.Instance.Send("LandingPage", stop);
+                await DeviceConnectionController.Instance.Send("LandingPage", stop);
 
             }
         }
 
         private async void Joypad_Captured(object sender, EventArgs e)
         {
-            if (DeviceConnection.Instance.ConnectionStatus == Common.Communication.ConnectionStatus.Connected)
+            if (DeviceConnectionController.Instance.ConnectionStatus == Common.Communication.ConnectionStatus.Connected)
             {
                 JsonObject start = new JsonObject();
                 start.AddValue("Target", "BrickPi.Drive");
                 start.AddValue("Action", "Start");
-                await DeviceConnection.Instance.Send("LandingPage", start);
+                await DeviceConnectionController.Instance.Send("LandingPage", start);
 
             }
 

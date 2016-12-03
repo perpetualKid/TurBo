@@ -1,0 +1,71 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using Windows.Data.Json;
+using Windows.UI.Xaml.Media.Imaging;
+using Common.Base;
+using Windows.ApplicationModel.Core;
+using Windows.UI.Core;
+using Windows.Storage.Streams;
+using System.Runtime.InteropServices.WindowsRuntime;
+
+namespace TurBoControl.Controller
+{
+    public class ImageSourceController
+    {
+        private ObservableCollection<BitmapImage> images;
+        private BitmapImage currentImage;
+        private const int maxImages = 10;
+
+        public event EventHandler<EventArgs> OnImageReceived;
+
+        public ImageSourceController()
+        {
+            images = new ObservableCollection<BitmapImage>();
+            DeviceConnectionController.Instance.RegisterOnDataReceivedEvent(nameof(ImageSourceController), Instance_OnDataReceived);
+        }
+        public ObservableCollection<BitmapImage> CachedImages
+        {
+            get { return this.images; }
+        }
+
+        public BitmapImage CurrentImage { get { return this.currentImage; } }
+
+        public async Task CaptureDeviceImage()
+        {
+            JsonObject imageCapture = new JsonObject();
+            imageCapture.AddValue("Target", "FrontCamera");
+            imageCapture.AddValue("Action", "Capture");
+            await DeviceConnectionController.Instance.Send(nameof(ImageSourceController), imageCapture);
+
+        }
+
+        private async void Instance_OnDataReceived(JsonObject data)
+        {
+            if (data.ContainsKey("Target") && data.GetNamedString("Target").ToUpperInvariant() == "FrontCamera".ToUpperInvariant() &&
+                data.ContainsKey("Action") && data.GetNamedString("Action").ToUpperInvariant() == "Capture".ToUpperInvariant())
+            {
+                await CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(CoreDispatcherPriority.Normal, async () =>
+                {
+                    byte[] buffer = Convert.FromBase64String(data.GetNamedString("ImageBase64"));
+                    BitmapImage image = new BitmapImage();
+                    using (InMemoryRandomAccessStream stream = new InMemoryRandomAccessStream())
+                    {
+                        await stream.WriteAsync(buffer.AsBuffer());
+                        stream.Seek(0);
+                        await image.SetSourceAsync(stream);
+                    }
+
+                    currentImage = image;
+                    while (images.Count >= maxImages)
+                        images.RemoveAt(maxImages - 1);
+                    images.Insert(0, image);
+                    OnImageReceived?.Invoke(this, EventArgs.Empty);
+                });
+            }
+        }
+    }
+}

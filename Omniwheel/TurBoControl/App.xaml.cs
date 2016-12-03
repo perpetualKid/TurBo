@@ -105,6 +105,6 @@ namespace TurBoControl
 
         public string OneDriveAccessToken { get; set; }
 
-        public DeviceConnection DeviceConnection { get { return DeviceConnection.Instance; } }
+        public DeviceConnectionController DeviceConnection { get { return DeviceConnectionController.Instance; } }
     }
 }

@@ -10,7 +10,7 @@ using Common.Base;
 
 namespace TurBoControl.Controller
 {
-    public class DeviceConnection
+    public class DeviceConnectionController
     {
         public enum FixedNames
         {
@@ -19,14 +19,14 @@ namespace TurBoControl.Controller
             Action,
         }
 
-        private static DeviceConnection instance;
+        private static DeviceConnectionController instance;
         private SocketClient socketClient;
         private Dictionary<string, System.Delegate> eventRoutingTable;
 
         public event EventHandler<ConnectionStatusChangedEventArgs> OnConnectionStatusChanged;
         public delegate void DataReceivedEventHandler(JsonObject data);
 
-        private DeviceConnection()
+        private DeviceConnectionController()
         {
             eventRoutingTable = new Dictionary<string, Delegate>();
             this.socketClient = new SocketClient();
@@ -67,12 +67,12 @@ namespace TurBoControl.Controller
         }
         #endregion
 
-        public static DeviceConnection Instance
+        public static DeviceConnectionController Instance
         {
             get
             {
                 if (null == instance)
-                    instance = new DeviceConnection();
+                    instance = new DeviceConnectionController();
                 return instance;
             }
         }

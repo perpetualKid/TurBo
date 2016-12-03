@@ -1,5 +1,5 @@
 ﻿<Page
-    x:Class="TurBoControl.Views.OneDriveLoginPage"
+    x:Class="TurBoControl.Views.OnboardCameraPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="using:TurBoControl.Views"
@@ -7,7 +7,22 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
-
+<!--    
+    <Page.Resources>
+        <DataTemplate x:Key="PhotosTemplate">
+            <Grid
+                Background="White"
+                BorderBrush="Black"
+                BorderThickness="1">
+                <Image
+                    Source="{x:Bind Items}"
+                    Stretch="UniformToFill"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"/>
+            </Grid>
+        </DataTemplate>
+    </Page.Resources>
+-->
     <Grid x:Name="LayoutRoot" 
           Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
           EntranceNavigationTransitionInfo.IsTargetElement="True"
@@ -37,18 +52,39 @@
 
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="80"/>
+            <RowDefinition/>
         </Grid.RowDefinitions>
 
         <controls:PageHeader Grid.ColumnSpan="2">
             <controls:PageHeader.HeaderContent>
-                <TextBlock x:Name="HeaderTextBlock" Text="OneDrive Permission" Style="{StaticResource PageTitleTextBlockStyle}" TextWrapping="NoWrap"/>
+                <TextBlock x:Name="HeaderTextBlock" Text="Onboard Camera" Style="{StaticResource PageTitleTextBlockStyle}" TextWrapping="NoWrap"/>
             </controls:PageHeader.HeaderContent>
         </controls:PageHeader>
-        <TextBlock Grid.Row="1" TextWrapping="Wrap">Please complete below webpage to give the aplication permission to access your OneDrive. </TextBlock>
-            <WebView x:Name="webView" Grid.Row="2" LoadCompleted="WebView_LoadCompleted" />
-            <TextBlock Name="txtAccessToken" Grid.Row="3" IsTextSelectionEnabled="True"></TextBlock>
+
+        <StackPanel Grid.Row="1" Margin="10,0,10, 0">
+            <Image x:Name="imgMain" Source="/Assets/Wide310x150Logo.scale-200.png" Stretch="None" Width="200" Height="200"/>
+            <Button x:Name="btnLoad" Click="btnLoad_Click" >Load</Button>
+            <!--            <GridView x:Name="gridView" Grid.Row="2" HorizontalAlignment="Center" HorizontalContentAlignment="Center" VerticalAlignment="Center" 
+                      ItemTemplate="{StaticResource PhotosTemplate}">
+            </GridView>
+-->            <ListView ItemsSource="{x:Bind Items}" Height="120"
+                         ScrollViewer.HorizontalScrollMode="Enabled" 
+          ScrollViewer.HorizontalScrollBarVisibility="Auto"
+          ScrollViewer.VerticalScrollMode="Disabled"
+          ScrollViewer.VerticalScrollBarVisibility="Hidden">
+                <ListView.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <ItemsStackPanel Orientation="Horizontal"/>
+                    </ItemsPanelTemplate>
+                </ListView.ItemsPanel>
+                <ListView.ItemTemplate>
+                    <DataTemplate x:DataType="BitmapImage">
+                        <Image Width="120" Height="80"
+                   Source="{x:Bind }"
+                   Stretch="Uniform" />
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+        </StackPanel>
     </Grid>
 </Page>
