@@ -23,7 +23,7 @@ namespace Devices.Control.Storage
 
         protected override async Task ProcessCommand(MessageContainer data)
         {
-            switch (ResolveParameter(data, "Action", 1).ToUpperInvariant())
+            switch (data.ResolveParameter(nameof(MessageContainer.FixedPropertyNames.Action), 1).ToUpperInvariant())
             {
                 case "HELP":
                     await ComponentHelp(data);
@@ -53,17 +53,17 @@ namespace Devices.Control.Storage
         protected override async Task ConnectStorage(MessageContainer data)
         {
             string containerName;
-            string connectionString = ResolveParameter(data, "ConnectionString", 2);
+            string connectionString = data.ResolveParameter("ConnectionString", 2);
             if (CloudStorageAccount.TryParse(connectionString, out storageAccount))
             {
-                containerName = ResolveParameter(data, "ContainerName", 3); 
+                containerName = data.ResolveParameter("ContainerName", 3); 
                 await ConnectStorage(connectionString, containerName);
             }
             else
             {
-                string storageAccount = ResolveParameter(data, "StorageAccount", 2);
-                string accessKey = ResolveParameter(data, "AccessKey", 3);
-                containerName = ResolveParameter(data, "ContainerName", 4);
+                string storageAccount = data.ResolveParameter("StorageAccount", 2);
+                string accessKey = data.ResolveParameter("AccessKey", 3);
+                containerName = data.ResolveParameter("ContainerName", 4);
                 await ConnectStorage(storageAccount, accessKey, containerName);
             }
             data.AddValue("Connect", "Connect " + (blobClient != null ? "successful" : "failed"));

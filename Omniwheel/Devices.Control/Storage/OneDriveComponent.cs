@@ -29,7 +29,7 @@ namespace Devices.Control.Storage
 
         protected override async Task ProcessCommand(MessageContainer data)
         {
-            switch (ResolveParameter(data, "Action", 1).ToUpperInvariant())
+            switch (data.ResolveParameter(nameof(MessageContainer.FixedPropertyNames.Action), 1).ToUpperInvariant())
             {
                 case "HELP":
                     await ComponentHelp(data);
@@ -52,8 +52,8 @@ namespace Devices.Control.Storage
         #region private implementation
         protected override async Task ListContent(MessageContainer data)
         {
-            string path = ResolveParameter(data, "Path", 2);
-            string filesOnlyParam = ResolveParameter(data, "FilesOnly", 3);
+            string path = data.ResolveParameter("Path", 2);
+            string filesOnlyParam = data.ResolveParameter("FilesOnly", 3);
             bool filesOnly = false;
             if (!bool.TryParse(filesOnlyParam, out filesOnly))
                 filesOnly = (!string.IsNullOrWhiteSpace(filesOnlyParam) && filesOnlyParam.ToUpperInvariant() == "FILESONLY");
@@ -71,9 +71,9 @@ namespace Devices.Control.Storage
 
         protected override async Task ConnectStorage(MessageContainer data)
         {
-            string clientId = ResolveParameter(data, "ClientId", 2);
-            string clientSecret = ResolveParameter(data, "ClientSecret", 3);
-            string accessCode = ResolveParameter(data, "AccessCode", 4);
+            string clientId = data.ResolveParameter("ClientId", 2);
+            string clientSecret = data.ResolveParameter("ClientSecret", 3);
+            string accessCode = data.ResolveParameter("AccessCode", 4);
 
             await OneDriveLogin(clientId, clientSecret, accessCode);
             data.AddValue("Login", "Login " + (oneDriveConnector != null && oneDriveConnector.LoggedIn ? "successful" : "failed"));

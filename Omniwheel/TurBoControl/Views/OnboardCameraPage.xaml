@@ -67,11 +67,11 @@
             <!--            <GridView x:Name="gridView" Grid.Row="2" HorizontalAlignment="Center" HorizontalContentAlignment="Center" VerticalAlignment="Center" 
                       ItemTemplate="{StaticResource PhotosTemplate}">
             </GridView>
--->            <ListView ItemsSource="{x:Bind Items}" Height="120"
+-->            <ListView x:Name="lvPictureCache" ItemsSource="{x:Bind Items}" Height="120"
                          ScrollViewer.HorizontalScrollMode="Enabled" 
           ScrollViewer.HorizontalScrollBarVisibility="Auto"
           ScrollViewer.VerticalScrollMode="Disabled"
-          ScrollViewer.VerticalScrollBarVisibility="Hidden">
+          ScrollViewer.VerticalScrollBarVisibility="Hidden" SelectionChanged="ListView_SelectionChanged">
                 <ListView.ItemsPanel>
                     <ItemsPanelTemplate>
                         <ItemsStackPanel Orientation="Horizontal"/>

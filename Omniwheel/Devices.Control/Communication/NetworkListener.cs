@@ -16,7 +16,7 @@ namespace Devices.Control.Communication
         private DataFormat dataFormat = DataFormat.Text;
         private SocketBase instance;
 
-        public NetworkListener(int port): base("TCP" + port.ToString())
+        public NetworkListener(int port): base("TCP." + port.ToString())
         {
             this.port = port;
         }
@@ -56,7 +56,7 @@ namespace Devices.Control.Communication
 
         protected override async Task ProcessCommand(MessageContainer data)
         {
-            switch (ResolveParameter(data, "Action", 1).ToUpperInvariant())
+            switch (data.ResolveParameter(nameof(MessageContainer.FixedPropertyNames.Action), 1).ToUpperInvariant())
             {
                 case "HELP":
                     await ComponentHelp(data).ConfigureAwait(false);

@@ -59,7 +59,7 @@ namespace Devices.Control.Lego
 
         protected override async Task ProcessCommand(MessageContainer data)
         {
-            switch (ResolveParameter(data, "Action", 1).ToUpperInvariant())
+            switch (data.ResolveParameter(nameof(MessageContainer.FixedPropertyNames.Action), 1).ToUpperInvariant())
             {
                 case "HELP":
                     await ComponentHelp(data).ConfigureAwait(false);

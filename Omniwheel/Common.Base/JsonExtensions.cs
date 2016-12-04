@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Text;
 using Windows.Data.Json;
 
@@ -78,6 +79,21 @@ namespace Common.Base
                 default:
                     return null;
             }
+        }
+
+        public static bool CompareKeyValue(this JsonObject json, string key, object value)
+        {
+            IJsonValue jsonValue;
+            return (json.TryGetValue(key, out jsonValue) && CompareJsonValue(jsonValue, EvaluateJsonValue(value)));
+        }
+
+        public static bool CompareJsonValue(this IJsonValue source, IJsonValue target)
+        {
+            if (source == null || target == null)
+                return false;
+            if (source.ValueType != target.ValueType)
+                return false;
+            return GetValueString(source) == GetValueString(target);
         }
     }
 }

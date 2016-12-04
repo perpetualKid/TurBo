@@ -29,7 +29,7 @@ namespace Devices.Control.Lego
 
         protected override async Task ProcessCommand(MessageContainer data)
         {
-            switch (ResolveParameter(data, "Action", 1).ToUpperInvariant())
+            switch (data.ResolveParameter(nameof(MessageContainer.FixedPropertyNames.Action), 1).ToUpperInvariant())
             {
                 case "HELP":
                     await ComponentHelp(data);
@@ -60,9 +60,9 @@ namespace Devices.Control.Lego
 
         private async Task DriveComponentDrive(MessageContainer data)
         {
-            double direction = Double.Parse(ResolveParameter(data, "Direction", 0));
-            int vLinear = int.Parse(ResolveParameter(data, "Velocity", 1));
-            int vAngular = int.Parse(ResolveParameter(data, "Rotation", 2));
+            double direction = Double.Parse(data.ResolveParameter("Direction", 0));
+            int vLinear = int.Parse(data.ResolveParameter("Velocity", 1));
+            int vAngular = int.Parse(data.ResolveParameter("Rotation", 2));
 
             holonomicDrive.MoveRobot(direction, vLinear, vAngular);
             await Task.CompletedTask;

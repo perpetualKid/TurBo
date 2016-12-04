@@ -144,5 +144,19 @@ namespace Common.Base
                 dataObject.SetNamedValue(nameof(FixedPropertyNames.Action), value);
             }
         }
+
+        /// <summary>
+        /// resolve the parameter by name or index
+        /// first look if the parameter is found by name in the json data object itself
+        /// if not found by name, try the parameter array by index 
+        /// </summary>
+        /// <returns></returns>        
+        public string ResolveParameter(string name, int index)
+        {
+            if (dataObject.ContainsKey(name))
+                return dataObject.GetNamedValue(name).GetValueString();
+            return parameters.GetAtAsString(index) ?? string.Empty;
+        }
+
     }
 }

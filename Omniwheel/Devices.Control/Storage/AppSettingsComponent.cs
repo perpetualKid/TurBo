@@ -28,7 +28,7 @@ namespace Devices.Control.Storage
 
         protected override async Task ProcessCommand(MessageContainer data)
         {
-            switch (ResolveParameter(data, "Action", 1).ToUpperInvariant())
+            switch (data.ResolveParameter(nameof(MessageContainer.FixedPropertyNames.Action), 1).ToUpperInvariant())
             {
                 case "HELP":
                     await ComponentHelp(data).ConfigureAwait(false);
@@ -55,7 +55,7 @@ namespace Devices.Control.Storage
         private async Task SettingsComponentGetSetting(MessageContainer data)
         {
             object settingValue;
-            string settingName = ResolveParameter(data, "Name", 0);
+            string settingName = data.ResolveParameter("Name", 0);
             if (!string.IsNullOrWhiteSpace(settingName))
             {
                 settings.Values.TryGetValue(settingName, out settingValue);
@@ -66,8 +66,8 @@ namespace Devices.Control.Storage
 
         private async Task SettingsComponentSetSetting(MessageContainer data)
         {
-            string settingName = ResolveParameter(data, "Name", 0);
-            string settingValue = ResolveParameter(data, "Value", 1);
+            string settingName = data.ResolveParameter("Name", 0);
+            string settingValue = data.ResolveParameter("Value", 1);
             
             if (!string.IsNullOrWhiteSpace(settingName))
             {

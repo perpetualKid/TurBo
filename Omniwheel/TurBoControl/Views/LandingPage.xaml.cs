@@ -31,7 +31,7 @@ namespace TurBoControl.Views
         {
             this.InitializeComponent();
             settings = ApplicationData.Current.LocalSettings;
-            imageSource = new ImageSourceController();
+            imageSource = ImageSourceController.Instance;
             imageSource.OnImageReceived += ImageSource_OnImageReceived;
         }
 
@@ -79,22 +79,6 @@ namespace TurBoControl.Views
                 });
 
             }
-            else if (data.ContainsKey("Target") && data.GetNamedString("Target").ToUpperInvariant() == "FrontCamera".ToUpperInvariant() &&
-                data.ContainsKey("Action") && data.GetNamedString("Action").ToUpperInvariant() == "Capture".ToUpperInvariant())
-            {
-                await CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(CoreDispatcherPriority.Normal, async () =>
-                {
-                    byte[] buffer = Convert.FromBase64String(data.GetNamedString("ImageBase64"));
-                    BitmapImage image = new BitmapImage();
-                    using (InMemoryRandomAccessStream stream = new InMemoryRandomAccessStream())
-                    {
-                        await stream.WriteAsync(buffer.AsBuffer());
-                        stream.Seek(0);
-                        await image.SetSourceAsync(stream);
-                    }
-                    imageFrontCamera.Source = image;
-                });
-            }
         }
 
         private async Task Connect(object sender)
@@ -127,7 +111,7 @@ namespace TurBoControl.Views
             //await SocketClient.Disconnect();
             //                await Task.Run(() => JsonStreamReader.ReadEndless(file.OpenStreamForReadAsync().Result));
             ConnectionFlyout.Hide();
-            await imageSource.CaptureDeviceImage();
+            //await imageSource.CaptureDeviceImage();
         }
 
         private async void DisplayMissingHostParametersDialog(object parameter)

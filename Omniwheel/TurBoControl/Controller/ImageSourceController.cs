@@ -16,17 +16,29 @@ namespace TurBoControl.Controller
 {
     public class ImageSourceController
     {
+        private static ImageSourceController instance;
         private ObservableCollection<BitmapImage> images;
         private BitmapImage currentImage;
         private const int maxImages = 10;
 
         public event EventHandler<EventArgs> OnImageReceived;
 
-        public ImageSourceController()
+        private ImageSourceController()
         {
             images = new ObservableCollection<BitmapImage>();
             DeviceConnectionController.Instance.RegisterOnDataReceivedEvent(nameof(ImageSourceController), Instance_OnDataReceived);
         }
+
+        public static ImageSourceController Instance
+        {
+            get
+            {
+                if (null == instance)
+                    instance = new ImageSourceController();
+                return instance;
+            }
+        }
+
         public ObservableCollection<BitmapImage> CachedImages
         {
             get { return this.images; }
@@ -45,8 +57,7 @@ namespace TurBoControl.Controller
 
         private async void Instance_OnDataReceived(JsonObject data)
         {
-            if (data.ContainsKey("Target") && data.GetNamedString("Target").ToUpperInvariant() == "FrontCamera".ToUpperInvariant() &&
-                data.ContainsKey("Action") && data.GetNamedString("Action").ToUpperInvariant() == "Capture".ToUpperInvariant())
+            if (data.CompareKeyValue("Target", "FrontCamera") && data.CompareKeyValue("Action", "Capture"))
             {
                 await CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(CoreDispatcherPriority.Normal, async () =>
                 {

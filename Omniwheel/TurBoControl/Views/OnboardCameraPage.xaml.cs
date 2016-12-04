@@ -28,8 +28,19 @@ namespace TurBoControl.Views
         public OnboardCameraPage()
         {
             this.InitializeComponent();
-            imageSource = new ImageSourceController();
+            imageSource = ImageSourceController.Instance;
+        }
+
+        protected override void OnNavigatedTo(NavigationEventArgs e)
+        {
+            base.OnNavigatedTo(e);
             imageSource.OnImageReceived += ImageSource_OnImageReceived;
+        }
+
+        protected override void OnNavigatedFrom(NavigationEventArgs e)
+        {
+            base.OnNavigatedFrom(e);
+            imageSource.OnImageReceived -= ImageSource_OnImageReceived;
         }
 
         private void ImageSource_OnImageReceived(object sender, EventArgs e)
@@ -45,6 +56,11 @@ namespace TurBoControl.Views
         private async void btnLoad_Click(object sender, RoutedEventArgs e)
         {
             await imageSource.CaptureDeviceImage();
+        }
+
+        private void ListView_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            this.imgMain.Source = this.imageSource.CachedImages[lvPictureCache.SelectedIndex];
         }
     }
 }

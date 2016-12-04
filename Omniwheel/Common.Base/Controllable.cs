@@ -49,22 +49,9 @@ namespace Common.Base
             return null;
         }
 
-        /// <summary>
-        /// resolve the parameter by name or index
-        /// first look if the parameter is found by name in the json data object itself
-        /// if not found by name, try the parameter array by index 
-        /// </summary>
-        /// <returns></returns>
-        protected static string ResolveParameter(MessageContainer data, string name,  int index)
-        {
-            if (data.JsonData.ContainsKey(name))
-                return data.JsonData.GetNamedValue(name).GetValueString();
-            return data.Parameters.GetAtAsString(index) ?? string.Empty;
-        }
-
         protected static async Task HandleInput(MessageContainer data)
         {
-            string component = ResolveParameter(data, "Target", 0).ToUpperInvariant();
+            string component = data.ResolveParameter(nameof(MessageContainer.FixedPropertyNames.Target), 0).ToUpperInvariant();
             if (string.IsNullOrEmpty(component))
                 throw new ArgumentNullException("No target component specified.");
             if (globalComponents.ContainsKey(component))
@@ -84,7 +71,7 @@ namespace Common.Base
                 if (component != "." && component != "ROOT")//assume no root component name given
                     data.PushParameters();  //and push all parameters back, as this is starting right with the action  
 
-                string action = ResolveParameter(data, "Action", 0).ToUpperInvariant();
+                string action = data.ResolveParameter("Action", 0).ToUpperInvariant();
                 switch (action)
                 {
                     case "HELP":
