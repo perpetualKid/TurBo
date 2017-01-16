@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using Turbo.Control.UWP.Controller;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
@@ -24,12 +25,23 @@ namespace Turbo.Control.UWP.Views
         {
             base.OnNavigatedTo(e);
             imageSource.OnImageReceived += ImageSource_OnImageReceived;
+            imageSource.SupportedFormats.CollectionChanged += SupportedFormats_CollectionChanged;
+        }
+
+        private void SupportedFormats_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        {
+            dropdownResolutions.Items.Clear();
+            foreach(var item in imageSource.SupportedFormats)
+            {
+                dropdownResolutions.Items.Add(item);
+            }
         }
 
         protected override void OnNavigatedFrom(NavigationEventArgs e)
         {
             base.OnNavigatedFrom(e);
             imageSource.OnImageReceived -= ImageSource_OnImageReceived;
+            imageSource.SupportedFormats.CollectionChanged -= SupportedFormats_CollectionChanged;
         }
 
         private void ImageSource_OnImageReceived(object sender, EventArgs e)
@@ -50,6 +62,11 @@ namespace Turbo.Control.UWP.Views
         private void ListView_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             this.imgMain.Source = this.imageSource.CachedImages[lvPictureCache.SelectedIndex];
+        }
+
+        private async void dropdownResolutions_DropDownOpened(object sender, object e)
+        {
+            await imageSource.GetSupportedModes();
         }
     }
 }

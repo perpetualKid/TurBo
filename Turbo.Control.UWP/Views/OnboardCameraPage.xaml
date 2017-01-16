@@ -85,6 +85,7 @@
                     </DataTemplate>
                 </ListView.ItemTemplate>
             </ListView>
+            <ComboBox x:Name="dropdownResolutions" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" DropDownOpened="dropdownResolutions_DropDownOpened"/>
         </StackPanel>
     </Grid>
 </Page>

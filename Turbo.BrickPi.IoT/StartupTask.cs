@@ -19,6 +19,7 @@ using Devices.Components.Common.Communication;
 using Devices.Communication;
 using System.Diagnostics;
 using Windows.Media.Capture;
+using Windows.Devices.Enumeration;
 
 // The Background Application template is documented at http://go.microsoft.com/fwlink/?LinkID=533884&clcid=0x409
 
@@ -74,13 +75,17 @@ namespace Turbo.BrickPi.IoT
             omniDrive = new DriveComponent("Drive", brickComponent, brick.Motors[MotorPort.Port_MA], brick.Motors[MotorPort.Port_MD], brick.Motors[MotorPort.Port_MB]);
             await ControllableComponent.RegisterComponent(omniDrive).ConfigureAwait(false);
 
-            camera = new CameraComponent("FrontCamera", new MediaCapture());
+            var videoDevices = await DeviceInformation.FindAllAsync(DeviceClass.VideoCapture).AsTask<DeviceInformationCollection>().ConfigureAwait(false);
+
+            camera = new CameraComponent("FrontCamera",
+                new MediaCaptureInitializationSettings
+                {
+                    StreamingCaptureMode = StreamingCaptureMode.Video,
+                    PhotoCaptureSource = PhotoCaptureSource.Auto,
+                    AudioDeviceId = string.Empty,
+                    VideoDeviceId = videoDevices[0].Id
+                });
             await ControllableComponent.RegisterComponent(camera).ConfigureAwait(false);
-
-            // Get available devices for capturing pictures
-            //            var allVideoDevices = await DeviceInformation.FindAllAsync(DeviceClass.VideoCapture).AsTask<DeviceInformationCollection>().ConfigureAwait(false);
-            //            mediaCapture = new MediaCapture();
-
 
             //await mediaCapture.InitializeAsync(new MediaCaptureInitializationSettings
             //{

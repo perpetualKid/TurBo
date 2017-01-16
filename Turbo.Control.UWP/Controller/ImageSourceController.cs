@@ -19,10 +19,13 @@ namespace Turbo.Control.UWP.Controller
         private const int maxImages = 10;
 
         public event EventHandler<EventArgs> OnImageReceived;
+        private ObservableCollection<string> supportedFormats;
+
 
         private ImageSourceController()
         {
             images = new ObservableCollection<BitmapImage>();
+            supportedFormats = new ObservableCollection<string>();
             DeviceConnectionController.Instance.RegisterOnDataReceivedEvent(nameof(ImageSourceController), Instance_OnDataReceived);
         }
 
@@ -41,6 +44,11 @@ namespace Turbo.Control.UWP.Controller
             get { return this.images; }
         }
 
+        public ObservableCollection<string> SupportedFormats
+        {
+            get { return this.supportedFormats; }
+        }
+
         public BitmapImage CurrentImage { get { return this.currentImage; } }
 
         public async Task CaptureDeviceImage()
@@ -50,6 +58,14 @@ namespace Turbo.Control.UWP.Controller
             imageCapture.AddValue("Action", "Capture");
             await DeviceConnectionController.Instance.Send(nameof(ImageSourceController), imageCapture);
 
+        }
+
+        public async Task GetSupportedModes()
+        {
+            JsonObject imageCapture = new JsonObject();
+            imageCapture.AddValue("Target", "FrontCamera");
+            imageCapture.AddValue("Action", "ListProperties");
+            await DeviceConnectionController.Instance.Send(nameof(ImageSourceController), imageCapture);
         }
 
         private async void Instance_OnDataReceived(JsonObject data)
@@ -72,6 +88,19 @@ namespace Turbo.Control.UWP.Controller
                         images.RemoveAt(maxImages - 1);
                     images.Insert(0, image);
                     OnImageReceived?.Invoke(this, EventArgs.Empty);
+                });
+            }
+            else if (data.CompareKeyValue("Target", "FrontCamera") && data.CompareKeyValue("Action", "ListProperties"))
+            {
+                await CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(CoreDispatcherPriority.Normal, async () =>
+                {
+                    supportedFormats.Clear();
+                    JsonArray formats = data.GetNamedArray("MediaFormat");
+                    foreach (var item in formats)
+                    {
+                        supportedFormats.Add(item.Stringify());
+                    }
+                    await Task.CompletedTask;
                 });
             }
         }

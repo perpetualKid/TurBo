@@ -128,6 +128,10 @@
       <Project>{8AD633BD-0B47-47B9-8FF3-B92C08B6EB07}</Project>
       <Name>Devices.Controllable</Name>
     </ProjectReference>
+    <ProjectReference Include="..\..\UWP.Devices\Devices.Util\Devices.Util.csproj">
+      <Project>{E0B70271-C5F3-4BEB-B30E-45536A296387}</Project>
+      <Name>Devices.Util</Name>
+    </ProjectReference>
   </ItemGroup>
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '14.0' ">
     <VisualStudioVersion>14.0</VisualStudioVersion>
