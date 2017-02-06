@@ -1,83 +1,69 @@
 ﻿using System.Threading.Tasks;
 using BrickPi.Uwp.Base;
-using Devices.Controllable;
+using Devices.Components;
 
 namespace Turbo.BrickPi.Components.Lego
 {
-    public class BrickPiLedComponent : ControllableComponent
+    public class BrickPiLedComponent : ComponentBase
     {
         private BrickLed brickLed;
 
-        public BrickPiLedComponent(string componentName, ControllableComponent parent, BrickLed led) : base(componentName, parent)
+        public BrickPiLedComponent(string componentName, ComponentBase parent, BrickLed led) : base(componentName, parent)
         {
             this.brickLed = led;
         }
 
-        protected override async Task ComponentHelp(MessageContainer data)
-        {
-            data.AddMultiPartValue("Help", "LED HELP : Shows this help screen.");
-            data.AddMultiPartValue("Help", "LED ON|ENABLE : Turns the LED on.");
-            data.AddMultiPartValue("Help", "LED OFF|DISABLE : Turns the LED off.");
-            data.AddMultiPartValue("Help", "LED TOGGLE : Toggle the LED from current status.");
-            data.AddMultiPartValue("Help", "LED STATUS : Returns the current status for the LED.");
-            await HandleOutput(data).ConfigureAwait(false);
-        }
-
-        protected override async Task ProcessCommand(MessageContainer data)
-        {
-            switch (data.ResolveParameter(nameof(MessageContainer.FixedPropertyNames.Action), 1).ToUpperInvariant())
-            {
-                case "HELP":
-                    await ComponentHelp(data).ConfigureAwait(false);
-                    break;
-                case "ON":
-                case "ENABLE":
-                    await SetLed(true).ConfigureAwait(false);
-                    break;
-                case "OFF":
-                case "DISABLE":
-                    await SetLed(false).ConfigureAwait(false);
-                    break;
-                case "TOGGLE":
-                    await LedComponentToogle(data).ConfigureAwait(false);
-                    break;
-                case "STATUS":
-                    await LedComponentGetStatus(data).ConfigureAwait(false);
-                    break;
-            }
-        }
 
         #region command handling
+        [Action("Status")]
+        [ActionHelp("Returns the current status for the LED.")]
         private async Task LedComponentGetStatus(MessageContainer data)
         {
             data.AddValue("Status", (await GetLedStatus().ConfigureAwait(false) ? "Enabled" : "Disabled"));
-            await HandleOutput(data).ConfigureAwait(false);
+            await ComponentHandler.HandleOutput(data).ConfigureAwait(false);
         }
 
+        [Action("Toogle")]
+        [ActionHelp("Toggle the LED from current status.")]
         private async Task LedComponentToogle(MessageContainer data)
         {
             await ToogleLed().ConfigureAwait(false);
             await LedComponentGetStatus(data).ConfigureAwait(false);
         }
+
+        [Action("Enable")]
+        [Action("On")]
+        [ActionHelp("Turns the LED on.")]
+        private async Task EnableLed(MessageContainer data)
+        {
+            await SetLed(true);
+        }
+
+        [Action("Disable")]
+        [Action("Off")]
+        [ActionHelp("Turns the LED off.")]
+        private async Task DisableLed(MessageContainer data)
+        {
+            await SetLed(false);
+        }
         #endregion
 
         #region public
-        public async Task<bool> GetLedStatus()
+        public Task<bool> GetLedStatus()
         {
-            await Task.CompletedTask.ConfigureAwait(false);
-            return brickLed.Light;
+            return Task.FromResult<bool>(brickLed.Light);
         }
 
-        public async Task ToogleLed()
+        public Task ToogleLed()
         {
             brickLed.Toggle();
-            await Task.CompletedTask.ConfigureAwait(false);
+            return Task.CompletedTask;
         }
 
-        public async Task SetLed(bool status)
+        public Task SetLed(bool status)
         {
             brickLed.Light = status;
-            await Task.CompletedTask.ConfigureAwait(false);
+            return Task.CompletedTask;
         }
         #endregion
     }

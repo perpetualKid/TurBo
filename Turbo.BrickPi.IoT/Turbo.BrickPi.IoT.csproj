@@ -121,13 +121,13 @@
       <Project>{4D8ACBE7-0837-4DAD-A6BA-37DE7BCEA517}</Project>
       <Name>Devices.Communication</Name>
     </ProjectReference>
+    <ProjectReference Include="..\..\UWP.Devices\Devices.Components.Base\Devices.Components.Base.csproj">
+      <Project>{39abe250-6554-4086-98d9-0d36903de939}</Project>
+      <Name>Devices.Components.Base</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\UWP.Devices\Devices.Components.Common\Devices.Components.Common.csproj">
       <Project>{CDA842EA-1BCB-43B1-8066-DBECE7FB6DEB}</Project>
       <Name>Devices.Components.Common</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\UWP.Devices\Devices.Controllable\Devices.Controllable.csproj">
-      <Project>{8AD633BD-0B47-47B9-8FF3-B92C08B6EB07}</Project>
-      <Name>Devices.Controllable</Name>
     </ProjectReference>
     <ProjectReference Include="..\Turbo.BrickPi.Components\Turbo.BrickPi.Components.csproj">
       <Project>{67BE144F-2AFF-490A-914D-187D86847D8B}</Project>

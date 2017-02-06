@@ -2,14 +2,14 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
+using Devices.Components;
 using Devices.Connectors.Storage;
-using Devices.Controllable;
 using Windows.Storage;
 using Windows.Storage.Streams;
 
 namespace Turbo.BrickPi.Components.Storage
 {
-    public class OneDriveComponent : StorageControllable
+    public class OneDriveComponent : StorageComponentBase
     {
         OneDriveConnector oneDriveConnector;
 
@@ -17,38 +17,12 @@ namespace Turbo.BrickPi.Components.Storage
         {
         }
 
-        protected override async Task ComponentHelp(MessageContainer data)
-        {
-            data.AddMultiPartValue("Help", "HELP : Shows this help screen.");
-            data.AddMultiPartValue("Help", "LOGIN:<ClientId>:<ClientSecret>:<AccessCode> : Logging in to OneDrive.");
-            data.AddMultiPartValue("Help", "LOGOUT|LOGOFF : Loging off from Onedrive.");
-            data.AddMultiPartValue("Help", "LIST|LISTFILES[:<Path>[:<FilesOnly|True>]] : List Folders and Files or Files only.");
-            await HandleOutput(data);
-        }
-
-        protected override async Task ProcessCommand(MessageContainer data)
-        {
-            switch (data.ResolveParameter(nameof(MessageContainer.FixedPropertyNames.Action), 1).ToUpperInvariant())
-            {
-                case "HELP":
-                    await ComponentHelp(data);
-                    break;
-                case "LOGIN":
-                case "LOGON":
-                    await ConnectStorage(data);
-                    break;
-                case "LOGOUT":
-                case "LOGOFF":
-                    await DisconnectStorage(data);
-                    break;
-                case "LIST":
-                case "LISTFILES":
-                    await ListContent(data);
-                    break;
-            }
-        }
-
         #region private implementation
+        [Action("List")]
+        [Action("ListFiles")]
+        [ActionParameter("Path", Required = false)]
+        [ActionParameter("FilesOnly", ParameterType = typeof(bool), Required = false)]
+        [ActionHelp("List Folders and Files, starting at root or in given path. Set FilesOnly to list only files.")]
         protected override async Task ListContent(MessageContainer data)
         {
             string path = data.ResolveParameter("Path", 2);
@@ -65,9 +39,16 @@ namespace Turbo.BrickPi.Components.Storage
             }
             else
                 data.AddValue("EmptyFiles", "No files or folder found.");
-            await HandleOutput(data); ;
+            await ComponentHandler.HandleOutput(data); ;
         }
 
+        [Action("Login")]
+        [Action("Logon")]
+        [Action("Connect")]
+        [ActionParameter("ClientId")]
+        [ActionParameter("ClientSecret")]
+        [ActionParameter("AccessCode")]
+        [ActionHelp("Logging in to OneDrive.")]
         protected override async Task ConnectStorage(MessageContainer data)
         {
             string clientId = data.ResolveParameter("ClientId", 2);
@@ -76,14 +57,18 @@ namespace Turbo.BrickPi.Components.Storage
 
             await OneDriveLogin(clientId, clientSecret, accessCode);
             data.AddValue("Login", "Login " + (oneDriveConnector != null && oneDriveConnector.LoggedIn ? "successful" : "failed"));
-            await HandleOutput(data); ;
+            await ComponentHandler.HandleOutput(data); ;
         }
 
+        [Action("Logout")]
+        [Action("Logoff")]
+        [Action("Disconnect")]
+        [ActionHelp("Loging off from Onedrive.")]
         protected override async Task DisconnectStorage(MessageContainer data)
         {
             await OneDriveLogout();
             data.AddValue("Logout", "Logout " + (oneDriveConnector == null || !oneDriveConnector.LoggedIn ? "successful" : "failed"));
-            await HandleOutput(data); ;
+            await ComponentHandler.HandleOutput(data); ;
         }
 
         #endregion

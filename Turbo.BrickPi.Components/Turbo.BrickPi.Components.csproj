@@ -120,13 +120,13 @@
     <EmbeddedResource Include="Properties\Turbo.BrickPi.Components.rd.xml" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\UWP.Devices\Devices.Components.Base\Devices.Components.Base.csproj">
+      <Project>{39ABE250-6554-4086-98D9-0D36903DE939}</Project>
+      <Name>Devices.Components.Base</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\UWP.Devices\Devices.Connectors\Devices.Connectors.csproj">
       <Project>{1770BD3F-C09B-42E6-AC21-1DB9B6CA37C6}</Project>
       <Name>Devices.Connectors</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\UWP.Devices\Devices.Controllable\Devices.Controllable.csproj">
-      <Project>{8AD633BD-0B47-47B9-8FF3-B92C08B6EB07}</Project>
-      <Name>Devices.Controllable</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\UWP.Devices\Devices.Util\Devices.Util.csproj">
       <Project>{E0B70271-C5F3-4BEB-B30E-45536A296387}</Project>

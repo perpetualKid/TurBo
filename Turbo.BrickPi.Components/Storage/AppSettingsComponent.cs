@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Devices.Controllable;
+using Devices.Components;
 using Windows.Storage;
 
 namespace Turbo.BrickPi.Components.Storage
 {
-    public class AppSettingsComponent : ControllableComponent
+    public class AppSettingsComponent : ComponentBase
     {
         ApplicationDataContainer settings;
 
@@ -15,42 +15,19 @@ namespace Turbo.BrickPi.Components.Storage
             this.settings = ApplicationData.Current.LocalSettings;
         }
 
-        protected override async Task ComponentHelp(MessageContainer data)
-        {
-            data.AddMultiPartValue("Help", "SETTINGS HELP : Shows this help screen.");
-            data.AddMultiPartValue("Help", "SETTINGS LIST : Returns a list of all available Settings, but no values.");
-            data.AddMultiPartValue("Help", "SETTINGS GET <SettingName> : Returns a setting  given by name.");
-            data.AddMultiPartValue("Help", "SETTINGS SET <SettingName>:<SettingValue> : Adds or sets a setting  and value.");
-            await HandleOutput(data).ConfigureAwait(false);
-        }
-
-        protected override async Task ProcessCommand(MessageContainer data)
-        {
-            switch (data.ResolveParameter(nameof(MessageContainer.FixedPropertyNames.Action), 1).ToUpperInvariant())
-            {
-                case "HELP":
-                    await ComponentHelp(data).ConfigureAwait(false);
-                    break;
-                case "GET":
-                    await SettingsComponentGetSetting(data).ConfigureAwait(false);
-                    break;
-                case "SET":
-                    await SettingsComponentSetSetting(data).ConfigureAwait(false);
-                    break;
-                case "LIST":
-                    await SettingsComponentGetAllSettingNames(data).ConfigureAwait(false);
-                    break;
-            }
-        }
-
         #region command handling
-        private async Task SettingsComponentGetAllSettingNames(MessageContainer data)
+        [Action("List")]
+        [ActionHelp(" Returns a list of all available Settings, but no values.")]
+        private async Task ListSettingNames(MessageContainer data)
         {
             data.AddValue("Settings", await GetSettingNames().ConfigureAwait(false));
-            await HandleOutput(data);
+            await ComponentHandler.HandleOutput(data);
         }
 
-        private async Task SettingsComponentGetSetting(MessageContainer data)
+        [Action("Get")]
+        [ActionParameter("SettingName")]
+        [ActionHelp("Returns a setting  given by name.")]
+        private async Task GetSettingByName(MessageContainer data)
         {
             object settingValue;
             string settingName = data.ResolveParameter("Name", 0);
@@ -58,11 +35,15 @@ namespace Turbo.BrickPi.Components.Storage
             {
                 settings.Values.TryGetValue(settingName, out settingValue);
                 data.AddValue(settingName, settingValue);
-                await HandleOutput(data);
+                await ComponentHandler.HandleOutput(data);
             }
         }
 
-        private async Task SettingsComponentSetSetting(MessageContainer data)
+        [Action("Set")]
+        [ActionParameter("SettingName")]
+        [ActionParameter("SettingValue")]
+        [ActionHelp("Adds or sets a setting  and value.")]
+        private async Task SetSettingByName(MessageContainer data)
         {
             string settingName = data.ResolveParameter("Name", 0);
             string settingValue = data.ResolveParameter("Value", 1);
@@ -76,10 +57,9 @@ namespace Turbo.BrickPi.Components.Storage
         #endregion
 
         #region public handling
-        public async Task<ICollection<string>> GetSettingNames()
+        public Task<ICollection<string>> GetSettingNames()
         {
-            await Task.CompletedTask;
-            return settings.Values.Keys;
+            return Task.FromResult<ICollection<string>>(settings.Values.Keys);
         }
 
         public ApplicationDataContainerSettings ApplicationSettings

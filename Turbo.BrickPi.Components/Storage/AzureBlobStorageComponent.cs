@@ -1,12 +1,12 @@
 ﻿using System.Threading.Tasks;
-using Devices.Controllable;
+using Devices.Components;
 using Microsoft.WindowsAzure.Storage;
 using Microsoft.WindowsAzure.Storage.Auth;
 using Microsoft.WindowsAzure.Storage.Blob;
 
 namespace Turbo.BrickPi.Components.Storage
 {
-    public class AzureBlobStorageComponent : StorageControllable
+    public class AzureBlobStorageComponent : StorageComponentBase
     {
         CloudStorageAccount storageAccount;
         CloudBlobClient blobClient;
@@ -16,35 +16,12 @@ namespace Turbo.BrickPi.Components.Storage
         {
         }
 
-        protected override async Task ProcessCommand(MessageContainer data)
-        {
-            switch (data.ResolveParameter(nameof(MessageContainer.FixedPropertyNames.Action), 1).ToUpperInvariant())
-            {
-                case "HELP":
-                    await ComponentHelp(data);
-                    break;
-                case "CONNECT":
-                    await ConnectStorage(data);
-                    break;
-                case "DISCONNECT":
-                    await DisconnectStorage(data);
-                    break;
-                case "LIST":
-                case "LISTFILES":
-                    await ListContent(data);
-                    break;
-            }
-        }
-
-        protected override async Task ComponentHelp(MessageContainer data)
-        {
-            data.AddMultiPartValue("Help", "HELP : Shows this help screen.");
-            data.AddMultiPartValue("Help", "CONNECT:<StorageConnectionString>|<StorageAccount>:<AccessKey> : Connecting to Azure Blob Storage.");
-            data.AddMultiPartValue("Help", "DISCONNECT: Disconnecting from Azure Blob Storage.");
-            data.AddMultiPartValue("Help", "LIST|LISTFILES[:<Path>[:<FilesOnly|True>]] : List Folders and Files or Files only.");
-            await HandleOutput(data);
-        }
-
+        [Action("Connect")]
+        [ActionParameter("ConnectionString")]
+        [ActionParameter("StorageAccount", Required = false)]
+        [ActionParameter("AccessKey", Required = false)]
+        [ActionParameter("ContainerName")]
+        [ActionHelp("Connecting to Storage Container in Azure Blob Storage.")]
         protected override async Task ConnectStorage(MessageContainer data)
         {
             string containerName;
@@ -62,16 +39,23 @@ namespace Turbo.BrickPi.Components.Storage
                 await ConnectStorage(storageAccount, accessKey, containerName);
             }
             data.AddValue("Connect", "Connect " + (blobClient != null ? "successful" : "failed"));
-            await HandleOutput(data); ;
+            await ComponentHandler.HandleOutput(data); ;
         }
 
+        [Action("Disconnect")]
+        [ActionHelp("Disconnecting from Azure Blob Storage.")]
         protected override async Task DisconnectStorage(MessageContainer data)
         {
             await DisconnectStorage();
             data.AddValue("Disconnect", "Disconnect " + (blobClient != null ? "successful" : "failed"));
-            await HandleOutput(data); ;
+            await ComponentHandler.HandleOutput(data); ;
         }
 
+        [Action("List")]
+        [Action("ListFiles")]
+        [ActionParameter("Path", Required = false)]
+        [ActionParameter("FilesOnly", ParameterType = typeof(bool), Required = false)]
+        [ActionHelp("List Folders and Files, starting at root or in given path. Set FilesOnly to list only files.")]
         protected override async Task ListContent(MessageContainer data)
         {
             await Task.CompletedTask.ConfigureAwait(false);

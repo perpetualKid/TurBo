@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Devices.Controllable;
+using Devices.Components;
 using Devices.Util.Extensions;
 using Windows.Data.Json;
 using Windows.Media.Capture;
@@ -11,7 +11,7 @@ using Windows.Storage.Streams;
 
 namespace Turbo.BrickPi.Components.Media
 {
-    public class CameraComponent : ControllableComponent
+    public class CameraComponent : ComponentBase
     {
         private MediaCapture mediaCapture;
         private MediaCaptureInitializationSettings mediaCaptureSettings;
@@ -43,41 +43,9 @@ namespace Turbo.BrickPi.Components.Media
             await base.InitializeDefaults();
         }
 
-        protected override async Task ComponentHelp(MessageContainer data)
-        {
-            data.AddMultiPartValue("Help", "CAMERA HELP : Shows this help screen.");
-            data.AddMultiPartValue("Help", "CAMERA CAPTURE : Takes a picture and returns as Base64 string.");
-            data.AddMultiPartValue("Help", "CAMERA GETALLFORMATS [<Type> <SubType> <Width> <Height>]: Returns a list of available capture formats.");
-            data.AddMultiPartValue("Help", "CAMERA GETCURRENTFORMAT: Returns current capture format.");
-            data.AddMultiPartValue("Help", "CAMERA SETRESOLUTION <Width>:<Height> Returns a list of available capture formats.");
-            await HandleOutput(data).ConfigureAwait(false);
-        }
-
-        protected override async Task ProcessCommand(MessageContainer data)
-        {
-            switch (data.ResolveParameter(nameof(MessageContainer.FixedPropertyNames.Action), 1).ToUpperInvariant())
-            {
-                case "HELP":
-                    await ComponentHelp(data).ConfigureAwait(false);
-                    break;
-                case "CAPTURE":
-                    await CameraComponentCapture(data).ConfigureAwait(false);
-                    break;
-                case "GETALL":
-                case "GETALLFORMATS":
-                    await CameraComponentGetAllFormats(data).ConfigureAwait(false);
-                    break;
-                case "GETCURRENT":
-                case "GETCURRENTFORMAT":
-//                    await CameraComponentGetCurrentFormat(data).ConfigureAwait(false);
-                    break;
-                case "SETRESOLUTION":
-                    await CameraComponentSetResolution(data).ConfigureAwait(false);
-                    break;
-            }
-        }
-
         #region command handling
+        [Action("Capture")]
+        [ActionHelp("Takes a picture and returns as Base64 string.")]
         private async Task CameraComponentCapture(MessageContainer data)
         {
             string imageBase64 = string.Empty;
@@ -92,35 +60,33 @@ namespace Turbo.BrickPi.Components.Media
                 imageBase64 = Convert.ToBase64String(bytes);
             }
             data.AddValue("ImageBase64", imageBase64);
-            await HandleOutput(data).ConfigureAwait(false);
+            await ComponentHandler.HandleOutput(data).ConfigureAwait(false);
         }
 
+        [Action("GetCurrentFormat")]
+        [ActionHelp("Returns current capture format.")]
         private async Task CameraComponentListProperties(MessageContainer data)
         {
-            foreach (var item in await GetSupportedMediaFormats().ConfigureAwait(false))
-            {
-                VideoEncodingProperties videoProperties = item as VideoEncodingProperties;
-                JsonObject properties = new JsonObject();
-                properties.AddValue(nameof(videoProperties.Bitrate), videoProperties.Bitrate);
-                properties.AddValue(nameof(videoProperties.FrameRate), $"{videoProperties.FrameRate.Denominator}/{videoProperties.FrameRate.Numerator}");
-                properties.AddValue(nameof(videoProperties.Height), videoProperties.Height);
-                properties.AddValue(nameof(videoProperties.ProfileId), videoProperties.ProfileId);
-                properties.AddValue(nameof(videoProperties.PixelAspectRatio), $"{videoProperties.PixelAspectRatio.Denominator}/{videoProperties.PixelAspectRatio.Numerator}");
-                properties.AddValue(nameof(videoProperties.Subtype), videoProperties.Subtype);
-                properties.AddValue(nameof(videoProperties.Type), videoProperties.Type);
-                properties.AddValue(nameof(videoProperties.Width), videoProperties.Width);
-                data.AddMultiPartValue("MediaFormat", properties);
-            }
-            await HandleOutput(data).ConfigureAwait(false);
+            data.AddMultiPartValue("MediaFormat", VideoPropertiesToJson(await GetCurrentFormat() as VideoEncodingProperties));
+            await ComponentHandler.HandleOutput(data).ConfigureAwait(false);
         }
 
         private async Task CameraComponentSetResolution(MessageContainer data)
         {
+            await Task.CompletedTask;
             uint width = uint.Parse(data.ResolveParameter("Width", 0));
             uint height = uint.Parse(data.ResolveParameter("Height", 1));
             //await SetCurrentFormat(width, height).ConfigureAwait(false);
         }
 
+        [Action("ListFormats")]
+        [Action("GetAllFormats")]
+        [ActionParameter("Type", Required = false)]
+        [ActionParameter("SubType", Required = false)]
+        [ActionParameter("Width", Required = false)]
+        [ActionParameter("Height", Required = false)]
+        [ActionParameter("BitRate", Required = false)]
+        [ActionHelp("Returns a list of available capture formats. If provided, filtered by the given parameters")]
         private async Task CameraComponentGetAllFormats(MessageContainer data)
         {
             uint width;
@@ -137,19 +103,9 @@ namespace Turbo.BrickPi.Components.Media
 
             foreach (var item in await GetSupportedMediaFormats(type, subtype, width, height, bitrate).ConfigureAwait(false))
             {
-                VideoEncodingProperties videoProperties = item as VideoEncodingProperties;
-                JsonObject properties = new JsonObject();
-                properties.AddValue(nameof(videoProperties.Bitrate), videoProperties.Bitrate);
-                properties.AddValue(nameof(videoProperties.FrameRate), $"{videoProperties.FrameRate.Denominator}/{videoProperties.FrameRate.Numerator}");
-                properties.AddValue(nameof(videoProperties.Height), videoProperties.Height);
-                properties.AddValue(nameof(videoProperties.ProfileId), videoProperties.ProfileId);
-                properties.AddValue(nameof(videoProperties.PixelAspectRatio), $"{videoProperties.PixelAspectRatio.Denominator}/{videoProperties.PixelAspectRatio.Numerator}");
-                properties.AddValue(nameof(videoProperties.Subtype), videoProperties.Subtype);
-                properties.AddValue(nameof(videoProperties.Type), videoProperties.Type);
-                properties.AddValue(nameof(videoProperties.Width), videoProperties.Width);
-                data.AddMultiPartValue("MediaFormat", properties);
+                data.AddMultiPartValue("MediaFormat", VideoPropertiesToJson(item as VideoEncodingProperties));
             }
-            await HandleOutput(data).ConfigureAwait(false);
+            await ComponentHandler.HandleOutput(data).ConfigureAwait(false);
         }
         #endregion
 
@@ -163,11 +119,11 @@ namespace Turbo.BrickPi.Components.Media
             return stream;
         }
 
-        public Task<IEnumerable<IMediaEncodingProperties>> GetSupportedMediaFormats()
+        public async Task<IEnumerable<IMediaEncodingProperties>> GetSupportedMediaFormats()
         {
             if (null != supportedFormats)
-                return Task.FromResult<IEnumerable<IMediaEncodingProperties>>(supportedFormats);
-            return Task.Run(() =>
+                return await Task.FromResult<IEnumerable<IMediaEncodingProperties>>(supportedFormats);
+            return await Task.Run(() =>
            {
                supportedFormats = mediaCapture.VideoDeviceController.GetAvailableMediaStreamProperties(MediaStreamType.Photo).OrderByDescending(
          resolution => ((VideoEncodingProperties)resolution).Width);
@@ -175,9 +131,9 @@ namespace Turbo.BrickPi.Components.Media
            });
         }
 
-        public Task<IMediaEncodingProperties> GetCurrentFormat()
+        public async Task<IMediaEncodingProperties> GetCurrentFormat()
         {
-            return Task.Run(() => mediaCapture.VideoDeviceController.GetMediaStreamProperties(MediaStreamType.Photo));
+            return await Task.Run(() => mediaCapture.VideoDeviceController.GetMediaStreamProperties(MediaStreamType.Photo));
         }
 
         public async Task SetCurrentFormat(IMediaEncodingProperties format)
@@ -209,6 +165,22 @@ namespace Turbo.BrickPi.Components.Media
         #region properties
         public MediaCapture MediaCapture { get { return this.mediaCapture; } }
 
+        #endregion
+
+        #region private helpers
+        private JsonObject VideoPropertiesToJson(VideoEncodingProperties videoProperties)
+        {
+            JsonObject properties = new JsonObject();
+            properties.AddValue(nameof(videoProperties.Bitrate), videoProperties.Bitrate);
+            properties.AddValue(nameof(videoProperties.FrameRate), $"{videoProperties.FrameRate.Denominator}/{videoProperties.FrameRate.Numerator}");
+            properties.AddValue(nameof(videoProperties.Height), videoProperties.Height);
+            properties.AddValue(nameof(videoProperties.ProfileId), videoProperties.ProfileId);
+            properties.AddValue(nameof(videoProperties.PixelAspectRatio), $"{videoProperties.PixelAspectRatio.Denominator}/{videoProperties.PixelAspectRatio.Numerator}");
+            properties.AddValue(nameof(videoProperties.Subtype), videoProperties.Subtype);
+            properties.AddValue(nameof(videoProperties.Type), videoProperties.Type);
+            properties.AddValue(nameof(videoProperties.Width), videoProperties.Width);
+            return properties;
+        }
         #endregion
     }
 }

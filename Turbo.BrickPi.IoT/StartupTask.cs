@@ -14,12 +14,12 @@ using BrickPi.Uwp.Sensors.NXT;
 using BrickPi.Uwp;
 using BrickPi.Uwp.Base;
 using System.Threading.Tasks;
-using Devices.Controllable;
 using Devices.Components.Common.Communication;
 using Devices.Communication;
 using System.Diagnostics;
 using Windows.Media.Capture;
 using Windows.Devices.Enumeration;
+using Devices.Components;
 
 // The Background Application template is documented at http://go.microsoft.com/fwlink/?LinkID=533884&clcid=0x409
 
@@ -47,17 +47,20 @@ namespace Turbo.BrickPi.IoT
             deferral = taskInstance.GetDeferral();
             taskInstance.Canceled += TaskInstance_Canceled;
 
+            //await ComponentHandler.InitializeDefaults();
             List<Task> setupTasks = new List<Task>();
 
-            setupTasks.Add(ControllableComponent.RegisterComponent(new SocketListener(8027)));
-            setupTasks.Add(ControllableComponent.RegisterComponent(new SocketListener(8031, DataFormat.Json)));
+            setupTasks.Add(ComponentHandler.RegisterComponent(new SocketListener(8027)));
+            setupTasks.Add(ComponentHandler.RegisterComponent(new SocketListener(8031, DataFormat.Json)));
+
             oneDrive = new OneDriveComponent();
-            setupTasks.Add(ControllableComponent.RegisterComponent(oneDrive));
+            setupTasks.Add(ComponentHandler.RegisterComponent(oneDrive));
             azureBlob = new AzureBlobStorageComponent();
-            setupTasks.Add(ControllableComponent.RegisterComponent(azureBlob));
+            setupTasks.Add(ComponentHandler.RegisterComponent(azureBlob));
             brickComponent = new BrickPiComponent();
-            setupTasks.Add(ControllableComponent.RegisterComponent(brickComponent));
-            setupTasks.Add(ControllableComponent.RegisterComponent(new AppSettingsComponent()));
+            setupTasks.Add(ComponentHandler.RegisterComponent(brickComponent));
+            setupTasks.Add(ComponentHandler.RegisterComponent(new AppSettingsComponent()));
+
             await Task.WhenAll(setupTasks).ConfigureAwait(false);
 
             brick = brickComponent.BrickPi;
@@ -73,7 +76,7 @@ namespace Turbo.BrickPi.IoT
             await brick.Sensors.Add(color).ConfigureAwait(false);
             await brickComponent.RegisterSensors();
             omniDrive = new DriveComponent("Drive", brickComponent, brick.Motors[MotorPort.Port_MA], brick.Motors[MotorPort.Port_MD], brick.Motors[MotorPort.Port_MB]);
-            await ControllableComponent.RegisterComponent(omniDrive).ConfigureAwait(false);
+            await ComponentHandler.RegisterComponent(omniDrive).ConfigureAwait(false);
 
             var videoDevices = await DeviceInformation.FindAllAsync(DeviceClass.VideoCapture).AsTask<DeviceInformationCollection>().ConfigureAwait(false);
 
@@ -85,7 +88,7 @@ namespace Turbo.BrickPi.IoT
                     AudioDeviceId = string.Empty,
                     VideoDeviceId = videoDevices[0].Id
                 });
-            await ControllableComponent.RegisterComponent(camera).ConfigureAwait(false);
+            await ComponentHandler.RegisterComponent(camera).ConfigureAwait(false);
 
             //await mediaCapture.InitializeAsync(new MediaCaptureInitializationSettings
             //{

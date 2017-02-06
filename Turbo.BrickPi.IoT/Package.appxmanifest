@@ -4,7 +4,7 @@
   <mp:PhoneIdentity PhoneProductId="8f4eec16-f27f-4f27-b7c1-c56b73f84900" PhonePublisherId="00000000-0000-0000-0000-000000000000" />
   <Properties>
     <DisplayName>Turbo.BrickPi.IoT</DisplayName>
-    <PublisherDisplayName>steffen.vorein</PublisherDisplayName>
+    <PublisherDisplayName>perpetualKid</PublisherDisplayName>
     <Logo>Assets\StoreLogo.png</Logo>
   </Properties>
   <Dependencies>
