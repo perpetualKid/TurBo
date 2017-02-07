@@ -112,7 +112,6 @@
     <Compile Include="Lego\BrickPiLedComponent.cs" />
     <Compile Include="Lego\DriveComponent.cs" />
     <Compile Include="Lego\NXTColorSensorComponent.cs" />
-    <Compile Include="Media\CameraComponent.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Storage\AppSettingsComponent.cs" />
     <Compile Include="Storage\AzureBlobStorageComponent.cs" />
@@ -133,6 +132,7 @@
       <Name>Devices.Util</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '14.0' ">
     <VisualStudioVersion>14.0</VisualStudioVersion>
   </PropertyGroup>

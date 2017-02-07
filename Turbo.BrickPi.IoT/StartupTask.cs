@@ -1,25 +1,22 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Net.Http;
-using Windows.ApplicationModel.Background;
-using Windows.Storage.Streams;
-using Windows.Storage;
-using Windows.Media.MediaProperties;
-using Turbo.BrickPi.Components.Storage;
-using Turbo.BrickPi.Components.Lego;
-using Turbo.BrickPi.Components.Media;
-using BrickPi.Uwp.Sensors.NXT;
+using System.Diagnostics;
+using System.Threading.Tasks;
 using BrickPi.Uwp;
 using BrickPi.Uwp.Base;
-using System.Threading.Tasks;
-using Devices.Components.Common.Communication;
+using BrickPi.Uwp.Sensors.NXT;
 using Devices.Communication;
-using System.Diagnostics;
-using Windows.Media.Capture;
-using Windows.Devices.Enumeration;
 using Devices.Components;
+using Devices.Components.Common.Communication;
+using Devices.Components.Common.Media;
+using Turbo.BrickPi.Components.Lego;
+using Turbo.BrickPi.Components.Storage;
+using Windows.ApplicationModel.Background;
+using Windows.Devices.Enumeration;
+using Windows.Media.Capture;
+using Windows.Media.MediaProperties;
+using Windows.Storage;
+using Windows.Storage.Streams;
 
 // The Background Application template is documented at http://go.microsoft.com/fwlink/?LinkID=533884&clcid=0x409
 
@@ -47,7 +44,6 @@ namespace Turbo.BrickPi.IoT
             deferral = taskInstance.GetDeferral();
             taskInstance.Canceled += TaskInstance_Canceled;
 
-            //await ComponentHandler.InitializeDefaults();
             List<Task> setupTasks = new List<Task>();
 
             setupTasks.Add(ComponentHandler.RegisterComponent(new SocketListener(8027)));
