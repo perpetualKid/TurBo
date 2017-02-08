@@ -64,7 +64,7 @@ namespace Turbo.Control.UWP.Controller
         {
             JsonObject imageCapture = new JsonObject();
             imageCapture.AddValue("Target", "FrontCamera");
-            imageCapture.AddValue("Action", "ListProperties");
+            imageCapture.AddValue("Action", "GetAllFormats");
             await DeviceConnectionController.Instance.Send(nameof(ImageSourceController), imageCapture);
         }
 
@@ -90,7 +90,7 @@ namespace Turbo.Control.UWP.Controller
                     OnImageReceived?.Invoke(this, EventArgs.Empty);
                 });
             }
-            else if (data.CompareKeyValue("Target", "FrontCamera") && data.CompareKeyValue("Action", "ListProperties"))
+            else if (data.CompareKeyValue("Target", "FrontCamera") && data.CompareKeyValue("Action", "GetAllFormats"))
             {
                 await CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(CoreDispatcherPriority.Normal, async () =>
                 {
