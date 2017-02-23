@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
-using Turbo.Control.UWP.Controller;
+using Devices.Controllers.Common;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Media.Imaging;
@@ -18,7 +18,7 @@ namespace Turbo.Control.UWP.Views
         public OnboardCameraPage()
         {
             this.InitializeComponent();
-            imageSource = ImageSourceController.Instance;
+            imageSource = ImageSourceController.GetNamedInstance<ImageSourceController>(nameof(ImageSourceController)).Result;
         }
 
         protected override void OnNavigatedTo(NavigationEventArgs e)
@@ -66,7 +66,7 @@ namespace Turbo.Control.UWP.Views
 
         private async void dropdownResolutions_DropDownOpened(object sender, object e)
         {
-            await imageSource.GetSupportedModes();
+            await imageSource.GetSupportedModesRequest();
         }
     }
 }

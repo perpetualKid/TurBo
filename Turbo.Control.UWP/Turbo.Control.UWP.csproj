@@ -99,8 +99,6 @@
     <Compile Include="AppShell.xaml.cs">
       <DependentUpon>AppShell.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Controller\DeviceConnectionController.cs" />
-    <Compile Include="Controller\ImageSourceController.cs" />
     <Compile Include="Controls\Joypad.xaml.cs">
       <DependentUpon>Joypad.xaml</DependentUpon>
     </Compile>
@@ -187,10 +185,21 @@
       <Project>{1770BD3F-C09B-42E6-AC21-1DB9B6CA37C6}</Project>
       <Name>Devices.Connectors</Name>
     </ProjectReference>
+    <ProjectReference Include="..\..\UWP.Devices\Devices.Controllers.Base\Devices.Controllers.Base.csproj">
+      <Project>{06af08bd-ff54-4f13-bf8e-218044469632}</Project>
+      <Name>Devices.Controllers.Base</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\UWP.Devices\Devices.Controllers.Common\Devices.Controllers.Common.csproj">
+      <Project>{ED9CE817-28E6-4BD9-BB99-FE712A319779}</Project>
+      <Name>Devices.Controllers.Common</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\UWP.Devices\Devices.Util\Devices.Util.csproj">
       <Project>{E0B70271-C5F3-4BEB-B30E-45536A296387}</Project>
       <Name>Devices.Util</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Controller\" />
   </ItemGroup>
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '14.0' ">
     <VisualStudioVersion>14.0</VisualStudioVersion>

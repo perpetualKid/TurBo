@@ -73,7 +73,6 @@
                     -->
                 </Button>
                 <Ellipse x:Name="ellColor" HorizontalAlignment="Left" Height="50" VerticalAlignment="Top" Width="50"/>
-                <Image x:Name="imageFrontCamera" Height="100" Width="100"/>
                 <TextBlock Style="{StaticResource SubtitleTextBlockStyle}">Top-Level Navigation</TextBlock>
                 <TextBlock Style="{StaticResource BodyTextBlockStyle}" Margin="0,4">This sample demonstrates a universal Windows app with top-level navigation.</TextBlock>
 

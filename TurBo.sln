@@ -21,6 +21,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Turbo.BrickPi.Components", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Devices.Components.Base", "..\UWP.Devices\Devices.Components.Base\Devices.Components.Base.csproj", "{39ABE250-6554-4086-98D9-0D36903DE939}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Devices.Controllers.Base", "..\UWP.Devices\Devices.Controllers.Base\Devices.Controllers.Base.csproj", "{06AF08BD-FF54-4F13-BF8E-218044469632}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Devices.Controllers.Common", "..\UWP.Devices\Devices.Controllers.Common\Devices.Controllers.Common.csproj", "{ED9CE817-28E6-4BD9-BB99-FE712A319779}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -189,6 +193,38 @@ Global
 		{39ABE250-6554-4086-98D9-0D36903DE939}.Release|x64.Build.0 = Release|x64
 		{39ABE250-6554-4086-98D9-0D36903DE939}.Release|x86.ActiveCfg = Release|x86
 		{39ABE250-6554-4086-98D9-0D36903DE939}.Release|x86.Build.0 = Release|x86
+		{06AF08BD-FF54-4F13-BF8E-218044469632}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{06AF08BD-FF54-4F13-BF8E-218044469632}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{06AF08BD-FF54-4F13-BF8E-218044469632}.Debug|ARM.ActiveCfg = Debug|ARM
+		{06AF08BD-FF54-4F13-BF8E-218044469632}.Debug|ARM.Build.0 = Debug|ARM
+		{06AF08BD-FF54-4F13-BF8E-218044469632}.Debug|x64.ActiveCfg = Debug|x64
+		{06AF08BD-FF54-4F13-BF8E-218044469632}.Debug|x64.Build.0 = Debug|x64
+		{06AF08BD-FF54-4F13-BF8E-218044469632}.Debug|x86.ActiveCfg = Debug|x86
+		{06AF08BD-FF54-4F13-BF8E-218044469632}.Debug|x86.Build.0 = Debug|x86
+		{06AF08BD-FF54-4F13-BF8E-218044469632}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{06AF08BD-FF54-4F13-BF8E-218044469632}.Release|Any CPU.Build.0 = Release|Any CPU
+		{06AF08BD-FF54-4F13-BF8E-218044469632}.Release|ARM.ActiveCfg = Release|ARM
+		{06AF08BD-FF54-4F13-BF8E-218044469632}.Release|ARM.Build.0 = Release|ARM
+		{06AF08BD-FF54-4F13-BF8E-218044469632}.Release|x64.ActiveCfg = Release|x64
+		{06AF08BD-FF54-4F13-BF8E-218044469632}.Release|x64.Build.0 = Release|x64
+		{06AF08BD-FF54-4F13-BF8E-218044469632}.Release|x86.ActiveCfg = Release|x86
+		{06AF08BD-FF54-4F13-BF8E-218044469632}.Release|x86.Build.0 = Release|x86
+		{ED9CE817-28E6-4BD9-BB99-FE712A319779}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ED9CE817-28E6-4BD9-BB99-FE712A319779}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ED9CE817-28E6-4BD9-BB99-FE712A319779}.Debug|ARM.ActiveCfg = Debug|ARM
+		{ED9CE817-28E6-4BD9-BB99-FE712A319779}.Debug|ARM.Build.0 = Debug|ARM
+		{ED9CE817-28E6-4BD9-BB99-FE712A319779}.Debug|x64.ActiveCfg = Debug|x64
+		{ED9CE817-28E6-4BD9-BB99-FE712A319779}.Debug|x64.Build.0 = Debug|x64
+		{ED9CE817-28E6-4BD9-BB99-FE712A319779}.Debug|x86.ActiveCfg = Debug|x86
+		{ED9CE817-28E6-4BD9-BB99-FE712A319779}.Debug|x86.Build.0 = Debug|x86
+		{ED9CE817-28E6-4BD9-BB99-FE712A319779}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{ED9CE817-28E6-4BD9-BB99-FE712A319779}.Release|Any CPU.Build.0 = Release|Any CPU
+		{ED9CE817-28E6-4BD9-BB99-FE712A319779}.Release|ARM.ActiveCfg = Release|ARM
+		{ED9CE817-28E6-4BD9-BB99-FE712A319779}.Release|ARM.Build.0 = Release|ARM
+		{ED9CE817-28E6-4BD9-BB99-FE712A319779}.Release|x64.ActiveCfg = Release|x64
+		{ED9CE817-28E6-4BD9-BB99-FE712A319779}.Release|x64.Build.0 = Release|x64
+		{ED9CE817-28E6-4BD9-BB99-FE712A319779}.Release|x86.ActiveCfg = Release|x86
+		{ED9CE817-28E6-4BD9-BB99-FE712A319779}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

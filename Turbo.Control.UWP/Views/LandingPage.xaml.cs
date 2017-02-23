@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Devices.Communication;
+using Devices.Controllers.Base;
 using Devices.Util.Extensions;
-using Turbo.Control.UWP.Controller;
 using Windows.ApplicationModel.Core;
 using Windows.Data.Json;
 using Windows.Storage;
@@ -22,30 +22,20 @@ namespace Turbo.Control.UWP.Views
     {
 
         ApplicationDataContainer settings;
-        ImageSourceController imageSource;
 
         public LandingPage()
         {
             this.InitializeComponent();
             settings = ApplicationData.Current.LocalSettings;
-            imageSource = ImageSourceController.Instance;
-            imageSource.OnImageReceived += ImageSource_OnImageReceived;
-        }
-
-        private void ImageSource_OnImageReceived(object sender, EventArgs e)
-        {
-            imageFrontCamera.Source = imageSource.CurrentImage;
         }
 
         protected override void OnNavigatedTo(NavigationEventArgs e)
         {
-            DeviceConnectionController.Instance.RegisterOnDataReceivedEvent("LandingPage", Instance_OnDataReceived);
             base.OnNavigatedTo(e);
         }
 
         protected override void OnNavigatedFrom(NavigationEventArgs e)
         {
-            DeviceConnectionController.Instance.UnRegisterOnDataReceivedEvent("LandingPage", Instance_OnDataReceived);
             base.OnNavigatedFrom(e);
         }
 
@@ -93,7 +83,7 @@ namespace Turbo.Control.UWP.Views
                 return;
             }
 
-            if (!await DeviceConnectionController.Instance.Connect(deviceHost, devicePort))
+            if (!await ControllerHandler.InitializeConnection(deviceHost, devicePort))
             {
                 ConnectionFlyout.Hide();
                 DisplayConnectionFailedDialog(sender, deviceHost, devicePort);
@@ -152,7 +142,7 @@ namespace Turbo.Control.UWP.Views
         private async void Joypad_Moved(object sender, Controls.JoypadEventArgs e)
         {
             JoypadValues.Text = $"Force: {e.Distance} Angle: {e.Angle}";
-            if (DeviceConnectionController.Instance.ConnectionStatus == ConnectionStatus.Connected)
+            if (ControllerHandler.Connection.ConnectionStatus == ConnectionStatus.Connected)
             {
                 JsonObject move = new JsonObject();
                 move.AddValue("Target", "BrickPi.Drive");
@@ -160,31 +150,31 @@ namespace Turbo.Control.UWP.Views
                 move.AddValue("Direction", e.Angle);
                 move.AddValue("Velocity", e.Distance);
                 move.AddValue("Rotation", 0);
-                await DeviceConnectionController.Instance.Send("LandingPage", move);
+                await ControllerHandler.Connection.Send("LandingPage", move);
 
             }
         }
 
         private async void Joypad_Released(object sender, Controls.JoypadEventArgs e)
         {
-            if (DeviceConnectionController.Instance.ConnectionStatus == ConnectionStatus.Connected)
+            if (ControllerHandler.Connection.ConnectionStatus == ConnectionStatus.Connected)
             {
                 JsonObject stop = new JsonObject();
                 stop.AddValue("Target", "BrickPi.Drive");
                 stop.AddValue("Action", "Stop");
-                await DeviceConnectionController.Instance.Send("LandingPage", stop);
+                await ControllerHandler.Connection.Send("LandingPage", stop);
 
             }
         }
 
         private async void Joypad_Captured(object sender, EventArgs e)
         {
-            if (DeviceConnectionController.Instance.ConnectionStatus == ConnectionStatus.Connected)
+            if (ControllerHandler.Connection.ConnectionStatus == ConnectionStatus.Connected)
             {
                 JsonObject start = new JsonObject();
                 start.AddValue("Target", "BrickPi.Drive");
                 start.AddValue("Action", "Start");
-                await DeviceConnectionController.Instance.Send("LandingPage", start);
+                await ControllerHandler.Connection.Send("LandingPage", start);
 
             }
 
