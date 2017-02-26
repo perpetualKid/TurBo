@@ -41,7 +41,8 @@ namespace Turbo.Control.UWP.Controls
             }
         }
 
-        public Type DestPage { get; set; }
+        public Type DestinationPage { get; set; }
+
         public object Arguments { get; set; }
 
         public event PropertyChangedEventHandler PropertyChanged = delegate { };

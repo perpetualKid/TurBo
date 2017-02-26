@@ -89,16 +89,7 @@ namespace Turbo.Control.UWP.Views
                 DisplayConnectionFailedDialog(sender, deviceHost, devicePort);
                 return;
             }
-            //JsonObject hello = new JsonObject();
-            //hello.AddValue("Target", "BrickPi.NxtColor.Port_S3");
-            //hello.AddValue("Action", "ARGB");
-            //await DeviceConnection.Instance.Send("LandingPage", hello);
-            //ellColor.Fill = new SolidColorBrush(Colors.White);
-            //await socketClient.Send(Guid.Empty, "ECHO");
-            //await SocketClient.Disconnect();
-            //                await Task.Run(() => JsonStreamReader.ReadEndless(file.OpenStreamForReadAsync().Result));
             ConnectionFlyout.Hide();
-            //await imageSource.CaptureDeviceImage();
         }
 
         private async void DisplayMissingHostParametersDialog(object parameter)

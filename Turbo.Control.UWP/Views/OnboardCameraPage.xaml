@@ -85,7 +85,24 @@
                     </DataTemplate>
                 </ListView.ItemTemplate>
             </ListView>
-            <ComboBox x:Name="dropdownResolutions" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" DropDownOpened="dropdownResolutions_DropDownOpened"/>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="1*"></ColumnDefinition>
+                    <ColumnDefinition Width="80"></ColumnDefinition>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"></RowDefinition>
+                    <RowDefinition Height="Auto"></RowDefinition>
+                    <RowDefinition Height="Auto"></RowDefinition>
+                </Grid.RowDefinitions>
+                <ComboBox Grid.Column="0" Grid.Row="0" x:Name="dropdownAllFormats" HorizontalAlignment="Stretch" Margin="10,0,10,0" ScrollViewer.HorizontalScrollBarVisibility="Auto"/>
+                <Button Grid.Column="1" x:Name="btnLoadFormats" HorizontalAlignment="Stretch" Click="btnLoadFormats_Click">
+                    <SymbolIcon x:Name="Refresh" Symbol="Refresh" />
+                </Button>
+                <TextBlock Grid.Row="1" Grid.Column="0" x:Name="textBlock" TextWrapping="Wrap" Text="TextBlock"/>
+                <ComboBox Grid.Column="1" Grid.Row="1" x:Name="dropDownFormats" HorizontalAlignment="Stretch" SelectionChanged="dropDownFormats_SelectionChanged"></ComboBox>
+                <ComboBox Grid.Column="1" Grid.Row="2" x:Name="dropDownResolutions" HorizontalAlignment="Stretch"></ComboBox>
+            </Grid>
         </StackPanel>
     </Grid>
 </Page>

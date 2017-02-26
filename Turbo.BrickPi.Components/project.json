@@ -2,7 +2,7 @@
   "dependencies": {
     "BrickPi.UWP": "1.0.1",
     "Microsoft.NETCore.UniversalWindowsPlatform": "5.2.2",
-    "WindowsAzure.Storage": "8.0.1"
+    "WindowsAzure.Storage": "8.1.1"
   },
   "frameworks": {
     "uap10.0": {}
