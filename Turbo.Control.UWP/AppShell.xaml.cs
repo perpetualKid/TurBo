@@ -54,6 +54,12 @@ namespace Turbo.Control.UWP
                     Label = "Onboard Camera",
                     DestinationPage = typeof(OnboardCameraPage)
                 },
+                new NavigationMenuItem()
+                {
+                    Symbol = Symbol.Comment,
+                    Label = "Debug Page",
+                    DestinationPage = typeof(DebugPage)
+                },
             });
 
         public static AppShell Current = null;

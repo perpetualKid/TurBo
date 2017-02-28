@@ -7,7 +7,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
-<!--    
+    <!--    
     <Page.Resources>
         <DataTemplate x:Key="PhotosTemplate">
             <Grid
@@ -67,7 +67,8 @@
             <!--            <GridView x:Name="gridView" Grid.Row="2" HorizontalAlignment="Center" HorizontalContentAlignment="Center" VerticalAlignment="Center" 
                       ItemTemplate="{StaticResource PhotosTemplate}">
             </GridView>
--->            <ListView x:Name="lvPictureCache" ItemsSource="{x:Bind Items}" Height="120"
+-->
+            <ListView x:Name="lvPictureCache" ItemsSource="{x:Bind Items}" Height="120"
                          ScrollViewer.HorizontalScrollMode="Enabled" 
           ScrollViewer.HorizontalScrollBarVisibility="Auto"
           ScrollViewer.VerticalScrollMode="Disabled"
@@ -101,7 +102,7 @@
                 </Button>
                 <TextBlock Grid.Row="1" Grid.Column="0" x:Name="textBlock" TextWrapping="Wrap" Text="TextBlock"/>
                 <ComboBox Grid.Column="1" Grid.Row="1" x:Name="dropDownFormats" HorizontalAlignment="Stretch" SelectionChanged="dropDownFormats_SelectionChanged"></ComboBox>
-                <ComboBox Grid.Column="1" Grid.Row="2" x:Name="dropDownResolutions" HorizontalAlignment="Stretch"></ComboBox>
+                <ComboBox Grid.Column="1" Grid.Row="2" x:Name="dropDownResolutions" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" SelectionChanged="dropDownResolutions_SelectionChanged"/>
             </Grid>
         </StackPanel>
     </Grid>

@@ -24,7 +24,7 @@ namespace Turbo.Control.UWP.Views
         public OnboardCameraPage()
         {
             this.InitializeComponent();
-            imageSource = ImageSourceController.GetNamedInstance<ImageSourceController>(nameof(ImageSourceController)).Result;
+            imageSource = ImageSourceController.GetNamedInstance<ImageSourceController>(nameof(ImageSourceController), "FrontCamera").Result;
         }
 
         protected override async void OnNavigatedTo(NavigationEventArgs e)
@@ -35,8 +35,8 @@ namespace Turbo.Control.UWP.Views
             imageSource.OnImageReceived += ImageSource_OnImageReceived;
             imageSource.OnCurrentFormatChanged += ImageSource_OnFormatChanged;
             imageSource.OnSupportedFormatsChanged += ImageSource_OnSupportedFormatsChanged;
-            await imageSource.GetCurrentFormat();
-            await imageSource.GetSupportedFormats();
+            await imageSource.RequestCurrentFormat();
+            await imageSource.RequestSupportedFormats();
         }
 
         private async void ImageSource_OnSupportedFormatsChanged(object sender, EventArgs e)
@@ -120,14 +120,23 @@ namespace Turbo.Control.UWP.Views
                 this.imgMain.Source = this.imageSource.CachedImages[lvPictureCache.SelectedIndex];
         }
 
-        private async void btnLoadFormats_Click(object sender, RoutedEventArgs e)
+        private void btnLoadFormats_Click(object sender, RoutedEventArgs e)
         {
-            await imageSource.GetSupportedFormats(subType:dropDownFormats.SelectedValue.ToString());
+            dropdownAllFormats.Items.Clear();
+            foreach (string item in imageSource.GetSupportedFormatsFiltered(dropDownFormats.SelectedValue as string, dropDownResolutions.SelectedValue as string))
+            {
+                dropdownAllFormats.Items.Add(item);
+            }            
         }
 
         private void dropDownFormats_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            UpdateFormatSelectionElements(sender);
+//            UpdateFormatSelectionElements(sender);
+        }
+
+        private void dropDownResolutions_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+//            UpdateFormatSelectionElements(sender);
         }
     }
 }

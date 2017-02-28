@@ -133,7 +133,7 @@ namespace Turbo.Control.UWP.Views
         private async void Joypad_Moved(object sender, Controls.JoypadEventArgs e)
         {
             JoypadValues.Text = $"Force: {e.Distance} Angle: {e.Angle}";
-            if (ControllerHandler.Connection.ConnectionStatus == ConnectionStatus.Connected)
+            if (ControllerHandler.ConnectionStatus == ConnectionStatus.Connected)
             {
                 JsonObject move = new JsonObject();
                 move.AddValue("Target", "BrickPi.Drive");
@@ -141,31 +141,31 @@ namespace Turbo.Control.UWP.Views
                 move.AddValue("Direction", e.Angle);
                 move.AddValue("Velocity", e.Distance);
                 move.AddValue("Rotation", 0);
-                await ControllerHandler.Connection.Send("LandingPage", move);
+                await ControllerHandler.Send("LandingPage", move);
 
             }
         }
 
         private async void Joypad_Released(object sender, Controls.JoypadEventArgs e)
         {
-            if (ControllerHandler.Connection.ConnectionStatus == ConnectionStatus.Connected)
+            if (ControllerHandler.ConnectionStatus == ConnectionStatus.Connected)
             {
                 JsonObject stop = new JsonObject();
                 stop.AddValue("Target", "BrickPi.Drive");
                 stop.AddValue("Action", "Stop");
-                await ControllerHandler.Connection.Send("LandingPage", stop);
+                await ControllerHandler.Send("LandingPage", stop);
 
             }
         }
 
         private async void Joypad_Captured(object sender, EventArgs e)
         {
-            if (ControllerHandler.Connection.ConnectionStatus == ConnectionStatus.Connected)
+            if (ControllerHandler.ConnectionStatus == ConnectionStatus.Connected)
             {
                 JsonObject start = new JsonObject();
                 start.AddValue("Target", "BrickPi.Drive");
                 start.AddValue("Action", "Start");
-                await ControllerHandler.Connection.Send("LandingPage", start);
+                await ControllerHandler.Send("LandingPage", start);
 
             }
 
