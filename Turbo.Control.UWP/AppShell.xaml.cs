@@ -56,7 +56,7 @@ namespace Turbo.Control.UWP
                 },
                 new NavigationMenuItem()
                 {
-                    Symbol = Symbol.Comment,
+                    Symbol = Symbol.Repair,
                     Label = "Debug Page",
                     DestinationPage = typeof(DebugPage)
                 },

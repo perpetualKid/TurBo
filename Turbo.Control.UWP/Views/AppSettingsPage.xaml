@@ -38,7 +38,7 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
-            <RowDefinition />
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
         <controls:PageHeader x:Name="pageHeader">
@@ -47,7 +47,7 @@
             </controls:PageHeader.HeaderContent>
         </controls:PageHeader>
 
-        <StackPanel Margin="0,0,0,0" Grid.Row="1">
+        <StackPanel Grid.Row="1">
             <TextBlock x:Name="lblClientId" HorizontalAlignment="Left" Margin="10" TextWrapping="Wrap" Text="ClientId (Guid)" VerticalAlignment="Top"/>
             <TextBox x:Name="txtOneDriveClientId" HorizontalAlignment="Left" Margin="10" TextWrapping="Wrap" Text="8981d8dd-22bf-49d2-86ce-57e7c4097fb2" VerticalAlignment="Top" PlaceholderText="OneDrive ClientId" Width="300"/>
             <TextBlock x:Name="lblCLientSecret" HorizontalAlignment="Left" Margin="10" TextWrapping="Wrap" Text="ClientSecret" VerticalAlignment="Top"/>

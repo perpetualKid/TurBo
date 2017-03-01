@@ -16,7 +16,10 @@
             </StackPanel>
         </Flyout>
     </Page.Resources>
-    <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+    <Grid x:Name="LayoutRoot"
+            Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
+            EntranceNavigationTransitionInfo.IsTargetElement="True"
+            Padding="24,0">
         <VisualStateManager.VisualStateGroups>
             <VisualStateGroup>
                 <VisualState>
@@ -24,8 +27,8 @@
                         <AdaptiveTrigger MinWindowWidth="{StaticResource MediumWindowSnapPoint}" />
                     </VisualState.StateTriggers>
                     <VisualState.Setters>
-                        <Setter Target="ContentContainer.Margin" Value="12,0,24,0"/>
-                        <Setter Target="title.Style" Value="{StaticResource PageTitleTextBlockStyle}"/>
+                        <Setter Target="LayoutRoot.Margin" Value="24,0"/>
+                        <Setter Target="HeaderTextBlock.Style" Value="{StaticResource PageTitleTextBlockStyle}"/>
                     </VisualState.Setters>
                 </VisualState>
                 <VisualState>
@@ -33,8 +36,8 @@
                         <AdaptiveTrigger MinWindowWidth="{StaticResource MinWindowSnapPoint}" />
                     </VisualState.StateTriggers>
                     <VisualState.Setters>
-                        <Setter Target="ContentContainer.Margin" Value="0,0,12,0"/>
-                        <Setter Target="title.Style" Value="{StaticResource NarrowPageTitleTextBlockStyle}"/>
+                        <Setter Target="LayoutRoot.Margin" Value="12,0"/>
+                        <Setter Target="HeaderTextBlock.Style" Value="{StaticResource NarrowPageTitleTextBlockStyle}"/>
                     </VisualState.Setters>
                 </VisualState>
             </VisualStateGroup>
@@ -46,17 +49,17 @@
             <RowDefinition />
         </Grid.RowDefinitions>
 
-        <controls:PageHeader x:Name="pageHeader">
+        <controls:PageHeader x:Name="pageHeader" Grid.Row="0">
             <controls:PageHeader.HeaderContent>
-                <TextBlock x:Name="title" Style="{StaticResource PageTitleTextBlockStyle}" Text="App Overview"/>
+                <TextBlock x:Name="HeaderTextBlock" Style="{StaticResource PageTitleTextBlockStyle}" Text="App Overview"/>
             </controls:PageHeader.HeaderContent>
         </controls:PageHeader>
 
-        <StackPanel Grid.Row="1" Margin="10,10,10,10">
+        <StackPanel Grid.Row="1">
             <controls:Joypad Width="200" Height="200" Canvas.ZIndex="1" Moved="Joypad_Moved" Released="Joypad_Released" Captured="Joypad_Captured"/>
             <TextBlock Name="JoypadValues">Test</TextBlock>
         </StackPanel>
-        <ScrollViewer Grid.Row="2" EntranceNavigationTransitionInfo.IsTargetElement="True" IsTabStop="True" Margin="12,4,0,0">
+        <ScrollViewer Grid.Row="2" EntranceNavigationTransitionInfo.IsTargetElement="True" IsTabStop="True">
             <StackPanel x:Name="ContentContainer" Margin="12,0,12,0">
                 <Button Name="btnConnect" AutomationProperties.HelpText="Connect to the Device" Content="Connect" Click="Button_Click">
                     <!--

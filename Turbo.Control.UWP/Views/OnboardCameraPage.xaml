@@ -7,22 +7,6 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
-    <!--    
-    <Page.Resources>
-        <DataTemplate x:Key="PhotosTemplate">
-            <Grid
-                Background="White"
-                BorderBrush="Black"
-                BorderThickness="1">
-                <Image
-                    Source="{x:Bind Items}"
-                    Stretch="UniformToFill"
-                    HorizontalAlignment="Center"
-                    VerticalAlignment="Center"/>
-            </Grid>
-        </DataTemplate>
-    </Page.Resources>
--->
     <Grid x:Name="LayoutRoot" 
           Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
           EntranceNavigationTransitionInfo.IsTargetElement="True"
@@ -55,13 +39,13 @@
             <RowDefinition/>
         </Grid.RowDefinitions>
 
-        <controls:PageHeader Grid.ColumnSpan="2">
+        <controls:PageHeader Grid.Row="0">
             <controls:PageHeader.HeaderContent>
                 <TextBlock x:Name="HeaderTextBlock" Text="Onboard Camera" Style="{StaticResource PageTitleTextBlockStyle}" TextWrapping="NoWrap"/>
             </controls:PageHeader.HeaderContent>
         </controls:PageHeader>
 
-        <StackPanel Grid.Row="1" Margin="10,0,10, 0">
+        <StackPanel Grid.Row="1">
             <Image x:Name="imgMain" Source="/Assets/Wide310x150Logo.scale-200.png" Stretch="None" Width="200" Height="200"/>
             <Button x:Name="btnLoad" Click="btnLoad_Click" >Load</Button>
             <!--            <GridView x:Name="gridView" Grid.Row="2" HorizontalAlignment="Center" HorizontalContentAlignment="Center" VerticalAlignment="Center" 

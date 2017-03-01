@@ -42,7 +42,7 @@
             <RowDefinition Height="80"/>
         </Grid.RowDefinitions>
 
-        <controls:PageHeader Grid.ColumnSpan="2">
+        <controls:PageHeader Grid.Row="0">
             <controls:PageHeader.HeaderContent>
                 <TextBlock x:Name="HeaderTextBlock" Text="OneDrive Permission" Style="{StaticResource PageTitleTextBlockStyle}" TextWrapping="NoWrap"/>
             </controls:PageHeader.HeaderContent>
