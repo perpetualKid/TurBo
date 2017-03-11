@@ -6,7 +6,7 @@ using Windows.UI.Xaml.Controls;
 namespace Turbo.Control.UWP.Controls
 {
     /// <summary>
-    /// Data to represent an item in the nav menu.
+    /// Data to represent an item in the navigation menu.
     /// </summary>
     public class NavigationMenuItem : INotifyPropertyChanged
     {
@@ -27,7 +27,7 @@ namespace Turbo.Control.UWP.Controls
             {
                 selected = value;
                 Visibility = value ? Visibility.Visible : Visibility.Collapsed;
-                this.OnPropertyChanged("IsSelected");
+                this.OnPropertyChanged(nameof(IsSelected));
             }
         }
 
@@ -37,7 +37,7 @@ namespace Turbo.Control.UWP.Controls
             set
             {
                 selectedVisibility = value;
-                this.OnPropertyChanged("Visibility");
+                this.OnPropertyChanged(nameof(Visibility));
             }
         }
 
@@ -46,6 +46,7 @@ namespace Turbo.Control.UWP.Controls
         public object Arguments { get; set; }
 
         public event PropertyChangedEventHandler PropertyChanged = delegate { };
+
         public void OnPropertyChanged(string propertyName)
         {
             // Raise the PropertyChanged event, passing the name of the property whose value has changed.

@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Devices.Controllers.Base;
 using Turbo.Control.UWP.Controls;
+using Turbo.Control.UWP.Controllers;
 using Turbo.Control.UWP.Views;
 using Windows.Foundation;
 using Windows.UI.Core;
@@ -10,6 +12,7 @@ using Windows.UI.Xaml.Automation;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Navigation;
+using System.Threading.Tasks;
 
 namespace Turbo.Control.UWP
 {
@@ -304,7 +307,6 @@ namespace Turbo.Control.UWP
             NavPaneDivider.Visibility = Visibility.Collapsed;
 
             // Prevent focus from moving to elements when they're not visible on screen
-            FeedbackNavPaneButton.IsTabStop = false;
             SettingsNavPaneButton.IsTabStop = false;
         }
 
@@ -330,7 +332,6 @@ namespace Turbo.Control.UWP
             NavPaneDivider.Visibility = Visibility.Visible;
             this.CheckTogglePaneButtonSizeChanged();
 
-            FeedbackNavPaneButton.IsTabStop = true;
             SettingsNavPaneButton.IsTabStop = true;
         }
 
@@ -380,14 +381,84 @@ namespace Turbo.Control.UWP
 
         private void SettingsNavPaneButton_Click(object sender, RoutedEventArgs e)
         {
+            this.NavMenuList.SetSelectedItem(null);
             if (this.AppFrame.CurrentSourcePageType != typeof(AppSettingsPage))
                 this.AppFrame.Navigate(typeof(AppSettingsPage), e.OriginalSource, new Windows.UI.Xaml.Media.Animation.DrillInNavigationTransitionInfo());
         }
 
         private void HomeNavPaneButton_Click(object sender, RoutedEventArgs e)
         {
+            this.NavMenuList.SetSelectedItem(null);
             if (this.AppFrame.CurrentSourcePageType != typeof(LandingPage))
                 this.AppFrame.Navigate(typeof(LandingPage), e.OriginalSource, new Windows.UI.Xaml.Media.Animation.DrillInNavigationTransitionInfo());
         }
+
+        private void DebugToggleButton_Click(object sender, RoutedEventArgs e)
+        {
+            DebugController.Instance.Enabled = (sender as AppBarToggleButton).IsChecked.Value;
+        }
+
+        private async void ConnectDeviceToggleButton_Checked(object sender, RoutedEventArgs e)
+        {
+            await Connect(sender);
+        }
+
+        private async Task Connect(object sender)
+        {
+            try
+            {
+
+                ConnectDeviceToggleButton.IsEnabled = false;
+                ConnectingActivity.Begin();
+                ConnectionFlyoutText.Text = DeviceConnectionHandler.ConnectionFlyoutText;
+
+                if (!DeviceConnectionHandler.Instance.CheckParametersSet())
+                {
+                    if (await DeviceConnectionHandler.Instance.ShowMissingHostParametersDialog() == ContentDialogResult.Primary)
+                    {
+                        if (this.AppFrame.CurrentSourcePageType != typeof(AppSettingsPage))
+                            this.AppFrame.Navigate(typeof(AppSettingsPage), sender, new Windows.UI.Xaml.Media.Animation.DrillInNavigationTransitionInfo());
+                    }
+                    ConnectDeviceToggleButton.IsChecked = false;
+                    return;
+                }
+
+                ContentDialogResult result = ContentDialogResult.Primary;
+                ConnectionFlyout.ShowAt(sender as FrameworkElement);
+                while (result == ContentDialogResult.Primary && !await DeviceConnectionHandler.Instance.Connect())
+                {
+                    ConnectionFlyout.ShowAt(sender as FrameworkElement);
+                    result = await DeviceConnectionHandler.Instance.ShowConnectionFailedDialog();
+                }
+                if (result == ContentDialogResult.Secondary)
+                {
+                    if (this.AppFrame.CurrentSourcePageType != typeof(AppSettingsPage))
+                        this.AppFrame.Navigate(typeof(AppSettingsPage), sender, new Windows.UI.Xaml.Media.Animation.DrillInNavigationTransitionInfo());
+                    ConnectDeviceToggleButton.IsChecked = false;
+                }
+            }
+            finally
+            {
+                ConnectionFlyout.Hide();
+                ConnectingActivity.Stop();
+                ConnectDeviceToggleButton.IsEnabled = true;
+            }
+        }
+
+        private async void ConnectDeviceToggleButton_Unchecked(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                ConnectDeviceToggleButton.IsEnabled = false;
+                ConnectingActivity.Begin();
+                await DeviceConnectionHandler.Instance.Disconnect();
+            }
+            finally
+            {
+                ConnectingActivity.Stop();
+                ConnectDeviceToggleButton.IsEnabled = true;
+            }
+        }
+
     }
 }

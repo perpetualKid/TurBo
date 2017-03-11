@@ -46,7 +46,7 @@
         </controls:PageHeader>
 
         <StackPanel Grid.Row="1">
-            <Image x:Name="imgMain" Source="/Assets/Wide310x150Logo.scale-200.png" Stretch="None" Width="200" Height="200"/>
+            <Image x:Name="imgMain" Stretch="UniformToFill" Width="200" Height="200" ScrollViewer.HorizontalScrollBarVisibility="Auto" ScrollViewer.VerticalScrollBarVisibility="Auto" HorizontalAlignment="Center" />
             <Button x:Name="btnLoad" Click="btnLoad_Click" >Load</Button>
             <!--            <GridView x:Name="gridView" Grid.Row="2" HorizontalAlignment="Center" HorizontalContentAlignment="Center" VerticalAlignment="Center" 
                       ItemTemplate="{StaticResource PhotosTemplate}">

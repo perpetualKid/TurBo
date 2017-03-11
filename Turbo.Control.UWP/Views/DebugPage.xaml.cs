@@ -35,15 +35,15 @@ namespace Turbo.Control.UWP.Views
         {
             base.OnNavigatedTo(e);
             debugController = await DebugController.GetNamedInstance<DebugController>("DebugController", string.Empty);
-            debugController.OnReceivedTextUpdated += DebugController_OnReceivedTextUpdated;
-            debugController.OnSentTextUpdated += DebugController_OnSentTextUpdated;
-            txtTextReceived.Text = debugController.TextReceived;
-            txtTextSent.Text = debugController.TextSent;
+            debugController.OnDataReceived += DebugController_OnReceivedTextUpdated;
+            debugController.OnDataReceived += DebugController_OnSentTextUpdated;
+            txtTextReceived.Text = debugController.DataReceived;
+            txtTextSent.Text = debugController.DataSent;
         }
         protected override void OnNavigatedFrom(NavigationEventArgs e)
         {
-            debugController.OnReceivedTextUpdated -= DebugController_OnReceivedTextUpdated;
-            debugController.OnSentTextUpdated -= DebugController_OnSentTextUpdated;
+            debugController.OnDataReceived -= DebugController_OnReceivedTextUpdated;
+            debugController.OnDataSent -= DebugController_OnSentTextUpdated;
             base.OnNavigatedFrom(e);
         }
 
@@ -51,7 +51,7 @@ namespace Turbo.Control.UWP.Views
         {
             await CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
             {
-                txtTextSent.Text = debugController.TextSent;
+                txtTextSent.Text = debugController.DataSent;
             });
         }
 
@@ -59,7 +59,7 @@ namespace Turbo.Control.UWP.Views
         {
             await CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
             {
-                txtTextReceived.Text = debugController.TextReceived;
+                txtTextReceived.Text = debugController.DataReceived;
             });
         }
 

@@ -40,7 +40,17 @@
                 <TextBlock x:Name="Text" Grid.Column="1" Text="{x:Bind Label}" Style="{StaticResource BodyTextBlockStyle}" TextWrapping="NoWrap" VerticalAlignment="Center"/>
             </Grid>
         </DataTemplate>
+        <Flyout x:Name="ConnectionFlyout" Placement="Top">
+            <StackPanel Orientation="Vertical">
+                <TextBlock Style="{StaticResource BodyTextBlockStyle}" Width="300" Margin="10,10,10,10" Name="ConnectionFlyoutText" Text="Connecting" TextWrapping="Wrap" />
+                <ProgressRing IsActive="True" Width="40" Height="40" Margin="10,10,10,10"/>
+            </StackPanel>
+        </Flyout>
+        <Storyboard x:Name="ConnectingActivity" AutoReverse="False" RepeatBehavior="Forever">
+            <DoubleAnimation Duration="0:0:1" To="360" Storyboard.TargetProperty="(UIElement.RenderTransform).(CompositeTransform.Rotation)" Storyboard.TargetName="symbolIcon" />
+        </Storyboard>
     </Page.Resources>
+
 
     <Grid x:Name="LayoutRoot">
         <!-- Adaptive triggers -->
@@ -54,7 +64,6 @@
                         <Setter Target="RootSplitView.DisplayMode" Value="CompactInline"/>
                         <Setter Target="RootSplitView.IsPaneOpen" Value="True"/>
                         <Setter Target="NavPaneDivider.Visibility" Value="Visible"/>
-                        <Setter Target="FeedbackNavPaneButton.IsTabStop" Value="True"/>
                         <Setter Target="SettingsNavPaneButton.IsTabStop" Value="True"/>
                     </VisualState.Setters>
                 </VisualState>
@@ -66,7 +75,6 @@
                         <Setter Target="RootSplitView.DisplayMode" Value="CompactOverlay"/>
                         <Setter Target="RootSplitView.IsPaneOpen" Value="False"/>
                         <Setter Target="NavPaneDivider.Visibility" Value="Collapsed"/>
-                        <Setter Target="FeedbackNavPaneButton.IsTabStop" Value="False"/>
                         <Setter Target="SettingsNavPaneButton.IsTabStop" Value="False"/>
                     </VisualState.Setters>
                 </VisualState>
@@ -77,7 +85,6 @@
                     <VisualState.Setters>
                         <Setter Target="RootSplitView.DisplayMode" Value="Overlay"/>
                         <Setter Target="RootSplitView.IsPaneOpen" Value="False"/>
-                        <Setter Target="FeedbackNavPaneButton.IsTabStop" Value="True"/>
                         <Setter Target="SettingsNavPaneButton.IsTabStop" Value="True"/>
                     </VisualState.Setters>
                 </VisualState>
@@ -133,34 +140,34 @@
                                Height="1"
                                Fill="{ThemeResource SystemControlForegroundBaseLowBrush}"
                                Margin="16,0,16,6"/>
-                    <Button x:Name="HomeNavPaneButton"
-                            Grid.Row="2"
-                            Grid.Column="0"
+                    <CommandBar Grid.Row="2" Grid.ColumnSpan="3" ClosedDisplayMode="Compact" Background="{ThemeResource ApplicationPageBackgroundThemeBrush}" VerticalAlignment="Stretch">
+                        <CommandBar.Content>
+                            <Button x:Name="HomeNavPaneButton"
                             Style="{StaticResource SplitViewPaneButtonStyle}"
                             Content="&#xE80F;"
                             AutomationProperties.Name="Home"
-                            ToolTipService.ToolTip="Home"
+                            ToolTipService.ToolTip="Home"                                    
                             Click="HomeNavPaneButton_Click"/>
-                    <Button x:Name="FeedbackNavPaneButton"
-                            Grid.Row="2"
-                            Grid.Column="1"
-                            Style="{StaticResource SplitViewPaneButtonStyle}"
-                            Content="&#xE76E;"
-                            AutomationProperties.Name="Feedback"
-                            ToolTipService.ToolTip="Feedback"/>
-                    <Button x:Name="SettingsNavPaneButton"
-                            Grid.Row="2"
-                            Grid.Column="2"
-                            Style="{StaticResource SplitViewPaneButtonStyle}"
-                            Content="&#xE713;"
-                            AutomationProperties.Name="Settings"
-                            ToolTipService.ToolTip="Settings" 
-                            Click="SettingsNavPaneButton_Click"/>
+                        </CommandBar.Content>
+                        <AppBarToggleButton x:Name="ConnectDeviceToggleButton" Label="Connect" Checked="ConnectDeviceToggleButton_Checked" Unchecked="ConnectDeviceToggleButton_Unchecked">
+                            <AppBarToggleButton.Icon>
+                                <SymbolIcon x:Name="symbolIcon" Symbol="Sync" RenderTransformOrigin="0.5,0.5">
+                                    <SymbolIcon.RenderTransform>
+                                        <CompositeTransform></CompositeTransform>
+                                    </SymbolIcon.RenderTransform>
+                                </SymbolIcon>
+                            </AppBarToggleButton.Icon>
+                        </AppBarToggleButton>
+                        <AppBarToggleButton x:Name="DebugToggleButton" Icon="Repair" Label="Debug" Click="DebugToggleButton_Click"></AppBarToggleButton>
+                        <AppBarButton x:Name="SettingsNavPaneButton" Icon="Setting" Label="Settings" Click="SettingsNavPaneButton_Click">
+                            
+                        </AppBarButton>
+                    </CommandBar>
                 </Grid>
+                
             </SplitView.Pane>
 
             <SplitView.Content>
-                <!-- OnNavigatingToPage we synchronize the selected item in the nav menu with the current page.-->
                 <Frame x:Name="frame"
                    Margin="0,4,0,0"
                    Navigating="OnNavigatingToPage">
@@ -176,5 +183,6 @@
                 </Frame>
             </SplitView.Content>
         </SplitView>
+
     </Grid>
 </Page>

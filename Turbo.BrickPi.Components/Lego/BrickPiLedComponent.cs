@@ -23,7 +23,7 @@ namespace Turbo.BrickPi.Components.Lego
             await ComponentHandler.HandleOutput(data).ConfigureAwait(false);
         }
 
-        [Action("Toogle")]
+        [Action("Toggle")]
         [ActionHelp("Toggle the LED from current status.")]
         private async Task LedComponentToogle(MessageContainer data)
         {
