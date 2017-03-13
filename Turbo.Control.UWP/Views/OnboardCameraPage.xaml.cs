@@ -55,41 +55,51 @@ namespace Turbo.Control.UWP.Views
             });
         }
 
-        private async void SupportedFormats_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
-        {
-            await CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
-            {
-                UpdateFormatSelectionElements(sender);
-            });
-        } 
-
+        bool updating;
         private void UpdateFormatSelectionElements(object sender)
         {
-            dropdownAllFormats.Items.Clear();
-            foreach (string item in imageSource.GetAllSupportedFormats())
-            {
-                dropdownAllFormats.Items.Add(item);
-            }
 
-            if (sender != dropDownFormats)
+            if (!updating)
             {
-                dropDownFormats.Items.Clear();
-                dropDownFormats.Items.Add(string.Empty);
-                foreach (string format in imageSource.GetSupportedCaptureFormats())
+                updating = true;
+                object selectedValue;
+
+                if (sender != dropdownFormatSelection)
                 {
-                    dropDownFormats.Items.Add(format);
+                    selectedValue = dropdownFormatSelection.SelectedValue;
+                    dropdownFormatSelection.Items.Clear();
+                    foreach (ImageSourceController.ImageFormat item in imageSource.GetSupportedFormatsFiltered(dropDownFormats.SelectedValue as string, dropDownResolutions.SelectedValue as string))
+                    {
+                        dropdownFormatSelection.Items.Add(item);
+                    }
+                    dropdownFormatSelection.SelectedValue = selectedValue;
                 }
-            }
 
-            if (sender != dropDownResolutions)
-            {
-                dropDownResolutions.Items.Clear();
-                foreach (string resolutionString in imageSource.GetSupportedCaptureResolutions(dropDownFormats.SelectedValue as string))
+                if (sender != dropDownFormats)
                 {
-                    dropDownResolutions.Items.Add(resolutionString);
+                    selectedValue = dropDownFormats.SelectedValue;
+                    dropDownFormats.Items.Clear();
+                    dropDownFormats.Items.Add(string.Empty);
+                    foreach (string format in imageSource.GetSupportedCaptureFormats(dropDownResolutions.SelectedValue as string))
+                    {
+                        dropDownFormats.Items.Add(format);
+                    }
+                    dropDownFormats.SelectedValue = selectedValue;
                 }
-            }
 
+                if (sender != dropDownResolutions)
+                {
+                    selectedValue = dropDownResolutions.SelectedValue;
+                    dropDownResolutions.Items.Clear();
+                    dropDownResolutions.Items.Add(string.Empty);
+                    foreach (string resolutionString in imageSource.GetSupportedCaptureResolutions(dropDownFormats.SelectedValue as string))
+                    {
+                        dropDownResolutions.Items.Add(resolutionString);
+                    }
+                    dropDownResolutions.SelectedValue = selectedValue;
+                }
+                updating = false;
+            }
         }
 
         protected override void OnNavigatedFrom(NavigationEventArgs e)
@@ -122,21 +132,26 @@ namespace Turbo.Control.UWP.Views
 
         private void btnLoadFormats_Click(object sender, RoutedEventArgs e)
         {
-            dropdownAllFormats.Items.Clear();
-            foreach (string item in imageSource.GetSupportedFormatsFiltered(dropDownFormats.SelectedValue as string, dropDownResolutions.SelectedValue as string))
-            {
-                dropdownAllFormats.Items.Add(item);
-            }            
         }
 
         private void dropDownFormats_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-//            UpdateFormatSelectionElements(sender);
+            UpdateFormatSelectionElements(sender);
         }
 
         private void dropDownResolutions_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-//            UpdateFormatSelectionElements(sender);
+            UpdateFormatSelectionElements(sender);
+        }
+
+        private async void dropdownFormatSelection_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            ImageSourceController.ImageFormat? format = dropdownFormatSelection.SelectedValue as ImageSourceController.ImageFormat?;
+            if (format.HasValue)
+            {
+                await imageSource.SetCaptureFormat(format.Value);
+            }
+
         }
     }
 }

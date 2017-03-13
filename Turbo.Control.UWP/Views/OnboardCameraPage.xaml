@@ -46,12 +46,10 @@
         </controls:PageHeader>
 
         <StackPanel Grid.Row="1">
-            <Image x:Name="imgMain" Stretch="UniformToFill" Width="200" Height="200" ScrollViewer.HorizontalScrollBarVisibility="Auto" ScrollViewer.VerticalScrollBarVisibility="Auto" HorizontalAlignment="Center" />
+            <ScrollViewer x:Name="scrollMainImagage" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" Width="400" Height="200">
+                <Image x:Name="imgMain" HorizontalAlignment="Center" />
+            </ScrollViewer>
             <Button x:Name="btnLoad" Click="btnLoad_Click" >Load</Button>
-            <!--            <GridView x:Name="gridView" Grid.Row="2" HorizontalAlignment="Center" HorizontalContentAlignment="Center" VerticalAlignment="Center" 
-                      ItemTemplate="{StaticResource PhotosTemplate}">
-            </GridView>
--->
             <ListView x:Name="lvPictureCache" ItemsSource="{x:Bind Items}" Height="120"
                          ScrollViewer.HorizontalScrollMode="Enabled" 
           ScrollViewer.HorizontalScrollBarVisibility="Auto"
@@ -80,8 +78,8 @@
                     <RowDefinition Height="Auto"></RowDefinition>
                     <RowDefinition Height="Auto"></RowDefinition>
                 </Grid.RowDefinitions>
-                <ComboBox Grid.Column="0" Grid.Row="0" x:Name="dropdownAllFormats" HorizontalAlignment="Stretch" Margin="10,0,10,0" ScrollViewer.HorizontalScrollBarVisibility="Auto"/>
-                <Button Grid.Column="1" x:Name="btnLoadFormats" HorizontalAlignment="Stretch" Click="btnLoadFormats_Click">
+                <ComboBox Grid.Column="0" Grid.Row="0" x:Name="dropdownFormatSelection" HorizontalAlignment="Stretch" Margin="10,0,10,0" ScrollViewer.HorizontalScrollBarVisibility="Auto" SelectionChanged="dropdownFormatSelection_SelectionChanged"/>
+                <Button Grid.Column="1" x:Name="btnLoadFormats" HorizontalAlignment="Stretch" Click="btnLoadFormats_Click" VerticalAlignment="Bottom">
                     <SymbolIcon x:Name="Refresh" Symbol="Refresh" />
                 </Button>
                 <TextBlock Grid.Row="1" Grid.Column="0" x:Name="textBlock" TextWrapping="Wrap" Text="TextBlock"/>

@@ -82,15 +82,13 @@ namespace Turbo.Control.UWP.Views
             }
             else
             {
-                ContentDialog invalidJson = new ContentDialog()
+                ContentDialog invalidJsonDialog = new ContentDialog()
                 {
                     Title = "Json Command not valid",
                     Content = "Please specify a valid Json string to be sent to the device host.",
                     PrimaryButtonText = "Ok"
                 };
-
-                ContentDialogResult result = await invalidJson.ShowAsync();
-
+                await invalidJsonDialog.ShowAsync();
             }
         }
     }
