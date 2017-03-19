@@ -73,7 +73,7 @@ namespace Turbo.Control.UWP.Views
                 move.AddValue("Action", "Move");
                 move.AddValue("Direction", e.Angle);
                 move.AddValue("Velocity", e.Distance);
-                move.AddValue("Rotation", 0);
+                move.AddValue("Rotation", Slider.Distance);
                 await ControllerHandler.Send("LandingPage", move);
 
             }
@@ -102,6 +102,45 @@ namespace Turbo.Control.UWP.Views
 
             }
 
+        }
+
+        private async void LinearSlider_Moved(object sender, Controls.SliderEventArgs e)
+        {
+            JoypadValues.Text = $"Force: {e.Distance}";
+            if (ControllerHandler.ConnectionStatus == ConnectionStatus.Connected)
+            {
+                JsonObject move = new JsonObject();
+                move.AddValue("Target", "BrickPi.Drive");
+                move.AddValue("Action", "Move");
+                move.AddValue("Direction", Joypad.Angle);
+                move.AddValue("Velocity", Joypad.Distance);
+                move.AddValue("Rotation", e.Distance);
+                await ControllerHandler.Send("LandingPage", move);
+            }
+        }
+
+        private async void LinearSlider_Released(object sender, Controls.SliderEventArgs e)
+        {
+            if (ControllerHandler.ConnectionStatus == ConnectionStatus.Connected)
+            {
+                JsonObject stop = new JsonObject();
+                stop.AddValue("Target", "BrickPi.Drive");
+                stop.AddValue("Action", "Stop");
+                await ControllerHandler.Send("LandingPage", stop);
+
+            }
+        }
+
+        private async void LinearSlider_Captured(object sender, EventArgs e)
+        {
+            if (ControllerHandler.ConnectionStatus == ConnectionStatus.Connected)
+            {
+                JsonObject start = new JsonObject();
+                start.AddValue("Target", "BrickPi.Drive");
+                start.AddValue("Action", "Start");
+                await ControllerHandler.Send("LandingPage", start);
+
+            }
         }
     }
 }

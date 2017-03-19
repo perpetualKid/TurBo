@@ -102,6 +102,9 @@
     <Compile Include="Controls\Joypad.xaml.cs">
       <DependentUpon>Joypad.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Controls\LinearSlider.xaml.cs">
+      <DependentUpon>LinearSlider.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Controls\NavigationMenuItem.cs" />
     <Compile Include="Controls\NavigationMenuListView.cs" />
     <Compile Include="Controls\PageHeader.xaml.cs">
@@ -155,6 +158,10 @@
     <Page Include="Controls\Joypad.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Controls\LinearSlider.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Controls\PageHeader.xaml">
       <Generator>MSBuild:Compile</Generator>

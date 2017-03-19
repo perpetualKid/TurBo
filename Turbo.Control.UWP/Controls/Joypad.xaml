@@ -6,8 +6,8 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
-    d:DesignHeight="300"
-    d:DesignWidth="300">
+    d:DesignHeight="340"
+    d:DesignWidth="340">
 
     <Viewbox Name="Viewbox" Stretch="Uniform">
         <Canvas x:Name="Base" Margin="0" Width="340" Height="340">

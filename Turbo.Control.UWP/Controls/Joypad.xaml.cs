@@ -35,8 +35,8 @@ namespace Turbo.Control.UWP.Controls
             DependencyProperty.Register(nameof(DistanceChangeThreshold), typeof(int), typeof(Joypad), null);
 
         /// <summary>Whether the joypad knob resets its place after being released</summary>
-        public static readonly DependencyProperty DisableResetOnReleaseProperty =
-            DependencyProperty.Register(nameof(DisableResetOnRelease), typeof(bool), typeof(Joypad), null);
+        public static readonly DependencyProperty ResetOnReleaseProperty =
+            DependencyProperty.Register(nameof(ResetOnRelease), typeof(bool), typeof(Joypad), new PropertyMetadata(true));
 
         /// <summary>Current angle in degrees from 0 to 360</summary>
         public int Angle
@@ -81,10 +81,10 @@ namespace Turbo.Control.UWP.Controls
         }
 
         /// <summary>Indicates whether the joypad knob resets its place after being released</summary>
-        public bool DisableResetOnRelease
+        public bool ResetOnRelease
         {
-            get { return Convert.ToBoolean(GetValue(DisableResetOnReleaseProperty)); }
-            set { SetValue(DisableResetOnReleaseProperty, value); }
+            get { return Convert.ToBoolean(GetValue(ResetOnReleaseProperty)); }
+            set { SetValue(ResetOnReleaseProperty, value); }
         }
 
         /// <summary>This event fires whenever the joypad moves more than the threshold values</summary>
@@ -115,7 +115,7 @@ namespace Turbo.Control.UWP.Controls
             Knob.ReleasePointerCapture(e.Pointer);
             pointerCaptured = false;
             Released?.Invoke(this, new JoypadEventArgs { Angle = Angle, Distance = Distance });
-            if (!this.DisableResetOnRelease)
+            if (this.ResetOnRelease)
             {
                 centerKnob.Begin();
             }
