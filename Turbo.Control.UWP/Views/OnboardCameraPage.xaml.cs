@@ -20,6 +20,7 @@ namespace Turbo.Control.UWP.Views
     public sealed partial class OnboardCameraPage : Page
     {
         private ImageSourceController imageSource;
+        private bool updating;
 
         public OnboardCameraPage()
         {
@@ -33,7 +34,6 @@ namespace Turbo.Control.UWP.Views
                 return;
             base.OnNavigatedTo(e);
             imageSource.OnImageReceived += ImageSource_OnImageReceived;
-            imageSource.OnCurrentFormatChanged += ImageSource_OnFormatChanged;
             imageSource.OnSupportedFormatsChanged += ImageSource_OnSupportedFormatsChanged;
             await imageSource.RequestCurrentFormat();
             await imageSource.RequestSupportedFormats();
@@ -47,15 +47,6 @@ namespace Turbo.Control.UWP.Views
             });
         }
 
-        private async void ImageSource_OnFormatChanged(object sender, ImageSourceController.ImageFormat imageFormat)
-        {
-            await CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
-            {
-                textBlock.Text = imageFormat.ToString();
-            });
-        }
-
-        bool updating;
         private void UpdateFormatSelectionElements(object sender)
         {
 
@@ -72,7 +63,7 @@ namespace Turbo.Control.UWP.Views
                     {
                         dropdownFormatSelection.Items.Add(item);
                     }
-                    dropdownFormatSelection.SelectedValue = selectedValue;
+                    dropdownFormatSelection.SelectedValue = dropdownFormatSelection.Items.SingleOrDefault( item => item.Equals(imageSource.CurrentImageFormat.Value));
                 }
 
                 if (sender != dropDownFormats)
@@ -106,7 +97,6 @@ namespace Turbo.Control.UWP.Views
         {
             base.OnNavigatedFrom(e);
             imageSource.OnImageReceived -= ImageSource_OnImageReceived;
-            imageSource.OnCurrentFormatChanged -= ImageSource_OnFormatChanged;
         }
 
         private async void ImageSource_OnImageReceived(object sender, BitmapImage e)
@@ -128,10 +118,6 @@ namespace Turbo.Control.UWP.Views
         {
             if (lvPictureCache.SelectedIndex > -1)
                 this.imgMain.Source = this.imageSource.CachedImages[lvPictureCache.SelectedIndex];
-        }
-
-        private void btnLoadFormats_Click(object sender, RoutedEventArgs e)
-        {
         }
 
         private void dropDownFormats_SelectionChanged(object sender, SelectionChangedEventArgs e)
