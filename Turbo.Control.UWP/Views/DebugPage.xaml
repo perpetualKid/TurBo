@@ -44,7 +44,7 @@
                 <TextBlock x:Name="HeaderTextBlock" Text="Debug" Style="{StaticResource PageTitleTextBlockStyle}" TextWrapping="NoWrap"/>
             </controls:PageHeader.HeaderContent>
         </controls:PageHeader>
-        <Grid Grid.Row="1" Margin="12">
+        <Grid Grid.Row="1">
             <Grid.RowDefinitions>
                 <RowDefinition Height="1*"></RowDefinition>
                 <RowDefinition Height="1*"></RowDefinition>
@@ -54,17 +54,17 @@
                 <ColumnDefinition Width="*"></ColumnDefinition>
                 <ColumnDefinition Width="Auto"></ColumnDefinition>
             </Grid.ColumnDefinitions>
-            <TextBox x:Name="txtTextReceived" Grid.Row="0" Grid.Column="0"  HorizontalAlignment="Stretch" TextWrapping="Wrap" Text="" VerticalAlignment="Stretch" Margin="12" ScrollViewer.HorizontalScrollBarVisibility="Auto" ScrollViewer.VerticalScrollBarVisibility="Auto" IsReadOnly="True"/>
-            <Button x:Name="btnTextReceivedClear" Grid.Row="0" Grid.Column="1" HorizontalAlignment="Center" Click="btnTextReceivedClear_Click" Margin="12">
+            <TextBox x:Name="txtTextReceived" Grid.Row="0" Grid.Column="0" Margin="12" HorizontalAlignment="Stretch" TextWrapping="Wrap" Text="" VerticalAlignment="Stretch" ScrollViewer.HorizontalScrollBarVisibility="Auto" ScrollViewer.VerticalScrollBarVisibility="Auto" IsReadOnly="True"/>
+            <Button x:Name="btnTextReceivedClear" Grid.Row="0" Grid.Column="1" HorizontalAlignment="Center" Click="btnTextReceivedClear_Click">
                 <SymbolIcon Symbol="Delete"/>
             </Button>
 
-            <TextBox x:Name="txtTextSent" Grid.Row="1" Grid.Column="0"  HorizontalAlignment="Stretch" TextWrapping="Wrap" Text="" VerticalAlignment="Stretch" Margin="12" ScrollViewer.HorizontalScrollBarVisibility="Auto" ScrollViewer.VerticalScrollBarVisibility="Auto" IsReadOnly="True"/>
-            <Button x:Name="btnTextSentClear" Grid.Row="1" Grid.Column="1" HorizontalAlignment="Center" Click="btnTextSentClear_Click" Margin="12">
+            <TextBox x:Name="txtTextSent" Grid.Row="1" Grid.Column="0" Margin="12" HorizontalAlignment="Stretch" TextWrapping="Wrap" Text="" VerticalAlignment="Stretch" ScrollViewer.HorizontalScrollBarVisibility="Auto" ScrollViewer.VerticalScrollBarVisibility="Auto" IsReadOnly="True"/>
+            <Button x:Name="btnTextSentClear" Grid.Row="1" Grid.Column="1" HorizontalAlignment="Center" Click="btnTextSentClear_Click">
                 <SymbolIcon Symbol="Delete"/>
             </Button>
-            <TextBox x:Name="txtTextCommand" Grid.Row="2" Grid.Column="0"  HorizontalAlignment="Stretch" Text="" Margin="12" ScrollViewer.HorizontalScrollBarVisibility="Auto" ScrollViewer.VerticalScrollBarVisibility="Auto" PlaceholderText="{}{&quot;Target&quot;:&quot;.&quot;, &quot;Action&quot;:&quot;ECHO&quot;, &quot;Parameters&quot;:[&quot;Test&quot;, &quot;Another Test&quot;, 123]}"/>
-            <Button x:Name="btnCommandAction" Grid.Row="2" Grid.Column="1" HorizontalAlignment="Center" Margin="12" Click="btnCommandAction_Click">
+            <TextBox x:Name="txtTextCommand" Grid.Row="2" Grid.Column="0" Margin="12" HorizontalAlignment="Stretch" Text="" ScrollViewer.HorizontalScrollBarVisibility="Auto" ScrollViewer.VerticalScrollBarVisibility="Auto" PlaceholderText="{}{&quot;Target&quot;:&quot;.&quot;, &quot;Action&quot;:&quot;ECHO&quot;, &quot;Parameters&quot;:[&quot;Test&quot;, &quot;Another Test&quot;, 123]}"/>
+            <Button x:Name="btnCommandAction" Grid.Row="2" Grid.Column="1" HorizontalAlignment="Center" Click="btnCommandAction_Click">
                 <SymbolIcon Symbol="MapPin"/>
             </Button>
 

@@ -70,7 +70,7 @@
                     </DataTemplate>
                 </ListView.ItemTemplate>
             </ListView>
-        <CommandBar x:Name="topbar" Grid.Row="3" Visibility="Visible" HorizontalContentAlignment="Stretch" IsDynamicOverflowEnabled="False" Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+        <CommandBar x:Name="topbar" Grid.Row="3" Visibility="Collapsed" HorizontalContentAlignment="Stretch" IsDynamicOverflowEnabled="False" Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
             <!--http://stackoverflow.com/questions/39126481/aligning-content-of-commandbar-in-uwp-->
             <AppBarButton Icon="Delete" Label="Delete"/>
             <CommandBar.Content>
