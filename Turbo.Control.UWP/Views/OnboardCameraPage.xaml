@@ -42,15 +42,14 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <controls:PageHeader Grid.Row="0" Margin="24,0">
+        <controls:PageHeader Grid.Row="0">
             <controls:PageHeader.HeaderContent>
                 <TextBlock x:Name="HeaderTextBlock" Text="Onboard Camera" Style="{StaticResource PageTitleTextBlockStyle}" TextWrapping="NoWrap"/>
             </controls:PageHeader.HeaderContent>
         </controls:PageHeader>
         <ScrollViewer x:Name="scrollMainImagage" Grid.Row="1" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
-            <Image x:Name="imgMain" HorizontalAlignment="Center" />
+            <Image x:Name="imgMain" HorizontalAlignment="Center" Source="ms-appx:///Assets/SplashScreen.png" DoubleTapped="imgMain_DoubleTapped" />
         </ScrollViewer>
-        <Button x:Name="btnLoad" Grid.Row="1" Click="btnLoad_Click" >Load</Button>
 
             <ListView Grid.Row="2" x:Name="lvPictureCache" ItemsSource="{x:Bind Items}" Height="120"
                          ScrollViewer.HorizontalScrollMode="Enabled" 
@@ -70,9 +69,10 @@
                     </DataTemplate>
                 </ListView.ItemTemplate>
             </ListView>
-        <CommandBar x:Name="topbar" Grid.Row="3" Visibility="Collapsed" HorizontalContentAlignment="Stretch" IsDynamicOverflowEnabled="False" Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+        <CommandBar x:Name="topbar" Grid.Row="3" Visibility="Visible" HorizontalContentAlignment="Stretch" IsDynamicOverflowEnabled="False" Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
             <!--http://stackoverflow.com/questions/39126481/aligning-content-of-commandbar-in-uwp-->
-            <AppBarButton Icon="Delete" Label="Delete"/>
+            <AppBarButton Icon="Camera" x:Name="AppBarButtonCapturePicture" Label="Capture" Click="AppBarButtonCapturePicture_Click" />
+            <AppBarButton Icon="Delete" Label="Delete" />
             <CommandBar.Content>
                 <Grid>
                     <Grid.ColumnDefinitions>

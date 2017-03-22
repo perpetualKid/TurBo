@@ -11,22 +11,20 @@ namespace Turbo.Control.UWP.Util
 {
     public static class PageNavigation
     {
-        public static async Task<bool> ConnectionNeeded(this Page page, Type destinationPageType, object parameter)
+        public static async Task<bool> CheckConnection(this Page page, object parameter)
         {
             if (!ControllerHandler.Connected)
             {
                 ContentDialog missingClientId = new ContentDialog()
                 {
-                    Title = "OneDrive ClientId missing",
-                    Content = "Please specify a valid OneDrive ClientId and ClientSecret.\r\n\r\nWhen you click OK you will be redirected to the Application Settings page.",
+                    Title = "Not Connected!",
+                    Content = "Please connect to device first.",
                     PrimaryButtonText = "Ok"
                 };
 
                 ContentDialogResult result = await missingClientId.ShowAsync();
-                page.Frame.Navigate(typeof(AppSettingsPage), parameter, new Windows.UI.Xaml.Media.Animation.DrillInNavigationTransitionInfo());
-                return false;
             }
-            return true;
+            return ControllerHandler.Connected;
         }
     }
 }

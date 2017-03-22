@@ -6,7 +6,6 @@
     xmlns:controls="using:Turbo.Control.UWP.Controls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    DataContext="{Binding RelativeSource={RelativeSource Mode=Self}}"
     mc:Ignorable="d">
     <Page.Resources>
         <Flyout x:Name="ConnectionFlyout" Placement="Left">

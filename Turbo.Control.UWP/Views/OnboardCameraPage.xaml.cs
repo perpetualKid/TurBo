@@ -24,19 +24,19 @@ namespace Turbo.Control.UWP.Views
 
         public OnboardCameraPage()
         {
-            this.InitializeComponent();
             imageSource = ImageSourceController.GetNamedInstance<ImageSourceController>(nameof(ImageSourceController), "FrontCamera").Result;
+            this.InitializeComponent();
         }
 
         protected override async void OnNavigatedTo(NavigationEventArgs e)
         {
-            if (!await this.ConnectionNeeded(typeof(LandingPage), e.Parameter))
+            if (!await this.CheckConnection(e.Parameter))
                 return;
-            base.OnNavigatedTo(e);
             imageSource.OnImageReceived += ImageSource_OnImageReceived;
             imageSource.OnSupportedFormatsChanged += ImageSource_OnSupportedFormatsChanged;
-            await imageSource.RequestCurrentFormat();
-            await imageSource.RequestSupportedFormats();
+            await imageSource.InitializeFormats();
+            UpdateFormatSelectionElements(null);
+            base.OnNavigatedTo(e);
         }
 
         private async void ImageSource_OnSupportedFormatsChanged(object sender, EventArgs e)
@@ -109,11 +109,6 @@ namespace Turbo.Control.UWP.Views
             get { return this.imageSource.CachedImages; }
         }
 
-        private async void btnLoad_Click(object sender, RoutedEventArgs e)
-        {
-            await imageSource.CaptureDeviceImage();
-        }
-
         private void ListView_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (lvPictureCache.SelectedIndex > -1)
@@ -133,12 +128,20 @@ namespace Turbo.Control.UWP.Views
         private async void dropdownFormatSelection_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             ImageSourceController.ImageFormat? format = dropdownFormatSelection.SelectedValue as ImageSourceController.ImageFormat?;
-            if (format.HasValue)
+            if (!updating && format.HasValue)
             {
                 await imageSource.SetCaptureFormat(format.Value);
             }
-
         }
 
+        private async void imgMain_DoubleTapped(object sender, Windows.UI.Xaml.Input.DoubleTappedRoutedEventArgs e)
+        {
+            await imageSource.CaptureDeviceImage();
+        }
+
+        private async void AppBarButtonCapturePicture_Click(object sender, RoutedEventArgs e)
+        {
+            await imageSource.CaptureDeviceImage();
+        }
     }
 }

@@ -151,7 +151,7 @@
                         </CommandBar.Content>
                         <AppBarToggleButton x:Name="ConnectDeviceToggleButton" Label="Connect" Checked="ConnectDeviceToggleButton_Checked" Unchecked="ConnectDeviceToggleButton_Unchecked">
                             <AppBarToggleButton.Icon>
-                                <SymbolIcon x:Name="symbolIcon" Symbol="Sync" RenderTransformOrigin="0.5,0.5">
+                                <SymbolIcon x:Name="symbolIcon" Symbol="Remote" RenderTransformOrigin="0.5,0.5">
                                     <SymbolIcon.RenderTransform>
                                         <CompositeTransform></CompositeTransform>
                                     </SymbolIcon.RenderTransform>

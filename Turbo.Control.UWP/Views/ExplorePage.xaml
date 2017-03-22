@@ -1,5 +1,5 @@
 ﻿<Page
-    x:Class="Turbo.Control.UWP.Views.DebugPage"
+    x:Class="Turbo.Control.UWP.Views.ExplorePage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="using:Turbo.Control.UWP.Views"
@@ -34,39 +34,27 @@
                 </VisualState>
             </VisualStateGroup>
         </VisualStateManager.VisualStateGroups>
+
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"></RowDefinition>
             <RowDefinition Height="*"></RowDefinition>
         </Grid.RowDefinitions>
         <controls:PageHeader x:Name="pageHeader" Grid.Row="0">
             <controls:PageHeader.HeaderContent>
-                <TextBlock x:Name="HeaderTextBlock" Text="Debug" Style="{StaticResource PageTitleTextBlockStyle}" TextWrapping="NoWrap"/>
+                <TextBlock x:Name="HeaderTextBlock" Style="{StaticResource PageTitleTextBlockStyle}" Text="Explore"/>
             </controls:PageHeader.HeaderContent>
         </controls:PageHeader>
         <Grid Grid.Row="1">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="1*"></RowDefinition>
-                <RowDefinition Height="1*"></RowDefinition>
-                <RowDefinition Height="Auto"></RowDefinition>
-            </Grid.RowDefinitions>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"></ColumnDefinition>
-                <ColumnDefinition Width="Auto"></ColumnDefinition>
+                <ColumnDefinition Width="*"></ColumnDefinition>
             </Grid.ColumnDefinitions>
-            <TextBox x:Name="txtTextReceived" Grid.Row="0" Grid.Column="0" Margin="12" HorizontalAlignment="Stretch" TextWrapping="Wrap" Text="" VerticalAlignment="Stretch" ScrollViewer.HorizontalScrollBarVisibility="Auto" ScrollViewer.VerticalScrollBarVisibility="Auto" IsReadOnly="True"/>
-            <Button x:Name="btnTextReceivedClear" Grid.Row="0" Grid.Column="1" HorizontalAlignment="Center" Click="btnTextReceivedClear_Click">
-                <SymbolIcon Symbol="Delete"/>
-            </Button>
-
-            <TextBox x:Name="txtTextSent" Grid.Row="1" Grid.Column="0" Margin="12" HorizontalAlignment="Stretch" TextWrapping="Wrap" Text="" VerticalAlignment="Stretch" ScrollViewer.HorizontalScrollBarVisibility="Auto" ScrollViewer.VerticalScrollBarVisibility="Auto" IsReadOnly="True"/>
-            <Button x:Name="btnTextSentClear" Grid.Row="1" Grid.Column="1" HorizontalAlignment="Center" Click="btnTextSentClear_Click">
-                <SymbolIcon Symbol="Delete"/>
-            </Button>
-            <TextBox x:Name="txtTextCommand" Grid.Row="2" Grid.Column="0" Margin="12" HorizontalAlignment="Stretch" Text="" ScrollViewer.HorizontalScrollBarVisibility="Auto" ScrollViewer.VerticalScrollBarVisibility="Auto" PlaceholderText="{}{&quot;Target&quot;:&quot;.&quot;, &quot;Action&quot;:&quot;ECHO&quot;, &quot;Parameters&quot;:[&quot;Test&quot;, &quot;Another Test&quot;, 123]}"/>
-            <Button x:Name="btnCommandAction" Grid.Row="2" Grid.Column="1" HorizontalAlignment="Center" Click="btnCommandAction_Click">
-                <SymbolIcon Symbol="Play"/>
-            </Button>
-
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"></RowDefinition>
+                <RowDefinition Height="*"></RowDefinition>
+            </Grid.RowDefinitions>
+            <TextBlock Grid.Column="0" Grid.Row="0">Color</TextBlock>
+            <Ellipse x:Name="ellColorSensor"></Ellipse>
         </Grid>
     </Grid>
 </Page>

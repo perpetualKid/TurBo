@@ -24,19 +24,19 @@ namespace Turbo.Control.UWP.Views
 
     public sealed partial class DebugPage : Page
     {
-        DebugController debugController;
+        DebugHandler debugController;
 
         public DebugPage()
         {
             this.InitializeComponent();
         }
 
-        protected override async void OnNavigatedTo(NavigationEventArgs e)
+        protected override void OnNavigatedTo(NavigationEventArgs e)
         {
             base.OnNavigatedTo(e);
-            debugController = await DebugController.GetNamedInstance<DebugController>("DebugController", string.Empty);
+            debugController = DebugHandler.Instance;
             debugController.OnDataReceived += DebugController_OnReceivedTextUpdated;
-            debugController.OnDataReceived += DebugController_OnSentTextUpdated;
+            debugController.OnDataSent += DebugController_OnSentTextUpdated;
             txtTextReceived.Text = debugController.DataReceived;
             txtTextSent.Text = debugController.DataSent;
         }

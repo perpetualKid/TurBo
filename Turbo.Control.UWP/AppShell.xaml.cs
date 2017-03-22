@@ -29,9 +29,9 @@ namespace Turbo.Control.UWP
             {
                 new NavigationMenuItem()
                 {
-                    Symbol = Symbol.Contact,
-                    Label = "Basic Page",
-//                    DestPage = typeof(BasicPage)
+                    Symbol = Symbol.View,
+                    Label = "Explore",
+                    DestinationPage = typeof(ExplorePage)
                 },
                 new NavigationMenuItem()
                 {
@@ -395,7 +395,7 @@ namespace Turbo.Control.UWP
 
         private void DebugToggleButton_Click(object sender, RoutedEventArgs e)
         {
-            DebugController.Instance.Enabled = (sender as AppBarToggleButton).IsChecked.Value;
+            DebugHandler.Instance.Enabled = (sender as AppBarToggleButton).IsChecked.Value;
         }
 
         private async void ConnectDeviceToggleButton_Checked(object sender, RoutedEventArgs e)
@@ -409,6 +409,7 @@ namespace Turbo.Control.UWP
             {
 
                 ConnectDeviceToggleButton.IsEnabled = false;
+                symbolIcon.Symbol = Symbol.Sync;
                 ConnectingActivity.Begin();
                 ConnectionFlyoutText.Text = DeviceConnectionHandler.ConnectionFlyoutText;
 
@@ -441,6 +442,7 @@ namespace Turbo.Control.UWP
             {
                 ConnectionFlyout.Hide();
                 ConnectingActivity.Stop();
+                symbolIcon.Symbol = Symbol.Remote;
                 ConnectDeviceToggleButton.IsEnabled = true;
             }
         }
