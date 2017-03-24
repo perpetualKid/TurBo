@@ -24,12 +24,12 @@ namespace Turbo.Control.UWP.Views
 
         public OnboardCameraPage()
         {
-            imageSource = ImageSourceController.GetNamedInstance<ImageSourceController>(nameof(ImageSourceController), "FrontCamera").Result;
             this.InitializeComponent();
         }
 
         protected override async void OnNavigatedTo(NavigationEventArgs e)
         {
+            imageSource = await ImageSourceController.GetNamedInstance<ImageSourceController>(nameof(ImageSourceController), "FrontCamera");
             if (!await this.CheckConnection(e.Parameter))
                 return;
             imageSource.OnImageReceived += ImageSource_OnImageReceived;
@@ -106,7 +106,7 @@ namespace Turbo.Control.UWP.Views
 
         public ObservableCollection<BitmapImage> Items
         {
-            get { return this.imageSource.CachedImages; }
+            get { return this.imageSource?.CachedImages; }
         }
 
         private void ListView_SelectionChanged(object sender, SelectionChangedEventArgs e)

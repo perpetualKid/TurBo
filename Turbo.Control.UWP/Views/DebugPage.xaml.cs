@@ -17,33 +17,33 @@ using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Navigation;
 
-// The Blank Page item template is documented at http://go.microsoft.com/fwlink/?LinkId=234238
-
 namespace Turbo.Control.UWP.Views
 {
 
     public sealed partial class DebugPage : Page
     {
-        DebugHandler debugController;
+        DebugHandler debugHandler;
+        GenericController debugController;
 
         public DebugPage()
         {
             this.InitializeComponent();
         }
 
-        protected override void OnNavigatedTo(NavigationEventArgs e)
+        protected override async void OnNavigatedTo(NavigationEventArgs e)
         {
             base.OnNavigatedTo(e);
-            debugController = DebugHandler.Instance;
-            debugController.OnDataReceived += DebugController_OnReceivedTextUpdated;
-            debugController.OnDataSent += DebugController_OnSentTextUpdated;
-            txtTextReceived.Text = debugController.DataReceived;
-            txtTextSent.Text = debugController.DataSent;
+            debugController = await GenericController.GetNamedInstance<GenericController>("DebugController", string.Empty);
+            debugHandler = DebugHandler.Instance;
+            debugHandler.OnDataReceived += DebugController_OnReceivedTextUpdated;
+            debugHandler.OnDataSent += DebugController_OnSentTextUpdated;
+            txtTextReceived.Text = debugHandler.DataReceived;
+            txtTextSent.Text = debugHandler.DataSent;
         }
         protected override void OnNavigatedFrom(NavigationEventArgs e)
         {
-            debugController.OnDataReceived -= DebugController_OnReceivedTextUpdated;
-            debugController.OnDataSent -= DebugController_OnSentTextUpdated;
+            debugHandler.OnDataReceived -= DebugController_OnReceivedTextUpdated;
+            debugHandler.OnDataSent -= DebugController_OnSentTextUpdated;
             base.OnNavigatedFrom(e);
         }
 
@@ -51,7 +51,7 @@ namespace Turbo.Control.UWP.Views
         {
             await CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
             {
-                txtTextSent.Text = debugController.DataSent;
+                txtTextSent.Text = debugHandler.DataSent;
             });
         }
 
@@ -59,18 +59,18 @@ namespace Turbo.Control.UWP.Views
         {
             await CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
             {
-                txtTextReceived.Text = debugController.DataReceived;
+                txtTextReceived.Text = debugHandler.DataReceived;
             });
         }
 
         private void btnTextReceivedClear_Click(object sender, RoutedEventArgs e)
         {
-            debugController?.ClearReceivedBuffer();
+            debugHandler?.ClearReceivedBuffer();
         }
 
         private void btnTextSentClear_Click(object sender, RoutedEventArgs e)
         {
-            debugController?.ClearSentBuffer();
+            debugHandler?.ClearSentBuffer();
         }
 
         private async void btnCommandAction_Click(object sender, RoutedEventArgs e)
@@ -78,7 +78,7 @@ namespace Turbo.Control.UWP.Views
             JsonObject data;
             if (JsonObject.TryParse(txtTextCommand.Text, out data))
             {
-                await ControllerHandler.Send(data);
+                await debugController.SendRequest(data, true);
             }
             else
             {

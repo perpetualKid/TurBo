@@ -45,7 +45,8 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
-            <RowDefinition />
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
         <controls:PageHeader x:Name="pageHeader" Grid.Row="0">
@@ -61,7 +62,6 @@
         </StackPanel>
         <ScrollViewer Grid.Row="2" EntranceNavigationTransitionInfo.IsTargetElement="True" IsTabStop="True">
             <StackPanel x:Name="ContentContainer" Margin="12,0,12,0">
-                <Ellipse x:Name="ellColor" HorizontalAlignment="Left" Height="50" VerticalAlignment="Top" Width="50"/>
                 <TextBlock Style="{StaticResource SubtitleTextBlockStyle}">Top-Level Navigation</TextBlock>
                 <TextBlock Style="{StaticResource BodyTextBlockStyle}" Margin="0,4">This sample demonstrates a universal Windows app with top-level navigation.</TextBlock>
 
@@ -73,14 +73,22 @@
                     higher z-order.  To enable content on individual pages to be aware of the floating "hamburger" the app uses a PageHeader control
                     that is aware of the "hamburger".
                 </TextBlock>
-
-                <TextBlock Style="{StaticResource SubtitleTextBlockStyle}" Margin="0,12,0,4">Things to see:</TextBlock>
-                <TextBlock Style="{StaticResource BodyTextBlockStyle}" Margin="0,8"> 1) App.xaml - The startup sequence using AppShell as the root element instead of a Frame.</TextBlock>
-                <TextBlock Style="{StaticResource BodyTextBlockStyle}" Margin="0,8"> 2) AppShell.xaml - The "chrome" of the app.</TextBlock>
-                <TextBlock Style="{StaticResource BodyTextBlockStyle}" Margin="0,8"> 3) PageHeader.xaml - Control to wrap an item on a Page to avoid visual overlap with the floating hamburger.</TextBlock>
-                <TextBlock Style="{StaticResource BodyTextBlockStyle}" Margin="0,8"> 4) Styles.xaml - Styles including one for a hamburger button.</TextBlock>
-                <TextBlock Style="{StaticResource BodyTextBlockStyle}" Margin="0,8"> 5) NavMenuListView class - A customized ListView to show the navigation items and handle keyboarding.</TextBlock>
             </StackPanel>
         </ScrollViewer>
+        <VariableSizedWrapGrid Orientation="Horizontal" Grid.Row="3" ItemHeight="80" ItemWidth="120">
+            <StackPanel VariableSizedWrapGrid.ColumnSpan="2">
+                <TextBlock>Distance using very long text sample with no line break</TextBlock>
+                <TextBlock>cm</TextBlock>
+            </StackPanel>
+            <Border BorderThickness="1" BorderBrush="Black">
+                <StackPanel>
+                    <TextBlock>Color</TextBlock>
+                    <Ellipse x:Name="ellColor" HorizontalAlignment="Left" Height="50" VerticalAlignment="Top" Width="50" Fill="Aqua" DoubleTapped="ellColor_DoubleTapped"/>
+            </StackPanel>
+            </Border>
+            <StackPanel>
+                <Image x:Name="imgPreview" Source="ms-appx:///Assets/SplashScreen.png" Stretch="UniformToFill" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" DoubleTapped="imgPreview_DoubleTapped"></Image>
+            </StackPanel>
+        </VariableSizedWrapGrid>
     </Grid>
 </Page>
