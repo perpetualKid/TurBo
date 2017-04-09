@@ -25,8 +25,7 @@ namespace Turbo.Control.UWP.Views
 
         ApplicationDataContainer settings;
         private ImageSourceController imageSource;
-        private GenericController testController;
-        private GenericController driveController;
+        private GenericController landingPageController;
 
         public LandingPage()
         {
@@ -38,8 +37,8 @@ namespace Turbo.Control.UWP.Views
         {
             imageSource = await ImageSourceController.GetNamedInstance<ImageSourceController>(nameof(ImageSourceController), "FrontCamera");
             imageSource.OnImageReceived += ImageSource_OnImageReceived;
-            testController = await GenericController.GetNamedInstance<GenericController>("LandingPage", "BrickPi.NxtColor.Port_S3");
-            testController.OnResponseReceived += TestController_OnResponseReceived;
+            landingPageController = await GenericController.GetNamedInstance<GenericController>("LandingPage", "BrickPi.NxtColor.Port_S3");
+            landingPageController.OnResponseReceived += TestController_OnResponseReceived;
             this.imgPreview.Source = imageSource.CurrentImage ?? new BitmapImage(new Uri("ms-appx:///Assets/SplashScreen.png"));
             base.OnNavigatedTo(e);
         }
@@ -58,13 +57,19 @@ namespace Turbo.Control.UWP.Views
                         ellColor.Fill = new SolidColorBrush(color);
                     });
                     break;
+                case "Distance":
+                    await CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
+                    {
+                        txtDistance.Text = $"{e.GetNamedNumber("Distance")} cm";
+                    });
+                    break;
             }
         }
 
         protected override void OnNavigatedFrom(NavigationEventArgs e)
         {
             imageSource.OnImageReceived -= ImageSource_OnImageReceived;
-            testController.OnResponseReceived -= TestController_OnResponseReceived;
+            landingPageController.OnResponseReceived -= TestController_OnResponseReceived;
             base.OnNavigatedFrom(e);
         }
 
@@ -75,7 +80,7 @@ namespace Turbo.Control.UWP.Views
 
         private async void Joypad_Moved(object sender, Controls.JoypadEventArgs e)
         {
-            JoypadValues.Text = $"Force: {e.Distance} Angle: {e.Angle}";
+//            JoypadValues.Text = $"Force: {e.Distance} Angle: {e.Angle}";
             await DriveMove();
         }
 
@@ -91,7 +96,7 @@ namespace Turbo.Control.UWP.Views
 
         private async void LinearSlider_Moved(object sender, Controls.SliderEventArgs e)
         {
-            JoypadValues.Text = $"Force: {e.Distance}";
+//            JoypadValues.Text = $"Force: {e.Distance}";
             await DriveMove();
         }
 
@@ -109,14 +114,14 @@ namespace Turbo.Control.UWP.Views
         {
             if (ControllerHandler.ConnectionStatus == ConnectionStatus.Connected)
             {
-                await testController.SendRequest("Start", "BrickPi.Drive");
+                await landingPageController.SendRequest("Start", "BrickPi.Drive");
             }
         }
         private async Task DriveStop()
         {
             if (ControllerHandler.ConnectionStatus == ConnectionStatus.Connected)
             {
-                await testController.SendRequest("Stop", "BrickPi.Drive");
+                await landingPageController.SendRequest("Stop", "BrickPi.Drive");
             }
         }
 
@@ -131,7 +136,7 @@ namespace Turbo.Control.UWP.Views
                 move.AddValue("Direction", Joypad.Angle);
                 move.AddValue("Velocity", Joypad.Distance);
                 move.AddValue("Rotation", Slider.Distance);
-                await testController.SendRequest(move, true);
+                await landingPageController.SendRequest(move, true);
             }
         }
 
@@ -144,7 +149,15 @@ namespace Turbo.Control.UWP.Views
         {
             if (ControllerHandler.ConnectionStatus == ConnectionStatus.Connected)
             {
-                await testController.SendRequest("ARGB");
+                await landingPageController.SendRequest("ARGB");
+            }
+        }
+
+        private async void StackPanel_DoubleTapped(object sender, Windows.UI.Xaml.Input.DoubleTappedRoutedEventArgs e)
+        {
+            if (ControllerHandler.ConnectionStatus == ConnectionStatus.Connected)
+            {
+                await landingPageController.SendRequest("Distance", "BrickPi.NxtUltrasonic.Port_S2");
             }
         }
     }

@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using BrickPi.Uwp;
 using BrickPi.Uwp.Base;
 using BrickPi.Uwp.Sensors;
@@ -27,6 +28,7 @@ namespace Turbo.BrickPi.Components.Lego
 
         public async Task RegisterSensors()
         {
+            List<Task> registratrationTasks = new List<Task>();
             foreach (RawSensor sensor in brickPi.Sensors)
             {
                 switch (sensor.SensorType)
@@ -36,11 +38,19 @@ namespace Turbo.BrickPi.Components.Lego
                     case SensorType.COLOR_GREEN:
                     case SensorType.COLOR_RED:
                     case SensorType.COLOR_FULL:
-                        await ComponentHandler.RegisterComponent(new NXTColorSensorComponent("NXTColor." + sensor.SensorPort.ToString(), this, sensor as NXTColorSensor)).ConfigureAwait(false);
+                        registratrationTasks.Add(ComponentHandler.RegisterComponent(new NXTColorSensorComponent("NXTColor." + sensor.SensorPort.ToString(), this, sensor as NXTColorSensor)));
                         break;
-
+                    case SensorType.TOUCH:
+                    case SensorType.TOUCH_DEBOUNCE:
+                        registratrationTasks.Add(ComponentHandler.RegisterComponent(new NXTTouchSensorComponent("NXTTouch." + sensor.SensorPort.ToString(), this, sensor as NXTTouchSensor)));
+                        break;
+                    case SensorType.ULTRASONIC_CONT:
+                    case SensorType.ULTRASONIC_SS:
+                        registratrationTasks.Add(ComponentHandler.RegisterComponent(new NXTUltraSonicSensorComponent("NXTUltrasonic." + sensor.SensorPort.ToString(), this, sensor as NXTUltraSonicSensor)));
+                        break;
                 }
             }
+            await Task.WhenAll(registratrationTasks).ConfigureAwait(false);
         }
 
         [Action("Version")]

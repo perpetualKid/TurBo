@@ -70,6 +70,8 @@ namespace Turbo.BrickPi.IoT
             await brick.Sensors.Add(color).ConfigureAwait(false);
             color = new NXTColorSensor(SensorPort.Port_S3, SensorType.COLOR_FULL);
             await brick.Sensors.Add(color).ConfigureAwait(false);
+            NXTUltraSonicSensor distance = new NXTUltraSonicSensor(SensorPort.Port_S2);
+            await brick.Sensors.Add(distance).ConfigureAwait(false);
             await brickComponent.RegisterSensors();
             omniDrive = new DriveComponent("Drive", brickComponent, brick.Motors[MotorPort.Port_MA], brick.Motors[MotorPort.Port_MD], brick.Motors[MotorPort.Port_MB]);
             await ComponentHandler.RegisterComponent(omniDrive).ConfigureAwait(false);

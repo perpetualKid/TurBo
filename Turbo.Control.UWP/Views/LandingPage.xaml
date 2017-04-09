@@ -51,15 +51,15 @@
 
         <controls:PageHeader x:Name="pageHeader" Grid.Row="0">
             <controls:PageHeader.HeaderContent>
-                <TextBlock x:Name="HeaderTextBlock" Style="{StaticResource PageTitleTextBlockStyle}" Text="App Overview"/>
+                <TextBlock x:Name="HeaderTextBlock" Style="{StaticResource PageTitleTextBlockStyle}" Text="TurBo Controller"/>
             </controls:PageHeader.HeaderContent>
         </controls:PageHeader>
 
         <StackPanel Grid.Row="1">
             <controls:Joypad x:Name="Joypad" Width="300" Height="300" Canvas.ZIndex="1" Moved="Joypad_Moved" Released="Joypad_Released" Captured="Joypad_Captured"/>
-            <TextBlock Name="JoypadValues">Test</TextBlock>
             <controls:LinearSlider x:Name="Slider" Width="300" Height="100" Moved="LinearSlider_Moved" Released="LinearSlider_Released" Captured="LinearSlider_Captured"/>
         </StackPanel>
+        <!--
         <ScrollViewer Grid.Row="2" EntranceNavigationTransitionInfo.IsTargetElement="True" IsTabStop="True">
             <StackPanel x:Name="ContentContainer" Margin="12,0,12,0">
                 <TextBlock Style="{StaticResource SubtitleTextBlockStyle}">Top-Level Navigation</TextBlock>
@@ -75,15 +75,16 @@
                 </TextBlock>
             </StackPanel>
         </ScrollViewer>
+        -->
         <VariableSizedWrapGrid Orientation="Horizontal" Grid.Row="3" ItemHeight="80" ItemWidth="120">
-            <StackPanel VariableSizedWrapGrid.ColumnSpan="2">
-                <TextBlock>Distance using very long text sample with no line break</TextBlock>
-                <TextBlock>cm</TextBlock>
+            <StackPanel VariableSizedWrapGrid.ColumnSpan="2" DoubleTapped="StackPanel_DoubleTapped">
+                <TextBlock>Distance</TextBlock>
+                <TextBlock x:Name="txtDistance" HorizontalAlignment="Center">cm</TextBlock>
             </StackPanel>
             <Border BorderThickness="1" BorderBrush="Black">
                 <StackPanel>
                     <TextBlock>Color</TextBlock>
-                    <Ellipse x:Name="ellColor" HorizontalAlignment="Left" Height="50" VerticalAlignment="Top" Width="50" Fill="Aqua" DoubleTapped="ellColor_DoubleTapped"/>
+                    <Ellipse x:Name="ellColor" HorizontalAlignment="Center" Height="50" VerticalAlignment="Top" Width="50" Fill="Aqua" DoubleTapped="ellColor_DoubleTapped"/>
             </StackPanel>
             </Border>
             <StackPanel>

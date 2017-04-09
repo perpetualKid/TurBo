@@ -112,6 +112,8 @@
     <Compile Include="Lego\BrickPiLedComponent.cs" />
     <Compile Include="Lego\DriveComponent.cs" />
     <Compile Include="Lego\NXTColorSensorComponent.cs" />
+    <Compile Include="Lego\NXTTouchSensorComponent.cs" />
+    <Compile Include="Lego\NXTUltraSonicSensorComponent.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Storage\AppSettingsComponent.cs" />
     <Compile Include="Storage\AzureBlobStorageComponent.cs" />
