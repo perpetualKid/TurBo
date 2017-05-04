@@ -33,6 +33,7 @@ namespace Turbo.Control.UWP
                     Label = "Explore",
                     DestinationPage = typeof(ExplorePage)
                 },
+                /*
                 new NavigationMenuItem()
                 {
                     Symbol = Symbol.Edit,
@@ -44,7 +45,7 @@ namespace Turbo.Control.UWP
                     Symbol = Symbol.Favorite,
                     Label = "Drill In Page",
 //                    DestPage = typeof(DrillInPage)
-                },
+                },*/
                 new NavigationMenuItem()
                 {
                     Symbol = Symbol.SyncFolder,
