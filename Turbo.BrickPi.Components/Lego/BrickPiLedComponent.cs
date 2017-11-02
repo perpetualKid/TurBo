@@ -25,27 +25,15 @@ namespace Turbo.BrickPi.Components.Lego
 
         [Action("Toggle")]
         [ActionHelp("Toggle the LED from current status.")]
+        [ActionParameter("SendStatus", ParameterType = typeof(bool), Required = false)]
         private async Task LedComponentToogle(MessageContainer data)
         {
+            if (!bool.TryParse(data.ResolveParameter("SendStatus", 0), out bool param))
+                param = false;
+
             await ToogleLed().ConfigureAwait(false);
-            await LedComponentGetStatus(data).ConfigureAwait(false);
-        }
-
-        int interval;
-
-        [Action("Blink")]
-        [ActionHelp("Toggle LED at the given interval")]
-        [ActionParameter("Interval ms")]
-        private async Task LedComponentBlink(MessageContainer data)
-        {
-            if (!int.TryParse(data.ResolveParameter("Interval", 0), out interval))
-                interval = 1000;
-
-            while (interval > 0)
-            {
-                await LedComponentToogle(data.Clone()).ConfigureAwait(true);
-                await Task.Delay(interval).ConfigureAwait(false);
-            }
+            if (param)
+                await LedComponentGetStatus(data).ConfigureAwait(false);
         }
 
         [Action("Enable")]

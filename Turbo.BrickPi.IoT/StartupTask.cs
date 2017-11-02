@@ -56,6 +56,7 @@ namespace Turbo.BrickPi.IoT
             brickComponent = new BrickPiComponent();
             setupTasks.Add(ComponentHandler.RegisterComponent(brickComponent));
             setupTasks.Add(ComponentHandler.RegisterComponent(new AppSettingsComponent()));
+            setupTasks.Add(ComponentHandler.RegisterComponent(new TimerComponent()));
 
             await Task.WhenAll(setupTasks).ConfigureAwait(false);
 

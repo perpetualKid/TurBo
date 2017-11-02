@@ -52,7 +52,7 @@ namespace Turbo.BrickPi.Components.Storage
             {
                 settings.Values[settingName] = settingValue;
             }
-            await Task.CompletedTask;
+            await Task.CompletedTask.ConfigureAwait(false);
         }
         #endregion
 
