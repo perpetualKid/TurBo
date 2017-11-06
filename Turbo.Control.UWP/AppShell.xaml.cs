@@ -13,6 +13,7 @@ using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Navigation;
 using System.Threading.Tasks;
+using Windows.Data.Json;
 
 namespace Turbo.Control.UWP
 {
@@ -64,6 +65,13 @@ namespace Turbo.Control.UWP
                     Label = "Debug Page",
                     DestinationPage = typeof(DebugPage)
                 },
+                new NavigationMenuItem()
+                {
+                    Symbol = Symbol.Manage,
+                    Label = "Control Panel",
+                    DestinationPage = typeof(DebugPage)
+                },
+
             });
 
         public static AppShell Current = null;
@@ -463,5 +471,32 @@ namespace Turbo.Control.UWP
             }
         }
 
+        private async void ShutdownSystemButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (ControllerHandler.Connected)
+            {
+                ContentDialog shutdownDialog = new ContentDialog()
+                {
+                    Title = "Shutdown Device!",
+                    Content = "Shutdown or Restart the device.",
+                    PrimaryButtonText = "Shutdown",
+                    SecondaryButtonText = "Reboot"
+                };
+
+                ContentDialogResult result = await shutdownDialog.ShowAsync();
+                if (result != ContentDialogResult.None)
+                {
+                    GenericController shutdownController = await GenericController.GetNamedInstance<GenericController>("RootController", "Root").ConfigureAwait(false);
+                    JsonObject request = new JsonObject
+                    {
+                        { "Target", JsonValue.CreateStringValue("Root") },
+                        { "Action", JsonValue.CreateStringValue("Shutdown") }
+                    };
+                    request.Add("Restart", JsonValue.CreateBooleanValue(result == ContentDialogResult.Secondary));
+                    await shutdownController.SendRequest(request, true).ConfigureAwait(false);
+                    await ControllerHandler.Disconnect().ConfigureAwait(false);
+                }
+            }
+        }
     }
 }

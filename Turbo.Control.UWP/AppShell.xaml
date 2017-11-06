@@ -46,6 +46,13 @@
                 <ProgressRing IsActive="True" Width="40" Height="40" Margin="10,10,10,10"/>
             </StackPanel>
         </Flyout>
+        <Flyout x:Name="ShutdownFlyout" Placement="Top">
+            <StackPanel Orientation="Vertical">
+                <TextBlock Style="{StaticResource BodyTextBlockStyle}" Width="300" Margin="10,10,10,10" Name="ShutdownFlyoutText" Text="Shutdown or Reboot" TextWrapping="Wrap" />
+                <Button></Button>
+
+            </StackPanel>
+        </Flyout>
         <Storyboard x:Name="ConnectingActivity" AutoReverse="False" RepeatBehavior="Forever">
             <DoubleAnimation Duration="0:0:1" To="360" Storyboard.TargetProperty="(UIElement.RenderTransform).(CompositeTransform.Rotation)" Storyboard.TargetName="symbolIcon" />
         </Storyboard>
@@ -159,8 +166,8 @@
                             </AppBarToggleButton.Icon>
                         </AppBarToggleButton>
                         <AppBarToggleButton x:Name="DebugToggleButton" Icon="Repair" Label="Debug" Click="DebugToggleButton_Click"></AppBarToggleButton>
-                        <AppBarButton x:Name="SettingsNavPaneButton" Icon="Setting" Label="Settings" Click="SettingsNavPaneButton_Click">
-                            
+                        <AppBarButton x:Name="SettingsNavPaneButton" Icon="Setting" Label="Settings" Click="SettingsNavPaneButton_Click"></AppBarButton>
+                        <AppBarButton x:Name="ShutdownSystemButton" Icon="Street" Label="Shutdown" Click="ShutdownSystemButton_Click">
                         </AppBarButton>
                     </CommandBar>
                 </Grid>
