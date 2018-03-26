@@ -53,6 +53,7 @@ namespace Turbo.BrickPi.Components.Lego
             await Task.WhenAll(registratrationTasks).ConfigureAwait(false);
         }
 
+        #region Command
         [Action("Version")]
         [ActionHelp("Gets the current BrickPi Version. Typically used as Health Check for Communication with BrickPi.")]
         private async Task GetBrickPiVersion(MessageContainer data)
@@ -61,7 +62,14 @@ namespace Turbo.BrickPi.Components.Lego
             await ComponentHandler.HandleOutput(data).ConfigureAwait(false);
         }
 
-        #region Command
+        [Action("Voltage")]
+        [ActionHelp("Returns current BrickPi power supply voltage. Typically used to monitor battery power supply.")]
+        private async Task GetBrickPiVoltage(MessageContainer data)
+        {
+            data.AddValue("Voltage", brickPi.Voltage);
+            await ComponentHandler.HandleOutput(data).ConfigureAwait(false);
+        }
+
         #endregion
 
         #region public

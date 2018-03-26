@@ -113,7 +113,6 @@ namespace Turbo.BrickPi.IoT
             //}
         }
 
-
         private void TaskInstance_Canceled(IBackgroundTaskInstance sender, BackgroundTaskCancellationReason reason)
         {
             //a few reasons that you may be interested in.
@@ -133,7 +132,7 @@ namespace Turbo.BrickPi.IoT
             deferral.Complete();
         }
 
-        private async void Touch_OnPressed(object sender, SensorEventArgs e)
+        private async void Touch_OnPressed(object sender, SensorChangedEventArgs e)
         {
             using (IRandomAccessStream stream = await camera.CaptureMediaStream(ImageEncodingProperties.CreateJpeg()).ConfigureAwait(false))
             {
